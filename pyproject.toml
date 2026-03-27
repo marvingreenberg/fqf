@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "fqf"
 dynamic = ["version"]
 description = "French Quarter Festival 2026 Schedule Builder"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.115",
     "uvicorn[standard]>=0.30",
@@ -40,14 +40,14 @@ local_scheme = "node-and-date"
 
 [tool.black]
 line-length = 100
-target-version = ["py310"]
+target-version = ["py311"]
 
 [tool.isort]
 profile = "black"
 line_length = 100
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 strict = true
 
 [tool.pytest.ini_options]
