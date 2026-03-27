@@ -1,0 +1,81 @@
+.PHONY: help setup setup-api setup-ui build build-api build-ui test test-api test-ui \
+        lint lint-api lint-ui format format-api format-ui dev clean \
+        build-image docker-run deploy e2e
+
+help: ## Show this help
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
+		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+
+# ── Setup ──────────────────────────────────────────────────────────────
+setup: setup-api setup-ui ## Install all dependencies
+
+setup-api: ## Install Python dependencies
+	uv venv
+	uv sync --all-extras
+
+setup-ui: ## Install frontend dependencies
+	pnpm --dir ui install
+
+# ── Build ──────────────────────────────────────────────────────────────
+build: build-api build-ui ## Build all packages
+
+build-api: ## Build Python package
+	uv build
+
+build-ui: ## Build SvelteKit frontend
+	pnpm --dir ui build
+
+# ── Test ───────────────────────────────────────────────────────────────
+test: test-api test-ui ## Run all tests
+
+test-api: ## Run Python tests with coverage
+	uv run pytest
+
+test-ui: ## Run frontend unit tests
+	pnpm --dir ui test
+
+# ── Lint ───────────────────────────────────────────────────────────────
+lint: lint-api lint-ui ## Run all linters
+
+lint-api: ## Lint Python code
+	uv run black --check src tests
+	uv run isort --check src tests
+	uv run mypy src
+
+lint-ui: ## Lint frontend code
+	pnpm --dir ui lint
+
+# ── Format ─────────────────────────────────────────────────────────────
+format: format-api format-ui ## Format all code
+
+format-api: ## Format Python code
+	uv run black src tests
+	uv run isort src tests
+
+format-ui: ## Format frontend code
+	pnpm --dir ui format
+
+# ── Dev ────────────────────────────────────────────────────────────────
+dev: ## Start dev servers
+	uv run uvicorn fqf.api.app:create_app --factory --reload --port 8000 &
+	pnpm --dir ui dev --open
+
+# ── Docker ─────────────────────────────────────────────────────────────
+build-image: ## Build Docker image locally
+	docker buildx build -t fqf:local .
+
+docker-run: build-image ## Build and run Docker image
+	docker run --rm -p 8000:8000 --env-file .env fqf:local
+
+# ── Deploy ─────────────────────────────────────────────────────────────
+deploy: ## Build, push, deploy to Cloud Run
+	@echo "Deploy target — configure per environment"
+
+# ── E2E ────────────────────────────────────────────────────────────────
+e2e: ## Run E2E tests
+	pnpm --dir ui exec playwright test
+
+# ── Clean ──────────────────────────────────────────────────────────────
+clean: ## Remove build artifacts
+	rm -rf dist/ build/ *.egg-info .mypy_cache .pytest_cache htmlcov .coverage
+	rm -rf ui/build ui/.svelte-kit
