@@ -22,7 +22,7 @@
 
 <div
     class="absolute left-0 right-1 rounded overflow-hidden cursor-pointer select-none
-           bg-surface-100 hover:bg-surface-200 transition-colors border-l-4"
+           fqf-act-block transition-colors border-l-4"
     style="top: {top}px; height: {height}px; border-left-color: {borderColor};"
     onclick={onDetail}
     role="button"

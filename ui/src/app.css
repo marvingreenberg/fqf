@@ -3,5 +3,28 @@
 
 /* Skeleton UI v4 — aliases resolve via vite.config.ts to avoid
    pnpm symlink resolution issues in @tailwindcss/vite's import resolver. */
-@import 'skeleton-theme/cerberus.css';
+@import 'skeleton-theme/seafoam.css';
 @import 'skeleton-base/index.css';
+
+/* FQF schedule grid styling */
+.fqf-stage-header {
+    background-color: #1a7a6d;
+    color: white;
+}
+
+.fqf-act-block {
+    background-color: #f0f7f6;
+    border: 1px solid #c8ddd9;
+}
+
+.fqf-act-block:hover {
+    background-color: #e0efed;
+}
+
+.fqf-grid-bg {
+    background-color: #fafcfb;
+}
+
+.fqf-time-col {
+    background-color: #f5f8f7;
+}

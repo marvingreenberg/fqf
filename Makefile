@@ -56,9 +56,14 @@ format-ui: ## Format frontend code
 	pnpm --dir ui format
 
 # ── Dev ────────────────────────────────────────────────────────────────
-dev: ## Start dev servers
-	uv run uvicorn fqf.api.app:create_app --factory --reload --port 8000 &
-	pnpm --dir ui dev --open
+dev: ## Start API + UI dev servers with hot reload, open browser
+	@trap 'kill 0 2>/dev/null; wait 2>/dev/null' EXIT; \
+	  uv run uvicorn fqf.api.app:create_app --factory --reload --port 8000 & \
+	  sleep 1; kill -0 $$! 2>/dev/null || { echo "ERROR: API server failed to start"; exit 1; }; \
+	  pnpm --dir ui dev & \
+	  for i in 1 2 3 4 5 6 7 8 9 10; do curl -s http://localhost:5173 >/dev/null 2>&1 && break; sleep 1; done; \
+	  open http://localhost:5173; \
+	  wait
 
 # ── Docker ─────────────────────────────────────────────────────────────
 build-image: ## Build Docker image locally

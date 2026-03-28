@@ -73,16 +73,16 @@
 <div class="flex overflow-auto h-full">
     <!-- Time labels: sticky left -->
     <div
-        class="sticky left-0 z-20 bg-surface-50 shrink-0 border-r border-surface-300"
+        class="sticky left-0 z-20 fqf-time-col shrink-0 border-r border-surface-300"
         style="width: {TIME_LABEL_WIDTH}px;"
     >
         <!-- Spacer matching sticky stage header height -->
-        <div class="h-12 border-b border-surface-300"></div>
+        <div class="h-14 border-b border-surface-300"></div>
         <!-- Time axis -->
         <div class="relative" style="height: {GRID_HEIGHT}px;">
             {#each timeLabels as { label, top }}
                 <span
-                    class="absolute right-1 text-xs text-surface-500 -translate-y-2"
+                    class="absolute right-2 text-xs font-medium text-surface-600 -translate-y-2"
                     style="top: {top}px;"
                 >
                     {label}
@@ -100,14 +100,14 @@
             >
                 <!-- Stage header: sticky top -->
                 <div
-                    class="sticky top-0 z-10 h-12 flex items-center justify-center px-1
-                           bg-surface-100 border-b border-surface-300 text-center"
+                    class="sticky top-0 z-10 h-14 flex items-center justify-center px-2
+                           fqf-stage-header border-b border-surface-300 text-center"
                 >
-                    <span class="text-xs font-semibold leading-tight line-clamp-2">{stage}</span>
+                    <span class="text-xs font-bold leading-tight line-clamp-2">{stage}</span>
                 </div>
 
                 <!-- Act blocks -->
-                <div class="relative" style="height: {GRID_HEIGHT}px;">
+                <div class="relative fqf-grid-bg" style="height: {GRID_HEIGHT}px;">
                     {#each stageActs as act (act.slug)}
                         <ActBlock
                             {act}
