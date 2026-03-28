@@ -1,51 +1,30 @@
-"""Neon Postgres connection and schedule CRUD operations.
+"""Firestore-backed schedule persistence.
 
-When DATABASE_URL is not set, falls back to in-memory storage for local dev.
+Uses Google Cloud Firestore for storage. Automatically connects to the local
+emulator when FIRESTORE_EMULATOR_HOST is set. Falls back to in-memory storage
+when neither Firestore nor emulator is available.
 """
 
-import json
 import logging
 import os
-
-import asyncpg  # type: ignore[import-untyped]
+from typing import Any
 
 from fqf.tokens.generator import generate_token
 
-DATABASE_URL_ENV = "DATABASE_URL"
-MIN_POOL_SIZE = 1
-MAX_POOL_SIZE = 5
-
 logger = logging.getLogger(__name__)
 
-_pool: asyncpg.Pool | None = None
+FIRESTORE_EMULATOR_HOST_ENV = "FIRESTORE_EMULATOR_HOST"
+GCP_PROJECT_ENV = "GCP_PROJECT"
+FALLBACK_PROJECT_ID = "fqf-local"
+SCHEDULES_COLLECTION = "schedules"
+PICKS_FIELD = "picks"
 
-# In-memory fallback for local dev (no DATABASE_URL)
+# Firestore client (lazy init). Typed as Any — the SDK's base class returns
+# DocumentSnapshot | Awaitable[DocumentSnapshot] from .get(), but the sync
+# client always returns DocumentSnapshot; Any avoids spurious union-attr errors.
+_db: Any = None
+# In-memory fallback
 _memory_store: dict[str, list[str]] | None = None
-
-CREATE_TABLE_SQL = """
-CREATE TABLE IF NOT EXISTS schedules (
-    token TEXT PRIMARY KEY,
-    picks JSONB NOT NULL DEFAULT '[]'::jsonb,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-"""
-
-INSERT_SCHEDULE_SQL = """
-INSERT INTO schedules (token, picks) VALUES ($1, '[]'::jsonb);
-"""
-
-SELECT_SCHEDULE_SQL = """
-SELECT picks FROM schedules WHERE token = $1;
-"""
-
-UPDATE_PICKS_SQL = """
-UPDATE schedules SET picks = $1::jsonb, updated_at = NOW() WHERE token = $2;
-"""
-
-SELECT_MULTIPLE_SQL = """
-SELECT token, picks FROM schedules WHERE token = ANY($1);
-"""
 
 
 def _using_memory() -> bool:
@@ -53,37 +32,61 @@ def _using_memory() -> bool:
 
 
 async def init_pool() -> None:
-    """Initialize the connection pool, or fall back to in-memory storage."""
-    global _pool, _memory_store
-    database_url = os.environ.get(DATABASE_URL_ENV, "")
-    if not database_url:
-        logger.info("No DATABASE_URL set — using in-memory schedule storage")
-        _memory_store = {}
+    """Initialize Firestore client or fall back to in-memory."""
+    global _db, _memory_store
+
+    emulator_host = os.environ.get(FIRESTORE_EMULATOR_HOST_ENV)
+    gcp_project = os.environ.get(GCP_PROJECT_ENV, "")
+
+    if emulator_host:
+        from google.cloud import firestore
+
+        project_id = gcp_project or FALLBACK_PROJECT_ID
+        logger.info(
+            "Connecting to Firestore emulator at %s (project: %s)", emulator_host, project_id
+        )
+        _db = firestore.Client(project=project_id)
         return
-    _pool = await asyncpg.create_pool(database_url, min_size=MIN_POOL_SIZE, max_size=MAX_POOL_SIZE)
-    async with _pool.acquire() as conn:
-        await conn.execute(CREATE_TABLE_SQL)
+
+    if gcp_project:
+        from google.cloud import firestore
+
+        logger.info("Connecting to Firestore (project: %s)", gcp_project)
+        _db = firestore.Client(project=gcp_project)
+        return
+
+    # Try default credentials (Cloud Run injects these automatically)
+    try:
+        from google.cloud import firestore
+
+        _db = firestore.Client()
+        logger.info("Connected to Firestore with default credentials")
+        return
+    except Exception:
+        pass
+
+    logger.info("No Firestore available — using in-memory schedule storage")
+    _memory_store = {}
 
 
 async def close_pool() -> None:
-    """Close the connection pool. Call once at app shutdown."""
-    global _pool, _memory_store
-    if _pool:
-        await _pool.close()
-        _pool = None
+    """Clean up resources."""
+    global _db, _memory_store
+    if _db is not None:
+        _db.close()
+        _db = None
     _memory_store = None
 
 
 async def create_schedule() -> str:
-    """Generate a new token and create an empty schedule row."""
+    """Generate a new token and create an empty schedule document."""
     token = generate_token()
     if _using_memory():
         assert _memory_store is not None
         _memory_store[token] = []
         return token
-    assert _pool is not None
-    async with _pool.acquire() as conn:
-        await conn.execute(INSERT_SCHEDULE_SQL, token)
+    assert _db is not None
+    _db.collection(SCHEDULES_COLLECTION).document(token).set({PICKS_FIELD: []})
     return token
 
 
@@ -94,12 +97,12 @@ async def load_schedule(token: str) -> list[str] | None:
         if token not in _memory_store:
             return None
         return list(_memory_store[token])
-    assert _pool is not None
-    async with _pool.acquire() as conn:
-        row = await conn.fetchrow(SELECT_SCHEDULE_SQL, token)
-    if row is None:
+    assert _db is not None
+    doc = _db.collection(SCHEDULES_COLLECTION).document(token).get()
+    if not doc.exists:
         return None
-    return json.loads(row["picks"])  # type: ignore[no-any-return]
+    data = doc.to_dict()
+    return list(data.get(PICKS_FIELD, [])) if data else []
 
 
 async def save_picks(token: str, picks: list[str]) -> bool:
@@ -110,10 +113,13 @@ async def save_picks(token: str, picks: list[str]) -> bool:
             return False
         _memory_store[token] = list(picks)
         return True
-    assert _pool is not None
-    async with _pool.acquire() as conn:
-        result = await conn.execute(UPDATE_PICKS_SQL, json.dumps(picks), token)
-    return bool(result == "UPDATE 1")
+    assert _db is not None
+    doc_ref = _db.collection(SCHEDULES_COLLECTION).document(token)
+    doc = doc_ref.get()
+    if not doc.exists:
+        return False
+    doc_ref.update({PICKS_FIELD: list(picks)})
+    return True
 
 
 async def load_multiple_schedules(tokens: list[str]) -> dict[str, list[str]]:
@@ -121,7 +127,11 @@ async def load_multiple_schedules(tokens: list[str]) -> dict[str, list[str]]:
     if _using_memory():
         assert _memory_store is not None
         return {t: list(_memory_store[t]) for t in tokens if t in _memory_store}
-    assert _pool is not None
-    async with _pool.acquire() as conn:
-        rows = await conn.fetch(SELECT_MULTIPLE_SQL, tokens)
-    return {row["token"]: json.loads(row["picks"]) for row in rows}
+    assert _db is not None
+    result: dict[str, list[str]] = {}
+    for token in tokens:
+        doc = _db.collection(SCHEDULES_COLLECTION).document(token).get()
+        if doc.exists:
+            data = doc.to_dict()
+            result[token] = list(data.get(PICKS_FIELD, [])) if data else []
+    return result

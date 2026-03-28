@@ -61,4 +61,4 @@ jobs:
             --max-instances 3 \
             --port 8000 \
             --allow-unauthenticated \
-            --set-env-vars "DATABASE_URL=${{ secrets.DATABASE_URL }}"
+            --service-account fqf-runtime@${{ secrets.GCP_PROJECT }}.iam.gserviceaccount.com
