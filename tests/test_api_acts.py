@@ -97,6 +97,8 @@ class TestGetAct:
         assert data["name"] == REBIRTH_NAME
         assert "about" in data
         assert "about_source" in data
+        assert "websites" in data
+        assert isinstance(data["websites"], list)
 
     @pytest.mark.asyncio
     async def test_detail_includes_summary_fields(self, client: AsyncClient) -> None:

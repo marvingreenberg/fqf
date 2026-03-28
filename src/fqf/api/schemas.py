@@ -27,12 +27,29 @@ class ActDetail(ActSummary):
 
     about: str
     about_source: str
+    websites: list[str]
 
 
 class ActListResponse(BaseModel):
     """Response for list/search endpoints."""
 
     acts: list[ActSummary]
+    count: int
+
+
+class StageInfo(BaseModel):
+    """Stage with geographic coordinates."""
+
+    name: str
+    lat: float
+    lng: float
+    order: int
+
+
+class StageListResponse(BaseModel):
+    """Response for stages endpoint."""
+
+    stages: list[StageInfo]
     count: int
 
 

@@ -36,6 +36,7 @@ def _to_detail(act: Act) -> ActDetail:
         genre=act.genre,
         about=act.about,
         about_source=act.about_source,
+        websites=act.websites,
     )
 
 
