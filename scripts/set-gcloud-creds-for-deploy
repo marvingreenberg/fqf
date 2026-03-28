@@ -57,6 +57,39 @@ secrets_exist() {
     gh secret list 2>/dev/null | grep -q "GCP_SA_KEY"
 }
 
+# Check if a SA already has a specific project-level role
+has_project_role() {
+    local email=$1 role=$2
+    gcloud projects get-iam-policy "$PROJECT" \
+        --flatten="bindings[].members" \
+        --filter="bindings.role=${role} AND bindings.members=serviceAccount:${email}" \
+        --format="value(bindings.role)" 2>/dev/null | grep -q .
+}
+
+# Check if a SA already has a repo-level role
+has_repo_role() {
+    local email=$1 repo=$2 role=$3
+    gcloud artifacts repositories get-iam-policy "$repo" \
+        --location="$REGION" \
+        --project="$PROJECT" \
+        --flatten="bindings[].members" \
+        --filter="bindings.role=${role} AND bindings.members=serviceAccount:${email}" \
+        --format="value(bindings.role)" 2>/dev/null | grep -q .
+}
+
+grant_project_role() {
+    local email=$1 role=$2
+    if has_project_role "$email" "$role"; then
+        echo "  ${role} — already bound"
+    else
+        echo "  Granting ${role}..."
+        gcloud projects add-iam-policy-binding "$PROJECT" \
+            --member="serviceAccount:${email}" \
+            --role="$role" \
+            --quiet &>/dev/null
+    fi
+}
+
 create_deploy_sa() {
     echo "Creating deploy service account ${DEPLOY_SA_NAME}..."
     gcloud iam service-accounts create "$DEPLOY_SA_NAME" \
@@ -64,20 +97,20 @@ create_deploy_sa() {
         --display-name="GitHub Actions Deploy"
 
     for role in "${DEPLOY_ROLES[@]}"; do
-        echo "  Granting ${role}..."
-        gcloud projects add-iam-policy-binding "$PROJECT" \
-            --member="serviceAccount:${DEPLOY_SA_EMAIL}" \
-            --role="$role" \
-            --quiet &>/dev/null || true
+        grant_project_role "$DEPLOY_SA_EMAIL" "$role"
     done
 
-    echo "  Granting Artifact Registry writer on ${REPO_NAME}..."
-    gcloud artifacts repositories add-iam-policy-binding "$REPO_NAME" \
-        --location="$REGION" \
-        --project="$PROJECT" \
-        --member="serviceAccount:${DEPLOY_SA_EMAIL}" \
-        --role="roles/artifactregistry.writer" \
-        --quiet &>/dev/null || true
+    if has_repo_role "$DEPLOY_SA_EMAIL" "$REPO_NAME" "roles/artifactregistry.writer"; then
+        echo "  Artifact Registry writer — already bound"
+    else
+        echo "  Granting Artifact Registry writer on ${REPO_NAME}..."
+        gcloud artifacts repositories add-iam-policy-binding "$REPO_NAME" \
+            --location="$REGION" \
+            --project="$PROJECT" \
+            --member="serviceAccount:${DEPLOY_SA_EMAIL}" \
+            --role="roles/artifactregistry.writer" \
+            --quiet &>/dev/null
+    fi
 }
 
 create_runtime_sa() {
@@ -86,11 +119,7 @@ create_runtime_sa() {
         --project="$PROJECT" \
         --display-name="FQF Cloud Run Runtime"
 
-    echo "  Granting Firestore (datastore.user)..."
-    gcloud projects add-iam-policy-binding "$PROJECT" \
-        --member="serviceAccount:${RUNTIME_SA_EMAIL}" \
-        --role="roles/datastore.user" \
-        --quiet &>/dev/null || true
+    grant_project_role "$RUNTIME_SA_EMAIL" "roles/datastore.user"
 }
 
 delete_sa() {
@@ -139,25 +168,37 @@ case "$MODE" in
         echo "Done. Fresh credentials created."
         ;;
     "")
-        all_exist=true
         if ! sa_exists "$DEPLOY_SA_EMAIL"; then
             create_deploy_sa
-            all_exist=false
         else
-            echo "Deploy SA ${DEPLOY_SA_NAME} already exists, reusing."
+            echo "Deploy SA ${DEPLOY_SA_NAME} already exists — ensuring bindings..."
+            for role in "${DEPLOY_ROLES[@]}"; do
+                grant_project_role "$DEPLOY_SA_EMAIL" "$role"
+            done
+            if has_repo_role "$DEPLOY_SA_EMAIL" "$REPO_NAME" "roles/artifactregistry.writer"; then
+                echo "  Artifact Registry writer — already bound"
+            else
+                echo "  Granting Artifact Registry writer on ${REPO_NAME}..."
+                gcloud artifacts repositories add-iam-policy-binding "$REPO_NAME" \
+                    --location="$REGION" \
+                    --project="$PROJECT" \
+                    --member="serviceAccount:${DEPLOY_SA_EMAIL}" \
+                    --role="roles/artifactregistry.writer" \
+                    --quiet &>/dev/null
+            fi
         fi
         if ! sa_exists "$RUNTIME_SA_EMAIL"; then
             create_runtime_sa
-            all_exist=false
         else
-            echo "Runtime SA ${RUNTIME_SA_NAME} already exists, reusing."
+            echo "Runtime SA ${RUNTIME_SA_NAME} already exists — ensuring bindings..."
+            grant_project_role "$RUNTIME_SA_EMAIL" "roles/datastore.user"
         fi
-        if $all_exist && secrets_exist; then
-            echo "All service accounts and GitHub secrets already set."
-            echo "Use --new to recreate, or --clear to remove."
-            exit 0
+        if secrets_exist; then
+            echo "GitHub secrets already set. Skipping key generation."
+            echo "Use --new to recreate everything from scratch."
+        else
+            set_secrets
         fi
-        set_secrets
         echo "Done."
         ;;
     *)
