@@ -57,7 +57,7 @@ format-ui: ## Format frontend code
 
 # ── Dev ────────────────────────────────────────────────────────────────
 dev: ## Start API + UI dev servers with hot reload, open browser
-	@trap 'kill 0 2>/dev/null; wait 2>/dev/null' EXIT; \
+	@trap 'kill -9 0 2>/dev/null; wait 2>/dev/null' EXIT; \
 	  uv run uvicorn fqf.api.app:create_app --factory --reload --port 8000 & \
 	  sleep 1; kill -0 $$! 2>/dev/null || { echo "ERROR: API server failed to start"; exit 1; }; \
 	  pnpm --dir ui dev & \
