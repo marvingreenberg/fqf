@@ -2,7 +2,7 @@
 
 from datetime import date, time
 
-from fqf.models import Act
+from fqf.models import STAGE_ORDER, Act
 from fqf.schedule.friday import FRIDAY_ACTS
 from fqf.schedule.saturday import SATURDAY_ACTS
 from fqf.schedule.sunday import SUNDAY_ACTS
@@ -15,9 +15,10 @@ _SLUG_INDEX: dict[str, Act] = {act.slug: act for act in SCHEDULE}
 
 def at(query_date: date, query_time: time) -> list[Act]:
     """Return all acts playing at a given date and time."""
+    fallback = len(STAGE_ORDER)
     return sorted(
         [a for a in SCHEDULE if a.date == query_date and a.start <= query_time < a.end],
-        key=lambda a: a.stage,
+        key=lambda a: STAGE_ORDER.get(a.stage, fallback),
     )
 
 
@@ -39,7 +40,8 @@ def on(query_date: date, stage: str | None = None) -> list[Act]:
     results = [a for a in SCHEDULE if a.date == query_date]
     if stage:
         results = [a for a in results if stage.lower() in a.stage.lower()]
-    return sorted(results, key=lambda a: (a.stage, a.start))
+    fallback = len(STAGE_ORDER)
+    return sorted(results, key=lambda a: (STAGE_ORDER.get(a.stage, fallback), a.start))
 
 
 def get_by_slug(slug: str) -> Act | None:

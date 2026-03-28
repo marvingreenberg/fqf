@@ -3,6 +3,7 @@
 from dataclasses import dataclass, field
 from datetime import date, time
 from enum import StrEnum
+from typing import NamedTuple
 
 from fqf.slugify import slugify
 
@@ -68,26 +69,61 @@ KREWE = "KREWE Eyewear Stage"
 CAFEBEIGNET = "Cafe Beignet Stage"
 
 ALL_STAGES = [
-    ABITA,
-    NEWORLEANS,
-    TROPICAL,
-    JACKDANIELS,
-    WILLOW,
-    LOYOLA,
     FISHFRY,
-    ENTERGY,
-    PANAMLIFE,
-    JAZZPLAYHOUSE,
-    FRENCHMARKET,
-    DUTCHALLEY,
+    ABITA,
     HOUSEOFBLUES,
+    TROPICAL,
     JAZZPARK,
-    SCHOOLHOUSE,
+    WILLOW,
+    CAFEBEIGNET,
+    JAZZPLAYHOUSE,
     HANCOCK,
     OMNI,
+    NEWORLEANS,
     KREWE,
-    CAFEBEIGNET,
+    JACKDANIELS,
+    FRENCHMARKET,
+    SCHOOLHOUSE,
+    PANAMLIFE,
+    DUTCHALLEY,
+    LOYOLA,
+    ENTERGY,
 ]
+
+STAGE_ORDER: dict[str, int] = {stage: idx for idx, stage in enumerate(ALL_STAGES)}
+
+
+# ── Stage locations (lat/lng from fqf2026_stages.csv) ─────────────────
+
+
+class StageLocation(NamedTuple):
+    """GPS coordinates for a festival stage."""
+
+    lat: float
+    lng: float
+
+
+STAGE_LOCATIONS: dict[str, StageLocation] = {
+    FISHFRY: StageLocation(29.95107, -90.06280),
+    ABITA: StageLocation(29.95278, -90.06307),
+    HOUSEOFBLUES: StageLocation(29.95338, -90.06627),
+    TROPICAL: StageLocation(29.95373, -90.06301),
+    JAZZPARK: StageLocation(29.95504, -90.06471),
+    WILLOW: StageLocation(29.95544, -90.06368),
+    CAFEBEIGNET: StageLocation(29.95582, -90.06843),
+    JAZZPLAYHOUSE: StageLocation(29.95582, -90.06850),
+    HANCOCK: StageLocation(29.95600, -90.06651),
+    OMNI: StageLocation(29.95631, -90.06562),
+    NEWORLEANS: StageLocation(29.95721, -90.06293),
+    KREWE: StageLocation(29.95763, -90.06521),
+    JACKDANIELS: StageLocation(29.95884, -90.05917),
+    FRENCHMARKET: StageLocation(29.96044, -90.05856),
+    SCHOOLHOUSE: StageLocation(29.96070, -90.06265),
+    PANAMLIFE: StageLocation(29.96073, -90.05650),
+    DUTCHALLEY: StageLocation(29.96083, -90.05823),
+    LOYOLA: StageLocation(29.96116, -90.05774),
+    ENTERGY: StageLocation(29.96145, -90.05825),
+}
 
 
 def t(h: int, m: int) -> time:
@@ -107,6 +143,7 @@ class Act:
     genre: str = Genre.UNKNOWN
     about: str = ""
     about_source: str = AboutSource.NONE
+    websites: list[str] = field(default_factory=list)
     slug: str = field(init=False)
 
     def __post_init__(self) -> None:

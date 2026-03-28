@@ -28,6 +28,16 @@ const CONFLICT_SEVERITY: Record<ConflictLevel, number> = {
     red: 2
 };
 
+/** Check conflict level between exactly two acts. */
+export function getConflictBetweenActs(a: ActSummary, b: ActSummary): ConflictLevel {
+    if (a.date !== b.date) return 'none';
+    const s1 = timeToMinutes(a.start);
+    const e1 = timeToMinutes(a.end);
+    const s2 = timeToMinutes(b.start);
+    const e2 = timeToMinutes(b.end);
+    return getConflictLevel(calculateOverlapRatio(s1, e1, s2, e2));
+}
+
 export function getWorstConflict(
     act: ActSummary,
     allActs: ActSummary[],

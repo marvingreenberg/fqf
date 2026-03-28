@@ -9,11 +9,14 @@ from fqf.models import (
     FRI,
     NEWORLEANS,
     SAT,
+    STAGE_LOCATIONS,
+    STAGE_ORDER,
     SUN,
     THU,
     AboutSource,
     Act,
     Genre,
+    StageLocation,
     t,
 )
 
@@ -62,12 +65,46 @@ class TestTimeHelper:
 
 
 class TestStageConstants:
+    EXPECTED_STAGE_COUNT = 19
+
     def test_stage_count(self) -> None:
-        EXPECTED_STAGE_COUNT = 19
-        assert len(ALL_STAGES) == EXPECTED_STAGE_COUNT
+        assert len(ALL_STAGES) == self.EXPECTED_STAGE_COUNT
 
     def test_no_duplicates(self) -> None:
         assert len(ALL_STAGES) == len(set(ALL_STAGES))
+
+    def test_geographic_order_matches_latitude(self) -> None:
+        latitudes = [STAGE_LOCATIONS[s].lat for s in ALL_STAGES]
+        assert latitudes == sorted(latitudes)
+
+
+class TestStageLocations:
+    def test_all_stages_have_locations(self) -> None:
+        for stage in ALL_STAGES:
+            assert stage in STAGE_LOCATIONS, f"Missing location for {stage}"
+
+    def test_location_is_named_tuple(self) -> None:
+        loc = STAGE_LOCATIONS[ABITA]
+        assert isinstance(loc, StageLocation)
+        assert isinstance(loc.lat, float)
+        assert isinstance(loc.lng, float)
+
+    def test_coordinates_in_new_orleans_area(self) -> None:
+        min_lat, max_lat = 29.94, 29.97
+        min_lng, max_lng = -90.08, -90.05
+        for stage, loc in STAGE_LOCATIONS.items():
+            assert min_lat <= loc.lat <= max_lat, f"{stage} lat {loc.lat} out of range"
+            assert min_lng <= loc.lng <= max_lng, f"{stage} lng {loc.lng} out of range"
+
+
+class TestStageOrder:
+    def test_all_stages_have_order(self) -> None:
+        for stage in ALL_STAGES:
+            assert stage in STAGE_ORDER
+
+    def test_order_values_contiguous(self) -> None:
+        expected = set(range(len(ALL_STAGES)))
+        assert set(STAGE_ORDER.values()) == expected
 
 
 class TestAct:
@@ -91,6 +128,15 @@ class TestAct:
         act = Act("Test", ABITA, THU, t(11, 0), t(12, 0))
         assert act.about == ""
         assert act.about_source == AboutSource.NONE
+
+    def test_default_websites(self) -> None:
+        act = Act("Test", ABITA, THU, t(11, 0), t(12, 0))
+        assert act.websites == []
+
+    def test_websites_with_values(self) -> None:
+        test_url = "https://example.com"
+        act = Act("Test", ABITA, THU, t(11, 0), t(12, 0), websites=[test_url])
+        assert act.websites == [test_url]
 
     def test_enriched_act(self) -> None:
         act = Act(

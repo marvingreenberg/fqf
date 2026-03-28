@@ -6,7 +6,7 @@
     let expanded = $state(false);
 
     const sortedGenres = $derived([...genres].sort());
-    const sortedStages = $derived([...stages].sort());
+    const sortedStages = $derived(stages);
 </script>
 
 <div class="fqf-filter-panel border-b">

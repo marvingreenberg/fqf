@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 
 from fqf.api.act_routes import router as act_router
 from fqf.api.schedule_routes import router as schedule_router
+from fqf.api.stage_routes import router as stage_router
 from fqf.db import close_pool, init_pool
 
 API_TITLE = "FQF 2026 Schedule Builder"
@@ -38,6 +39,7 @@ def create_app() -> FastAPI:
 
     app.include_router(act_router)
     app.include_router(schedule_router)
+    app.include_router(stage_router)
 
     # Static mount must be last — it catches all remaining paths for SPA routing
     static_dir = Path(__file__).parent.parent / "static"

@@ -11,6 +11,19 @@ export interface ActSummary {
 export interface ActDetail extends ActSummary {
     about: string;
     about_source: string;
+    websites: string[];
+}
+
+export interface StageInfo {
+    name: string;
+    lat: number;
+    lng: number;
+    order: number;
+}
+
+export interface StageListResponse {
+    stages: StageInfo[];
+    count: number;
 }
 
 export interface ActListResponse {

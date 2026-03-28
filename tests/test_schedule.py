@@ -7,6 +7,7 @@ from fqf.models import (
     JACKDANIELS,
     NEWORLEANS,
     SAT,
+    STAGE_ORDER,
     SUN,
     THU,
     TROPICAL,
@@ -86,10 +87,10 @@ class TestAt:
         results = at(THU, t(6, 0))
         assert results == []
 
-    def test_sorted_by_stage(self) -> None:
+    def test_sorted_by_geographic_stage_order(self) -> None:
         results = at(SAT, t(14, 0))
-        stages = [act.stage for act in results]
-        assert stages == sorted(stages)
+        stage_indices = [STAGE_ORDER[act.stage] for act in results]
+        assert stage_indices == sorted(stage_indices)
 
     def test_boundary_start_included(self) -> None:
         # Acts starting exactly at the query time should be included
@@ -149,11 +150,11 @@ class TestOn:
         assert all(JACKDANIELS.lower() in a.stage.lower() for a in results)
         assert len(results) > 0
 
-    def test_sorted_by_stage_then_time(self) -> None:
+    def test_sorted_by_geographic_stage_then_time(self) -> None:
         results = on(FRI)
         for i in range(len(results) - 1):
-            assert (results[i].stage, results[i].start) <= (
-                results[i + 1].stage,
+            assert (STAGE_ORDER[results[i].stage], results[i].start) <= (
+                STAGE_ORDER[results[i + 1].stage],
                 results[i + 1].start,
             )
 

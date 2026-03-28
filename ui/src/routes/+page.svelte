@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import type { ActSummary, ActDetail, MobileSortMode, ViewMode } from '$lib/types';
-    import { listActs, getAct } from '$lib/api';
+    import { listActs, getAct, listStages } from '$lib/api';
     import { appState } from '$lib/stores.svelte';
     import DayTabs from '$lib/components/DayTabs.svelte';
     import ScheduleGrid from '$lib/components/ScheduleGrid.svelte';
@@ -19,11 +19,12 @@
     let detailAct = $state<ActDetail | null>(null);
     let detailLoading = $state(false);
     let innerWidth = $state(MOBILE_BREAKPOINT + 1);
+    let stageLocations = $state(new Map<string, { lat: number; lng: number }>());
 
     const isMobile = $derived(innerWidth < MOBILE_BREAKPOINT);
 
     const uniqueGenres = $derived([...new Set(acts.map((a) => a.genre))].sort());
-    const uniqueStages = $derived([...new Set(acts.map((a) => a.stage))].sort());
+    const uniqueStages = $derived([...new Set(acts.map((a) => a.stage))]);
     const visibleActs = $derived(acts.filter((a) => appState.isActVisible(a)));
 
     const SORT_MODES: { value: MobileSortMode; label: string }[] = [
@@ -80,8 +81,10 @@
         }
     });
 
-    onMount(() => {
+    onMount(async () => {
         loadActs(appState.selectedDate);
+        const resp = await listStages();
+        stageLocations = new Map(resp.stages.map((s) => [s.name, { lat: s.lat, lng: s.lng }]));
     });
 </script>
 
@@ -133,6 +136,7 @@
             <MySchedule
                 {allActs}
                 picks={appState.picks}
+                {stageLocations}
                 onTogglePick={(slug) => appState.togglePick(slug)}
                 onActDetail={openDetail}
             />
@@ -203,8 +207,35 @@
                             >
                                 {detailAct.name}
                             </h2>
-                            <p class="text-sm mt-1" style="color: rgba(74, 26, 107, 0.55);">
+                            <p class="text-sm mt-1 flex items-center gap-1.5" style="color: rgba(74, 26, 107, 0.55);">
                                 {detailAct.stage}
+                                {#if stageLocations.has(detailAct.stage)}
+                                    {@const loc = stageLocations.get(detailAct.stage)}
+                                    <a
+                                        href="https://www.google.com/maps/dir/?api=1&destination={loc?.lat},{loc?.lng}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        title="Directions"
+                                        style="color: rgba(74, 26, 107, 0.4);"
+                                        class="hover:opacity-80 transition-opacity"
+                                        onclick={(e) => e.stopPropagation()}
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="14"
+                                            height="14"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="2"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                        >
+                                            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                                            <circle cx="12" cy="10" r="3" />
+                                        </svg>
+                                    </a>
+                                {/if}
                             </p>
                         </div>
                         <span class="fqf-genre-badge shrink-0">
@@ -216,9 +247,42 @@
                         {detailAct.start}–{detailAct.end}
                     </p>
 
-                    <p class="text-sm leading-relaxed whitespace-pre-line">
+                    <p class="text-sm leading-relaxed">
                         {detailAct.about || 'No bio available yet.'}
                     </p>
+
+                    {#if detailAct.websites.length > 0}
+                        <div class="flex gap-2 mt-3">
+                            {#each detailAct.websites as url}
+                                <a
+                                    href={url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    title={new URL(url).hostname.replace('www.', '')}
+                                    style="color: rgba(74, 26, 107, 0.4);"
+                                    class="hover:opacity-80 transition-opacity"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="18"
+                                        height="18"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M2 12h20" />
+                                        <path
+                                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+                                        />
+                                    </svg>
+                                </a>
+                            {/each}
+                        </div>
+                    {/if}
                 {/if}
             </div>
         </div>
