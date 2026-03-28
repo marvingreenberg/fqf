@@ -7,6 +7,7 @@
     import ScheduleGrid from '$lib/components/ScheduleGrid.svelte';
     import MobileSchedule from '$lib/components/MobileSchedule.svelte';
     import MySchedule from '$lib/components/MySchedule.svelte';
+    import MergeView from '$lib/components/MergeView.svelte';
 
     const MOBILE_BREAKPOINT = 768;
 
@@ -130,9 +131,7 @@
                 onActDetail={openDetail}
             />
         {:else if appState.viewMode === 'merge'}
-            <div class="flex items-center justify-center h-full text-surface-500">
-                <p>Merge view coming soon.</p>
-            </div>
+            <MergeView />
         {:else if loading}
             <div class="flex items-center justify-center h-full">
                 <p class="text-surface-500">Loading schedule…</p>
