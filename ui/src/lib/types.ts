@@ -31,11 +31,17 @@ export interface ActListResponse {
     count: number;
 }
 
+export interface ShareRef {
+    share_id: string;
+    name: string;
+}
+
 export interface ScheduleResponse {
     token: string;
     name: string;
     picks: string[];
     acts: ActSummary[];
+    shares: ShareRef[];
 }
 
 export interface ScheduleUpdate {

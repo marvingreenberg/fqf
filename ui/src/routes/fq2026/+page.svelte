@@ -74,7 +74,7 @@
         if (!shareId) return;
         try {
             const resp = await loadSharedSchedule(shareId);
-            appState.addSharedSchedule({
+            await appState.addSharedSchedule({
                 share_id: shareId,
                 name: appState.pendingShareName ?? resp.name,
                 picks: resp.picks,

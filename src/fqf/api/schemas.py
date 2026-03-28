@@ -53,11 +53,25 @@ class StageListResponse(BaseModel):
     count: int
 
 
+class ShareRef(BaseModel):
+    """A persisted reference to a shared schedule."""
+
+    share_id: str
+    name: str
+
+
 class ScheduleUpdate(BaseModel):
     """Request body for saving picks."""
 
     picks: list[str]
     name: str | None = None
+
+
+class AddShareRequest(BaseModel):
+    """Request body for adding a share reference."""
+
+    share_id: str
+    name: str
 
 
 class TokenResponse(BaseModel):
@@ -73,6 +87,7 @@ class ScheduleResponse(BaseModel):
     name: str
     picks: list[str]
     acts: list[ActSummary]
+    shares: list[ShareRef] = []
 
 
 class ShareResponse(BaseModel):

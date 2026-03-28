@@ -10,6 +10,8 @@ from fqf.db import (
     NAME_FIELD,
     PICKS_FIELD,
     SHARE_ID_FIELD,
+    SHARES_FIELD,
+    add_share_to_schedule,
     close_pool,
     create_schedule,
     create_share_id,
@@ -17,6 +19,7 @@ from fqf.db import (
     load_multiple_schedules,
     load_schedule,
     load_schedule_by_share,
+    remove_share_from_schedule,
     save_picks,
 )
 
@@ -41,8 +44,18 @@ def reset_db_state():
     db_module._memory_store = None
 
 
-def _mem_doc(picks: list[str], name: str = "", share_id: str = "") -> dict:
-    return {PICKS_FIELD: picks, NAME_FIELD: name, SHARE_ID_FIELD: share_id}
+def _mem_doc(
+    picks: list[str],
+    name: str = "",
+    share_id: str = "",
+    shares: list[dict] | None = None,
+) -> dict:
+    return {
+        PICKS_FIELD: picks,
+        NAME_FIELD: name,
+        SHARE_ID_FIELD: share_id,
+        SHARES_FIELD: shares if shares is not None else [],
+    }
 
 
 def _make_firestore_doc(*, exists: bool, data: dict | None = None) -> MagicMock:
@@ -209,7 +222,7 @@ class TestInMemoryLoadSchedule:
     async def test_returns_picks_and_name_for_existing_token(self) -> None:
         db_module._memory_store = {FAKE_TOKEN: _mem_doc(list(SAMPLE_PICKS), name=SAMPLE_NAME)}
         result = await load_schedule(FAKE_TOKEN)
-        assert result == (SAMPLE_PICKS, SAMPLE_NAME)
+        assert result == (SAMPLE_PICKS, SAMPLE_NAME, [])
 
     @pytest.mark.asyncio
     async def test_returns_none_for_missing_token(self) -> None:
@@ -221,14 +234,25 @@ class TestInMemoryLoadSchedule:
     async def test_returns_empty_picks_and_empty_name_for_blank_doc(self) -> None:
         db_module._memory_store = {FAKE_TOKEN: _mem_doc([])}
         result = await load_schedule(FAKE_TOKEN)
-        assert result == ([], "")
+        assert result == ([], "", [])
+
+    @pytest.mark.asyncio
+    async def test_returns_shares_when_present(self) -> None:
+        share_entry = {SHARE_ID_FIELD: SHARE_ID, NAME_FIELD: "Friend"}
+        db_module._memory_store = {
+            FAKE_TOKEN: _mem_doc(list(SAMPLE_PICKS), shares=[share_entry])
+        }
+        result = await load_schedule(FAKE_TOKEN)
+        assert result is not None
+        picks, name, shares = result
+        assert shares == [share_entry]
 
     @pytest.mark.asyncio
     async def test_returns_copy_not_reference(self) -> None:
         db_module._memory_store = {FAKE_TOKEN: _mem_doc(list(SAMPLE_PICKS))}
         result = await load_schedule(FAKE_TOKEN)
         assert result is not None
-        picks, _ = result
+        picks, _, _shares = result
         picks.append("mutated")
         assert db_module._memory_store[FAKE_TOKEN][PICKS_FIELD] == SAMPLE_PICKS
 
@@ -356,7 +380,7 @@ class TestFirestoreCreateSchedule:
             token = await create_schedule()
 
         assert token == FAKE_TOKEN
-        expected = {PICKS_FIELD: [], NAME_FIELD: "", SHARE_ID_FIELD: ""}
+        expected = {PICKS_FIELD: [], NAME_FIELD: "", SHARE_ID_FIELD: "", SHARES_FIELD: []}
         fake_client.collection().document().set.assert_called_once_with(expected)
 
     @pytest.mark.asyncio
@@ -370,7 +394,7 @@ class TestFirestoreCreateSchedule:
         with patch("fqf.db.generate_token", return_value=FAKE_TOKEN):
             await create_schedule(name=SAMPLE_NAME)
 
-        expected = {PICKS_FIELD: [], NAME_FIELD: SAMPLE_NAME, SHARE_ID_FIELD: ""}
+        expected = {PICKS_FIELD: [], NAME_FIELD: SAMPLE_NAME, SHARE_ID_FIELD: "", SHARES_FIELD: []}
         fake_client.collection().document().set.assert_called_once_with(expected)
 
     @pytest.mark.asyncio
@@ -392,7 +416,7 @@ class TestFirestoreCreateSchedule:
             token = await create_schedule()
 
         assert token == ANOTHER_TOKEN
-        expected = {PICKS_FIELD: [], NAME_FIELD: "", SHARE_ID_FIELD: ""}
+        expected = {PICKS_FIELD: [], NAME_FIELD: "", SHARE_ID_FIELD: "", SHARES_FIELD: []}
         doc_ref_new.set.assert_called_once_with(expected)
 
     @pytest.mark.asyncio
@@ -419,7 +443,21 @@ class TestFirestoreLoadSchedule:
         db_module._db = fake_client
 
         result = await load_schedule(FAKE_TOKEN)
-        assert result == (SAMPLE_PICKS, SAMPLE_NAME)
+        assert result == (SAMPLE_PICKS, SAMPLE_NAME, [])
+
+    @pytest.mark.asyncio
+    async def test_returns_shares_when_present(self) -> None:
+        share_entry = {SHARE_ID_FIELD: SHARE_ID, NAME_FIELD: "Friend"}
+        data = {PICKS_FIELD: list(SAMPLE_PICKS), NAME_FIELD: SAMPLE_NAME, SHARES_FIELD: [share_entry]}
+        doc = _make_firestore_doc(exists=True, data=data)
+        fake_client = MagicMock()
+        fake_client.collection().document().get.return_value = doc
+        db_module._db = fake_client
+
+        result = await load_schedule(FAKE_TOKEN)
+        assert result is not None
+        picks, name, shares = result
+        assert shares == [share_entry]
 
     @pytest.mark.asyncio
     async def test_returns_none_for_missing_doc(self) -> None:
@@ -439,7 +477,7 @@ class TestFirestoreLoadSchedule:
         db_module._db = fake_client
 
         result = await load_schedule(FAKE_TOKEN)
-        assert result == ([], "")
+        assert result == ([], "", [])
 
     @pytest.mark.asyncio
     async def test_returns_empty_when_data_is_none(self) -> None:
@@ -449,7 +487,7 @@ class TestFirestoreLoadSchedule:
         db_module._db = fake_client
 
         result = await load_schedule(FAKE_TOKEN)
-        assert result == ([], "")
+        assert result == ([], "", [])
 
 
 class TestFirestoreSavePicks:
@@ -620,3 +658,145 @@ class TestFirestoreLoadScheduleByShare:
 
         result = await load_schedule_by_share("deadbeef")
         assert result is None
+
+
+# ── In-memory: add_share_to_schedule ─────────────────────────────────────────
+
+
+SHARE_NAME = "Friend"
+
+
+class TestInMemoryAddShareToSchedule:
+    @pytest.mark.asyncio
+    async def test_adds_share_and_returns_true(self) -> None:
+        db_module._memory_store = {FAKE_TOKEN: _mem_doc([])}
+        result = await add_share_to_schedule(FAKE_TOKEN, SHARE_ID, SHARE_NAME)
+        assert result is True
+        shares = db_module._memory_store[FAKE_TOKEN][SHARES_FIELD]
+        assert shares == [{SHARE_ID_FIELD: SHARE_ID, NAME_FIELD: SHARE_NAME}]
+
+    @pytest.mark.asyncio
+    async def test_deduplicates_by_share_id(self) -> None:
+        existing = [{SHARE_ID_FIELD: SHARE_ID, NAME_FIELD: SHARE_NAME}]
+        db_module._memory_store = {FAKE_TOKEN: _mem_doc([], shares=existing)}
+        await add_share_to_schedule(FAKE_TOKEN, SHARE_ID, SHARE_NAME)
+        assert len(db_module._memory_store[FAKE_TOKEN][SHARES_FIELD]) == 1
+
+    @pytest.mark.asyncio
+    async def test_returns_false_for_missing_token(self) -> None:
+        db_module._memory_store = {}
+        result = await add_share_to_schedule("ghost-token", SHARE_ID, SHARE_NAME)
+        assert result is False
+
+
+# ── In-memory: remove_share_from_schedule ────────────────────────────────────
+
+
+class TestInMemoryRemoveShareFromSchedule:
+    @pytest.mark.asyncio
+    async def test_removes_share_and_returns_true(self) -> None:
+        existing = [{SHARE_ID_FIELD: SHARE_ID, NAME_FIELD: SHARE_NAME}]
+        db_module._memory_store = {FAKE_TOKEN: _mem_doc([], shares=existing)}
+        result = await remove_share_from_schedule(FAKE_TOKEN, SHARE_ID)
+        assert result is True
+        assert db_module._memory_store[FAKE_TOKEN][SHARES_FIELD] == []
+
+    @pytest.mark.asyncio
+    async def test_noop_when_share_id_not_present(self) -> None:
+        db_module._memory_store = {FAKE_TOKEN: _mem_doc([])}
+        result = await remove_share_from_schedule(FAKE_TOKEN, "not-there")
+        assert result is True
+        assert db_module._memory_store[FAKE_TOKEN][SHARES_FIELD] == []
+
+    @pytest.mark.asyncio
+    async def test_returns_false_for_missing_token(self) -> None:
+        db_module._memory_store = {}
+        result = await remove_share_from_schedule("ghost-token", SHARE_ID)
+        assert result is False
+
+
+# ── Firestore: add_share_to_schedule ─────────────────────────────────────────
+
+
+class TestFirestoreAddShareToSchedule:
+    @pytest.mark.asyncio
+    async def test_adds_share_and_updates_doc(self) -> None:
+        fake_client = MagicMock()
+        db_module._db = fake_client
+
+        doc_data = {PICKS_FIELD: [], NAME_FIELD: "", SHARES_FIELD: []}
+        doc = _make_firestore_doc(exists=True, data=doc_data)
+        doc_ref = MagicMock()
+        doc_ref.get.return_value = doc
+        fake_client.collection().document.return_value = doc_ref
+
+        result = await add_share_to_schedule(FAKE_TOKEN, SHARE_ID, SHARE_NAME)
+
+        assert result is True
+        expected_shares = [{SHARE_ID_FIELD: SHARE_ID, NAME_FIELD: SHARE_NAME}]
+        doc_ref.update.assert_called_once_with({SHARES_FIELD: expected_shares})
+
+    @pytest.mark.asyncio
+    async def test_does_not_update_when_share_already_exists(self) -> None:
+        fake_client = MagicMock()
+        db_module._db = fake_client
+
+        existing = [{SHARE_ID_FIELD: SHARE_ID, NAME_FIELD: SHARE_NAME}]
+        doc_data = {PICKS_FIELD: [], NAME_FIELD: "", SHARES_FIELD: existing}
+        doc = _make_firestore_doc(exists=True, data=doc_data)
+        doc_ref = MagicMock()
+        doc_ref.get.return_value = doc
+        fake_client.collection().document.return_value = doc_ref
+
+        result = await add_share_to_schedule(FAKE_TOKEN, SHARE_ID, SHARE_NAME)
+
+        assert result is True
+        doc_ref.update.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_returns_false_for_missing_doc(self) -> None:
+        fake_client = MagicMock()
+        db_module._db = fake_client
+
+        doc = _make_firestore_doc(exists=False)
+        doc_ref = MagicMock()
+        doc_ref.get.return_value = doc
+        fake_client.collection().document.return_value = doc_ref
+
+        result = await add_share_to_schedule("ghost-token", SHARE_ID, SHARE_NAME)
+        assert result is False
+
+
+# ── Firestore: remove_share_from_schedule ────────────────────────────────────
+
+
+class TestFirestoreRemoveShareFromSchedule:
+    @pytest.mark.asyncio
+    async def test_removes_share_and_updates_doc(self) -> None:
+        fake_client = MagicMock()
+        db_module._db = fake_client
+
+        existing = [{SHARE_ID_FIELD: SHARE_ID, NAME_FIELD: SHARE_NAME}]
+        doc_data = {PICKS_FIELD: [], NAME_FIELD: "", SHARES_FIELD: existing}
+        doc = _make_firestore_doc(exists=True, data=doc_data)
+        doc_ref = MagicMock()
+        doc_ref.get.return_value = doc
+        fake_client.collection().document.return_value = doc_ref
+
+        result = await remove_share_from_schedule(FAKE_TOKEN, SHARE_ID)
+
+        assert result is True
+        doc_ref.update.assert_called_once_with({SHARES_FIELD: []})
+
+    @pytest.mark.asyncio
+    async def test_returns_false_for_missing_doc(self) -> None:
+        fake_client = MagicMock()
+        db_module._db = fake_client
+
+        doc = _make_firestore_doc(exists=False)
+        doc_ref = MagicMock()
+        doc_ref.get.return_value = doc
+        fake_client.collection().document.return_value = doc_ref
+
+        result = await remove_share_from_schedule("ghost-token", SHARE_ID)
+        assert result is False

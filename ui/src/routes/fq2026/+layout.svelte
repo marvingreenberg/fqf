@@ -9,7 +9,7 @@
 
     let gateVisible = $state(true);
 
-    onMount(() => {
+    onMount(async () => {
         // Load saved identity from localStorage
         appState.loadFromStorage();
 
@@ -21,7 +21,18 @@
             appState.pendingShareName = shareName;
         }
 
-        // If already confirmed this session, skip gate
+        // If a token was found in storage, auto-confirm so the gate never shows
+        if (appState.token) {
+            try {
+                await appState.confirm(appState.token);
+                gateVisible = false;
+            } catch {
+                // Token no longer valid — show gate so user can re-identify
+            }
+            return;
+        }
+
+        // If already confirmed this session (e.g. guest view), skip gate
         if (appState.confirmed) {
             gateVisible = false;
         }

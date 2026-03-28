@@ -162,7 +162,7 @@
                             if (!appState.pendingShareId) return;
                             const { loadSharedSchedule } = await import('$lib/api');
                             const resp = await loadSharedSchedule(appState.pendingShareId);
-                            appState.addSharedSchedule({
+                            await appState.addSharedSchedule({
                                 share_id: appState.pendingShareId,
                                 name: appState.pendingShareName ?? resp.name,
                                 picks: resp.picks,

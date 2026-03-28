@@ -65,12 +65,15 @@ class TestCreateSchedule:
 # ── GET /api/v1/schedule/{token} ──────────────────────────────────────────────
 
 
+SAMPLE_SHARE_RAW = [{"share_id": SHARE_ID, "name": "Friend"}]
+
+
 class TestLoadSchedule:
     @pytest.mark.asyncio
     async def test_returns_200_with_picks_acts_and_name(self, client: AsyncClient) -> None:
         with patch(
             f"{DB_MODULE}.load_schedule",
-            new=AsyncMock(return_value=(SAMPLE_PICKS, SAMPLE_NAME)),
+            new=AsyncMock(return_value=(SAMPLE_PICKS, SAMPLE_NAME, [])),
         ):
             resp = await client.get(f"{SCHEDULE_URL}/{FAKE_TOKEN}")
 
@@ -82,10 +85,21 @@ class TestLoadSchedule:
         assert len(data["acts"]) == len(SAMPLE_PICKS)
 
     @pytest.mark.asyncio
+    async def test_returns_shares_in_response(self, client: AsyncClient) -> None:
+        with patch(
+            f"{DB_MODULE}.load_schedule",
+            new=AsyncMock(return_value=(SAMPLE_PICKS, SAMPLE_NAME, SAMPLE_SHARE_RAW)),
+        ):
+            resp = await client.get(f"{SCHEDULE_URL}/{FAKE_TOKEN}")
+
+        data = resp.json()
+        assert data["shares"] == [{"share_id": SHARE_ID, "name": "Friend"}]
+
+    @pytest.mark.asyncio
     async def test_unknown_slugs_omitted_from_acts(self, client: AsyncClient) -> None:
         with patch(
             f"{DB_MODULE}.load_schedule",
-            new=AsyncMock(return_value=(ONE_UNKNOWN_PICK, "")),
+            new=AsyncMock(return_value=(ONE_UNKNOWN_PICK, "", [])),
         ):
             resp = await client.get(f"{SCHEDULE_URL}/{FAKE_TOKEN}")
 
@@ -97,7 +111,7 @@ class TestLoadSchedule:
     async def test_act_summary_shape(self, client: AsyncClient) -> None:
         with patch(
             f"{DB_MODULE}.load_schedule",
-            new=AsyncMock(return_value=(SAMPLE_PICKS, "")),
+            new=AsyncMock(return_value=(SAMPLE_PICKS, "", [])),
         ):
             resp = await client.get(f"{SCHEDULE_URL}/{FAKE_TOKEN}")
 
@@ -113,11 +127,12 @@ class TestLoadSchedule:
 
     @pytest.mark.asyncio
     async def test_empty_picks_returns_empty_acts(self, client: AsyncClient) -> None:
-        with patch(f"{DB_MODULE}.load_schedule", new=AsyncMock(return_value=([], ""))):
+        with patch(f"{DB_MODULE}.load_schedule", new=AsyncMock(return_value=([], "", []))):
             resp = await client.get(f"{SCHEDULE_URL}/{FAKE_TOKEN}")
         data = resp.json()
         assert data["picks"] == []
         assert data["acts"] == []
+        assert data["shares"] == []
 
 
 # ── PUT /api/v1/schedule/{token} ──────────────────────────────────────────────
@@ -130,7 +145,7 @@ class TestSaveSchedule:
             patch(f"{DB_MODULE}.save_picks", new=AsyncMock(return_value=True)),
             patch(
                 f"{DB_MODULE}.load_schedule",
-                new=AsyncMock(return_value=(SAMPLE_PICKS, "")),
+                new=AsyncMock(return_value=(SAMPLE_PICKS, "", [])),
             ),
         ):
             resp = await client.put(f"{SCHEDULE_URL}/{FAKE_TOKEN}", json={"picks": SAMPLE_PICKS})
@@ -144,7 +159,7 @@ class TestSaveSchedule:
     @pytest.mark.asyncio
     async def test_name_field_in_body_is_passed_to_save_picks(self, client: AsyncClient) -> None:
         mock_save = AsyncMock(return_value=True)
-        mock_load = AsyncMock(return_value=(SAMPLE_PICKS, SAMPLE_NAME))
+        mock_load = AsyncMock(return_value=(SAMPLE_PICKS, SAMPLE_NAME, []))
         with (
             patch(f"{DB_MODULE}.save_picks", new=mock_save),
             patch(f"{DB_MODULE}.load_schedule", new=mock_load),
@@ -170,7 +185,7 @@ class TestSaveSchedule:
             patch(f"{DB_MODULE}.save_picks", new=AsyncMock(return_value=True)),
             patch(
                 f"{DB_MODULE}.load_schedule",
-                new=AsyncMock(return_value=(ONE_UNKNOWN_PICK, "")),
+                new=AsyncMock(return_value=(ONE_UNKNOWN_PICK, "", [])),
             ),
         ):
             resp = await client.put(
@@ -314,3 +329,60 @@ class TestMergeSchedules:
         data = resp.json()
         assert data["schedules"] == []
         assert data["acts"] == []
+
+
+# ── POST /api/v1/schedule/{token}/add-share ───────────────────────────────────
+
+
+class TestAddShare:
+    @pytest.mark.asyncio
+    async def test_returns_200_with_updated_shares(self, client: AsyncClient) -> None:
+        loaded = (SAMPLE_PICKS, SAMPLE_NAME, SAMPLE_SHARE_RAW)
+        with (
+            patch(f"{DB_MODULE}.add_share_to_schedule", new=AsyncMock(return_value=True)),
+            patch(f"{DB_MODULE}.load_schedule", new=AsyncMock(return_value=loaded)),
+        ):
+            resp = await client.post(
+                f"{SCHEDULE_URL}/{FAKE_TOKEN}/add-share",
+                json={"share_id": SHARE_ID, "name": "Friend"},
+            )
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["shares"] == [{"share_id": SHARE_ID, "name": "Friend"}]
+
+    @pytest.mark.asyncio
+    async def test_returns_404_when_token_not_found(self, client: AsyncClient) -> None:
+        with patch(f"{DB_MODULE}.add_share_to_schedule", new=AsyncMock(return_value=False)):
+            resp = await client.post(
+                f"{SCHEDULE_URL}/{FAKE_TOKEN}/add-share",
+                json={"share_id": SHARE_ID, "name": "Friend"},
+            )
+        assert resp.status_code == 404
+
+
+# ── DELETE /api/v1/schedule/{token}/remove-share/{share_id} ──────────────────
+
+
+class TestRemoveShare:
+    @pytest.mark.asyncio
+    async def test_returns_200_with_share_removed(self, client: AsyncClient) -> None:
+        loaded = (SAMPLE_PICKS, SAMPLE_NAME, [])
+        with (
+            patch(f"{DB_MODULE}.remove_share_from_schedule", new=AsyncMock(return_value=True)),
+            patch(f"{DB_MODULE}.load_schedule", new=AsyncMock(return_value=loaded)),
+        ):
+            resp = await client.delete(
+                f"{SCHEDULE_URL}/{FAKE_TOKEN}/remove-share/{SHARE_ID}"
+            )
+
+        assert resp.status_code == 200
+        assert resp.json()["shares"] == []
+
+    @pytest.mark.asyncio
+    async def test_returns_404_when_token_not_found(self, client: AsyncClient) -> None:
+        with patch(f"{DB_MODULE}.remove_share_from_schedule", new=AsyncMock(return_value=False)):
+            resp = await client.delete(
+                f"{SCHEDULE_URL}/{FAKE_TOKEN}/remove-share/{SHARE_ID}"
+            )
+        assert resp.status_code == 404

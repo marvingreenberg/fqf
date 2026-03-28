@@ -21,6 +21,7 @@ SCHEDULES_COLLECTION = "schedules"
 PICKS_FIELD = "picks"
 NAME_FIELD = "name"
 SHARE_ID_FIELD = "share_id"
+SHARES_FIELD = "shares"
 SHARE_ID_BYTES = 4
 MAX_RETRY_ATTEMPTS = 10
 
@@ -28,7 +29,7 @@ MAX_RETRY_ATTEMPTS = 10
 # DocumentSnapshot | Awaitable[DocumentSnapshot] from .get(), but the sync
 # client always returns DocumentSnapshot; Any avoids spurious union-attr errors.
 _db: Any = None
-# In-memory fallback: maps token -> {"picks": [...], "name": "...", "share_id": "..."}
+# In-memory fallback: maps token -> {"picks": [...], "name": "...", "share_id": "...", "shares": [...]}
 _memory_store: dict[str, dict[str, Any]] | None = None
 
 
@@ -93,13 +94,20 @@ async def create_schedule(name: str = "") -> str:
         if _using_memory():
             assert _memory_store is not None
             if token not in _memory_store:
-                _memory_store[token] = {PICKS_FIELD: [], NAME_FIELD: name, SHARE_ID_FIELD: ""}
+                _memory_store[token] = {
+                    PICKS_FIELD: [],
+                    NAME_FIELD: name,
+                    SHARE_ID_FIELD: "",
+                    SHARES_FIELD: [],
+                }
                 return token
         else:
             assert _db is not None
             doc_ref = _db.collection(SCHEDULES_COLLECTION).document(token)
             if not doc_ref.get().exists:
-                doc_ref.set({PICKS_FIELD: [], NAME_FIELD: name, SHARE_ID_FIELD: ""})
+                doc_ref.set(
+                    {PICKS_FIELD: [], NAME_FIELD: name, SHARE_ID_FIELD: "", SHARES_FIELD: []}
+                )
                 return token
         logger.warning("Token collision on attempt %d: %s", attempt + 1, token)
 
@@ -108,22 +116,27 @@ async def create_schedule(name: str = "") -> str:
     )
 
 
-async def load_schedule(token: str) -> tuple[list[str], str] | None:
-    """Load picks and name for a token. Returns (picks, name) or None if token doesn't exist."""
+async def load_schedule(token: str) -> tuple[list[str], str, list[dict[str, str]]] | None:
+    """Load picks, name, and shares for a token.
+
+    Returns (picks, name, shares) or None if token doesn't exist.
+    """
     if _using_memory():
         assert _memory_store is not None
         if token not in _memory_store:
             return None
         doc = _memory_store[token]
-        return list(doc[PICKS_FIELD]), doc.get(NAME_FIELD, "")
+        shares: list[dict[str, str]] = list(doc.get(SHARES_FIELD, []))
+        return list(doc[PICKS_FIELD]), doc.get(NAME_FIELD, ""), shares
     assert _db is not None
     doc = _db.collection(SCHEDULES_COLLECTION).document(token).get()
     if not doc.exists:
         return None
     data = doc.to_dict()
     if not data:
-        return [], ""
-    return list(data.get(PICKS_FIELD, [])), data.get(NAME_FIELD, "")
+        return [], "", []
+    fs_shares: list[dict[str, str]] = list(data.get(SHARES_FIELD, []))
+    return list(data.get(PICKS_FIELD, [])), data.get(NAME_FIELD, ""), fs_shares
 
 
 async def save_picks(token: str, picks: list[str], name: str | None = None) -> bool:
@@ -191,6 +204,58 @@ async def load_schedule_by_share(share_id: str) -> tuple[str, list[str], str] | 
         name: str = str(data.get(NAME_FIELD, ""))
         return doc.id, list(data.get(PICKS_FIELD, [])), name
     return None
+
+
+async def add_share_to_schedule(token: str, share_id: str, share_name: str) -> bool:
+    """Add a share reference to a user's schedule. Deduplicates by share_id.
+
+    Returns False if token not found.
+    """
+    if _using_memory():
+        assert _memory_store is not None
+        if token not in _memory_store:
+            return False
+        existing: list[dict[str, str]] = _memory_store[token].setdefault(SHARES_FIELD, [])
+        if not any(s[SHARE_ID_FIELD] == share_id for s in existing):
+            existing.append({SHARE_ID_FIELD: share_id, NAME_FIELD: share_name})
+        return True
+    assert _db is not None
+    doc_ref = _db.collection(SCHEDULES_COLLECTION).document(token)
+    doc = doc_ref.get()
+    if not doc.exists:
+        return False
+    data = doc.to_dict() or {}
+    fs_shares: list[dict[str, str]] = list(data.get(SHARES_FIELD, []))
+    if not any(s[SHARE_ID_FIELD] == share_id for s in fs_shares):
+        fs_shares.append({SHARE_ID_FIELD: share_id, NAME_FIELD: share_name})
+        doc_ref.update({SHARES_FIELD: fs_shares})
+    return True
+
+
+async def remove_share_from_schedule(token: str, share_id: str) -> bool:
+    """Remove a share reference from a user's schedule.
+
+    Returns False if token not found.
+    """
+    if _using_memory():
+        assert _memory_store is not None
+        if token not in _memory_store:
+            return False
+        existing = _memory_store[token].get(SHARES_FIELD, [])
+        _memory_store[token][SHARES_FIELD] = [
+            s for s in existing if s[SHARE_ID_FIELD] != share_id
+        ]
+        return True
+    assert _db is not None
+    doc_ref = _db.collection(SCHEDULES_COLLECTION).document(token)
+    doc = doc_ref.get()
+    if not doc.exists:
+        return False
+    data = doc.to_dict() or {}
+    fs_shares: list[dict[str, str]] = list(data.get(SHARES_FIELD, []))
+    updated = [s for s in fs_shares if s[SHARE_ID_FIELD] != share_id]
+    doc_ref.update({SHARES_FIELD: updated})
+    return True
 
 
 async def load_multiple_schedules(tokens: list[str]) -> dict[str, list[str]]:

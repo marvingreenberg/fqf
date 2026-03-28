@@ -7,7 +7,8 @@ import type {
     MergeResponse,
     StageListResponse,
     ShareResponse,
-    SharedScheduleResponse
+    SharedScheduleResponse,
+    ShareRef
 } from '$lib/types';
 
 const BASE = '/api/v1';
@@ -69,6 +70,20 @@ export async function createShare(token: string): Promise<ShareResponse> {
 
 export async function loadSharedSchedule(shareId: string): Promise<SharedScheduleResponse> {
     return fetchJson<SharedScheduleResponse>(`${BASE}/schedule/by-share/${shareId}`);
+}
+
+export async function addShareToSchedule(token: string, shareRef: ShareRef): Promise<ScheduleResponse> {
+    return fetchJson<ScheduleResponse>(`${BASE}/schedule/${token}/add-share`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(shareRef)
+    });
+}
+
+export async function removeShareFromSchedule(token: string, shareId: string): Promise<ScheduleResponse> {
+    return fetchJson<ScheduleResponse>(`${BASE}/schedule/${token}/remove-share/${shareId}`, {
+        method: 'DELETE'
+    });
 }
 
 export async function mergeSchedules(tokens: string[]): Promise<MergeResponse> {

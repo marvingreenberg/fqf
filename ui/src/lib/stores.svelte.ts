@@ -1,4 +1,4 @@
-import type { ActSummary, SharedSchedule, ViewMode, MobileSortMode } from '$lib/types';
+import type { ActSummary, SharedSchedule, ViewMode, MobileSortMode, ShareRef } from '$lib/types';
 import { FESTIVAL_DATES, IDENTITY_STORAGE_KEY } from '$lib/types';
 
 const SAVE_DEBOUNCE_MS = 1000;
@@ -56,13 +56,26 @@ class AppState {
     }
 
     async confirm(token: string, name?: string): Promise<void> {
-        const { loadSchedule } = await import('$lib/api');
+        const { loadSchedule, loadSharedSchedule } = await import('$lib/api');
         const resp = await loadSchedule(token);
         this.token = resp.token;
         this.name = name ?? resp.name ?? '';
         this.picks = new Set(resp.picks);
         this.confirmed = true;
         this.saveToStorage();
+
+        // Restore persisted shared schedules from the API response
+        if (resp.shares && resp.shares.length > 0) {
+            const loaded = await Promise.allSettled(
+                resp.shares.map(async (ref: ShareRef) => {
+                    const shared = await loadSharedSchedule(ref.share_id);
+                    return { share_id: ref.share_id, name: ref.name || shared.name, picks: shared.picks, acts: shared.acts };
+                })
+            );
+            this.sharedSchedules = loaded
+                .filter((r): r is PromiseFulfilledResult<SharedSchedule> => r.status === 'fulfilled')
+                .map((r) => r.value);
+        }
     }
 
     clearIdentity(): void {
@@ -106,10 +119,22 @@ class AppState {
         }, SAVE_DEBOUNCE_MS);
     }
 
-    addSharedSchedule(schedule: SharedSchedule): void {
+    async addSharedSchedule(schedule: SharedSchedule): Promise<void> {
         const exists = this.sharedSchedules.some((s) => s.share_id === schedule.share_id);
         if (!exists) {
             this.sharedSchedules = [...this.sharedSchedules, schedule];
+        }
+        if (this.token) {
+            const { addShareToSchedule } = await import('$lib/api');
+            await addShareToSchedule(this.token, { share_id: schedule.share_id, name: schedule.name });
+        }
+    }
+
+    async removeSharedSchedule(shareId: string): Promise<void> {
+        this.sharedSchedules = this.sharedSchedules.filter((s) => s.share_id !== shareId);
+        if (this.token) {
+            const { removeShareFromSchedule } = await import('$lib/api');
+            await removeShareFromSchedule(this.token, shareId);
         }
     }
 

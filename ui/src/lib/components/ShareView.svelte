@@ -114,30 +114,43 @@
     {#if allEntries.length > 0}
         <div class="shrink-0 px-3 py-2 border-b fqf-filter-panel flex flex-wrap items-center gap-3">
             {#each allEntries as entry (entry.id)}
-                <label class="flex items-center gap-1.5 cursor-pointer select-none">
-                    <input
-                        type="checkbox"
-                        checked={checkedIds.has(entry.id)}
-                        onchange={() => toggleChecked(entry.id)}
-                        class="rounded"
-                        style="accent-color: var(--mg-purple);"
-                    />
-                    <span
-                        class="fqf-emoji-circle {badgeClass(entry.id)}"
-                        aria-hidden="true"
-                        title={entry.id}
-                    >
-                        {emojiMap[entry.id] ?? '?'}
-                    </span>
-                    <span class="text-sm font-medium" style="color: var(--mg-purple-deep);">
-                        {entry.label}
-                        {#if entry.id === appState.token}
-                            <span class="text-xs font-normal" style="color: rgba(74,26,107,0.5);">
-                                (you)
-                            </span>
-                        {/if}
-                    </span>
-                </label>
+                <div class="flex items-center gap-1.5">
+                    <label class="flex items-center gap-1.5 cursor-pointer select-none">
+                        <input
+                            type="checkbox"
+                            checked={checkedIds.has(entry.id)}
+                            onchange={() => toggleChecked(entry.id)}
+                            class="rounded"
+                            style="accent-color: var(--mg-purple);"
+                        />
+                        <span
+                            class="fqf-emoji-circle {badgeClass(entry.id)}"
+                            aria-hidden="true"
+                            title={entry.id}
+                        >
+                            {emojiMap[entry.id] ?? '?'}
+                        </span>
+                        <span class="text-sm font-medium" style="color: var(--mg-purple-deep);">
+                            {entry.label}
+                            {#if entry.id === appState.token}
+                                <span class="text-xs font-normal" style="color: rgba(74,26,107,0.5);">
+                                    (you)
+                                </span>
+                            {/if}
+                        </span>
+                    </label>
+                    {#if entry.id !== appState.token}
+                        <button
+                            class="text-xs leading-none"
+                            style="color: rgba(74,26,107,0.4);"
+                            title="Remove {entry.label}"
+                            aria-label="Remove {entry.label}"
+                            onclick={() => appState.removeSharedSchedule(entry.id)}
+                        >
+                            ×
+                        </button>
+                    {/if}
+                </div>
             {/each}
         </div>
     {/if}
