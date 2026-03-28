@@ -15,7 +15,7 @@
     --mg-green-deep: #1a7a4a;
     --mg-green: #2ecc71;
     --mg-cream: #faf6f0;
-    --mg-card: #fffdf7;
+    --mg-card: #f0f7f2;
     --mg-text: #1a1a1a;
 }
 
@@ -136,13 +136,13 @@ h3,
 }
 
 .fqf-act-block.picked {
-    background-color: rgba(26, 122, 74, 0.12);
+    background-color: rgba(26, 122, 74, 0.18);
     border-color: var(--mg-green-deep);
     border-width: 1.5px;
 }
 
 .fqf-act-block.picked:hover {
-    background-color: rgba(26, 122, 74, 0.18);
+    background-color: rgba(26, 122, 74, 0.25);
 }
 
 .fqf-act-block.conflict-yellow {
@@ -157,19 +157,19 @@ h3,
 
 /* ── Grid background and time column ─────────────────────────────────────── */
 .fqf-grid-bg {
-    background-color: rgba(74, 26, 107, 0.04);
+    background-color: rgba(26, 122, 74, 0.08);
     background-image: repeating-linear-gradient(
         0deg,
         transparent,
         transparent 59px,
-        rgba(74, 26, 107, 0.06) 59px,
-        rgba(74, 26, 107, 0.06) 60px
+        rgba(26, 122, 74, 0.1) 59px,
+        rgba(26, 122, 74, 0.1) 60px
     );
     background-size: 100% 60px;
 }
 
 .fqf-time-col {
-    background-color: rgba(74, 26, 107, 0.04);
+    background-color: rgba(26, 122, 74, 0.06);
 }
 
 .fqf-time-label {
@@ -286,7 +286,12 @@ h3,
 }
 
 .fqf-fleur:hover {
-    transform: scale(1.15);
+    transform: scale(1.25);
+}
+
+.fqf-fleur:hover svg {
+    fill: var(--mg-gold-rich);
+    opacity: 0.8;
 }
 
 .fqf-fleur svg {
@@ -309,7 +314,7 @@ h3,
 }
 
 .fqf-list-row.picked {
-    background-color: rgba(26, 122, 74, 0.1);
+    background-color: rgba(26, 122, 74, 0.16);
     border-left: 3px solid var(--mg-green-deep);
 }
 
@@ -325,9 +330,9 @@ h3,
 
 /* ── Section / group headers (mobile/my-schedule/merge) ─────────────────── */
 .fqf-group-header {
-    background: linear-gradient(90deg, rgba(74, 26, 107, 0.12) 0%, transparent 100%);
-    border-bottom: 1px solid rgba(74, 26, 107, 0.15);
-    color: var(--mg-purple-deep);
+    background: linear-gradient(90deg, rgba(26, 122, 74, 0.18) 0%, rgba(26, 122, 74, 0.06) 100%);
+    border-bottom: 1px solid rgba(26, 122, 74, 0.2);
+    color: var(--mg-green-deep);
     font-family: 'DM Sans', system-ui, sans-serif;
     font-size: 0.7rem;
     font-weight: 700;
