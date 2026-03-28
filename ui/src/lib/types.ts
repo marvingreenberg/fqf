@@ -33,16 +33,29 @@ export interface ActListResponse {
 
 export interface ScheduleResponse {
     token: string;
+    name: string;
     picks: string[];
     acts: ActSummary[];
 }
 
 export interface ScheduleUpdate {
     picks: string[];
+    name?: string;
 }
 
 export interface TokenResponse {
     token: string;
+}
+
+export interface ShareResponse {
+    share_id: string;
+    share_url: string;
+}
+
+export interface SharedScheduleResponse {
+    name: string;
+    picks: string[];
+    acts: ActSummary[];
 }
 
 export interface MergeEntry {
@@ -55,9 +68,15 @@ export interface MergeResponse {
     acts: ActSummary[];
 }
 
+export interface SharedSchedule {
+    share_id: string;
+    name: string;
+    picks: string[];
+}
+
 export type ConflictLevel = 'none' | 'yellow' | 'red';
 
-export type ViewMode = 'grid' | 'mobile' | 'my-schedule' | 'merge';
+export type ViewMode = 'grid' | 'mobile' | 'my-schedule' | 'share';
 
 export type MobileSortMode = 'by-time' | 'by-stage';
 
@@ -69,3 +88,5 @@ export const DAY_LABELS: Record<string, string> = {
     '2026-04-18': 'Sat 18',
     '2026-04-19': 'Sun 19'
 };
+
+export const IDENTITY_STORAGE_KEY = 'fqf_identity';
