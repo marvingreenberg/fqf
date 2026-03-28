@@ -17,7 +17,9 @@
     let { act, top, height, isPicked, conflictLevel, onToggle, onDetail }: Props = $props();
 
     const showTime = $derived(height > MIN_HEIGHT_FOR_TIME);
-    const showConflictIcon = $derived(height > MIN_HEIGHT_FOR_ICON && isPicked && conflictLevel !== 'none');
+    const showConflictIcon = $derived(
+        height > MIN_HEIGHT_FOR_ICON && isPicked && conflictLevel !== 'none'
+    );
 
     const blockClass = $derived.by(() => {
         let cls = 'fqf-act-block';
@@ -74,16 +76,37 @@
             {/if}
         </div>
         {#if showConflictIcon}
-            <span class="shrink-0 mt-0.5" title={conflictLevel === 'red' ? 'Major time conflict' : 'Minor time conflict'}>
+            <span
+                class="shrink-0 mt-0.5"
+                title={conflictLevel === 'red' ? 'Major time conflict' : 'Minor time conflict'}
+            >
                 {#if conflictLevel === 'red'}
                     <svg viewBox="0 0 16 16" width="14" height="14" fill="#b42828">
-                        <circle cx="8" cy="8" r="7" fill="#b42828"/>
-                        <text x="8" y="12" text-anchor="middle" fill="white" font-size="12" font-weight="bold">!</text>
+                        <circle cx="8" cy="8" r="7" fill="#b42828" />
+                        <text
+                            x="8"
+                            y="12"
+                            text-anchor="middle"
+                            fill="white"
+                            font-size="12"
+                            font-weight="bold">!</text
+                        >
                     </svg>
                 {:else}
                     <svg viewBox="0 0 18 16" width="14" height="13" fill="none">
-                        <path d="M9 1L17 15H1L9 1Z" fill="var(--mg-gold-rich)" stroke="var(--mg-gold-rich)"/>
-                        <text x="9" y="14" text-anchor="middle" fill="var(--mg-purple-deep)" font-size="11" font-weight="bold">!</text>
+                        <path
+                            d="M9 1L17 15H1L9 1Z"
+                            fill="var(--mg-gold-rich)"
+                            stroke="var(--mg-gold-rich)"
+                        />
+                        <text
+                            x="9"
+                            y="14"
+                            text-anchor="middle"
+                            fill="var(--mg-purple-deep)"
+                            font-size="11"
+                            font-weight="bold">!</text
+                        >
                     </svg>
                 {/if}
             </span>
