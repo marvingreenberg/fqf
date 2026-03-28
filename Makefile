@@ -1,5 +1,5 @@
-.PHONY: help setup setup-api setup-ui build build-api build-ui test test-api test-ui \
-        lint lint-api lint-ui format format-api format-ui dev clean \
+.PHONY: help setup check-prereqs setup-api setup-ui build build-api build-ui test test-api test-ui \
+        lint lint-api lint-ui format format-api format-ui dev dev-firestore clean \
         build-image docker-run deploy e2e
 
 help: ## Show this help
@@ -7,7 +7,10 @@ help: ## Show this help
 		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 # ── Setup ──────────────────────────────────────────────────────────────
-setup: setup-api setup-ui ## Install all dependencies
+setup: check-prereqs setup-api setup-ui ## Install all dependencies
+
+check-prereqs: ## Check development prerequisites
+	@./scripts/check_prerequisites.sh
 
 setup-api: ## Install Python dependencies
 	uv venv
@@ -56,9 +59,23 @@ format-ui: ## Format frontend code
 	pnpm --dir ui format
 
 # ── Dev ────────────────────────────────────────────────────────────────
+# Uses in-memory storage by default — no Firestore needed for local dev.
+# Use `make dev-firestore` to run against the local Firestore emulator instead.
 dev: ## Start API + UI dev servers with hot reload, open browser
 	@trap 'kill -9 0 2>/dev/null; wait 2>/dev/null' EXIT; \
 	  uv run uvicorn fqf.api.app:create_app --factory --reload --port 8000 & \
+	  sleep 1; kill -0 $$! 2>/dev/null || { echo "ERROR: API server failed to start"; exit 1; }; \
+	  pnpm --dir ui dev & \
+	  for i in 1 2 3 4 5 6 7 8 9 10; do curl -s http://localhost:5173 >/dev/null 2>&1 && break; sleep 1; done; \
+	  open http://localhost:5173; \
+	  wait
+
+dev-firestore: ## Start dev with Firestore emulator
+	@echo "Starting Firestore emulator..."
+	@FIRESTORE_EMULATOR_HOST=localhost:8081 gcloud beta emulators firestore start --host-port=localhost:8081 &
+	@sleep 3
+	@trap 'kill 0 2>/dev/null; wait 2>/dev/null' EXIT; \
+	  FIRESTORE_EMULATOR_HOST=localhost:8081 uv run uvicorn fqf.api.app:create_app --factory --reload --port 8000 & \
 	  sleep 1; kill -0 $$! 2>/dev/null || { echo "ERROR: API server failed to start"; exit 1; }; \
 	  pnpm --dir ui dev & \
 	  for i in 1 2 3 4 5 6 7 8 9 10; do curl -s http://localhost:5173 >/dev/null 2>&1 && break; sleep 1; done; \

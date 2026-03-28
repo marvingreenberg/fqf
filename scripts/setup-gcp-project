@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Creates a GCP project for FQF and enables the required APIs.
+# Usage: ./scripts/setup-gcp-project <PROJECT_ID> [REGION]
+set -euo pipefail
+
+PROJECT_ID="${1:-}"
+REGION="${2:-us-central1}"
+
+ARTIFACT_REPO="fqf"
+REQUIRED_APIS=(
+    "run.googleapis.com"
+    "artifactregistry.googleapis.com"
+    "firestore.googleapis.com"
+)
+
+if [[ -z "$PROJECT_ID" ]]; then
+    echo "Usage: $0 <PROJECT_ID> [REGION]"
+    echo "  PROJECT_ID  GCP project ID to create (e.g. fqf-prod)"
+    echo "  REGION      Cloud Run / Artifact Registry region (default: us-central1)"
+    exit 1
+fi
+
+echo "==> Creating project: $PROJECT_ID"
+gcloud projects create "$PROJECT_ID" || echo "Project already exists — continuing"
+
+echo "==> Setting active project"
+gcloud config set project "$PROJECT_ID"
+
+echo "==> Enabling APIs..."
+for api in "${REQUIRED_APIS[@]}"; do
+    echo "    $api"
+    gcloud services enable "$api" --project "$PROJECT_ID"
+done
+
+echo "==> Creating Artifact Registry repository: $ARTIFACT_REPO (region: $REGION)"
+gcloud artifacts repositories create "$ARTIFACT_REPO" \
+    --repository-format=docker \
+    --location="$REGION" \
+    --project="$PROJECT_ID" \
+    --description="FQF Docker images" \
+    || echo "Repository already exists — continuing"
+
+echo ""
+echo "GCP project setup complete."
+echo "  Project:     $PROJECT_ID"
+echo "  Region:      $REGION"
+echo "  AR repo:     $REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO"
+echo ""
+echo "Next: run ./scripts/set-gcloud-creds-for-deploy to create service accounts and set GitHub secrets."
