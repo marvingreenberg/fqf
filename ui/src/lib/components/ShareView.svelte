@@ -71,29 +71,15 @@
     // All acts from all shared schedules (union, deduped by slug)
     const allActs = $derived.by((): ActSummary[] => {
         const bySlug = new Map<string, ActSummary>();
-
-        // Self acts come from appState.acts (populated by the page)
-        // Shared acts come from the SharedSchedule objects stored in appState
-        // We need access to acts from shared responses — stored alongside picks
-        // The shared schedule only stores picks+name; acts must come from separate source.
-        // Since SharedScheduleResponse includes acts, we track them in a separate store below.
-        for (const act of _sharedActs) {
-            bySlug.set(act.slug, act);
+        for (const schedule of appState.sharedSchedules) {
+            for (const act of schedule.acts) {
+                bySlug.set(act.slug, act);
+            }
         }
         return [...bySlug.values()].sort(
             (a, b) => a.date.localeCompare(b.date) || a.start.localeCompare(b.start)
         );
     });
-
-    // Acts keyed from shared responses, accumulated as shares are loaded
-    // We expose a setter so the parent page can feed acts in.
-    let _sharedActs = $state<ActSummary[]>([]);
-
-    export function addSharedActs(acts: ActSummary[]): void {
-        const bySlug = new Map<string, ActSummary>(_sharedActs.map((a) => [a.slug, a]));
-        for (const act of acts) bySlug.set(act.slug, act);
-        _sharedActs = [...bySlug.values()];
-    }
 
     const groupedByDay = $derived.by(() => {
         const visible = allActs.filter((a) => allPickSlugs.has(a.slug));

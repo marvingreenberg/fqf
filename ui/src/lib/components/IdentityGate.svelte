@@ -165,7 +165,8 @@
                             appState.addSharedSchedule({
                                 share_id: appState.pendingShareId,
                                 name: appState.pendingShareName ?? resp.name,
-                                picks: resp.picks
+                                picks: resp.picks,
+                                acts: resp.acts
                             });
                             appState.pendingShareId = null;
                             appState.pendingShareName = null;

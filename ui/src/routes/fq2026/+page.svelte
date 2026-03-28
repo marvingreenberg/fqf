@@ -20,7 +20,6 @@
     let detailLoading = $state(false);
     let innerWidth = $state(MOBILE_BREAKPOINT + 1);
     let stageLocations = $state(new Map<string, { lat: number; lng: number }>());
-    let shareViewRef = $state<{ addSharedActs: (acts: ActSummary[]) => void } | null>(null);
 
     const isMobile = $derived(innerWidth < MOBILE_BREAKPOINT);
 
@@ -78,9 +77,9 @@
             appState.addSharedSchedule({
                 share_id: shareId,
                 name: appState.pendingShareName ?? resp.name,
-                picks: resp.picks
+                picks: resp.picks,
+                acts: resp.acts
             });
-            shareViewRef?.addSharedActs(resp.acts);
             appState.pendingShareId = null;
             appState.pendingShareName = null;
             appState.viewMode = 'share';
@@ -170,7 +169,7 @@
                 onActDetail={openDetail}
             />
         {:else if appState.viewMode === 'share'}
-            <ShareView bind:this={shareViewRef} />
+            <ShareView />
         {:else if loading}
             <div class="flex items-center justify-center h-full">
                 <p style="color: var(--mg-purple); opacity: 0.6;">Loading schedule…</p>

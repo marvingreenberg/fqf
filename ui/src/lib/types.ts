@@ -72,6 +72,7 @@ export interface SharedSchedule {
     share_id: string;
     name: string;
     picks: string[];
+    acts: ActSummary[];
 }
 
 export type ConflictLevel = 'none' | 'yellow' | 'red';
