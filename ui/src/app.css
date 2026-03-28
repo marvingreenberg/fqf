@@ -1,0 +1,7 @@
+/* Tailwind v4 via Vite plugin */
+@import 'tailwindcss';
+
+/* Skeleton UI v4 — aliases resolve via vite.config.ts to avoid
+   pnpm symlink resolution issues in @tailwindcss/vite's import resolver. */
+@import 'skeleton-theme/cerberus.css';
+@import 'skeleton-base/index.css';
