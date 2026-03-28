@@ -119,22 +119,53 @@ h3,
 .fqf-act-block {
     background-color: var(--mg-card);
     border: 1px solid rgba(74, 26, 107, 0.12);
+    border-radius: 0.5rem;
     box-shadow: 0 1px 3px rgba(74, 26, 107, 0.08);
     transition:
-        transform 0.12s ease,
-        box-shadow 0.12s ease,
-        background-color 0.12s ease;
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        background-color 0.15s ease,
+        border-color 0.15s ease;
 }
 
 .fqf-act-block:hover {
-    background-color: #fff9ee;
+    background-color: rgba(26, 122, 74, 0.08);
+    border-color: rgba(26, 122, 74, 0.3);
     transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(74, 26, 107, 0.15);
+    box-shadow: 0 4px 12px rgba(26, 122, 74, 0.15);
+}
+
+.fqf-act-block.picked {
+    background-color: rgba(26, 122, 74, 0.12);
+    border-color: var(--mg-green-deep);
+    border-width: 1.5px;
+}
+
+.fqf-act-block.picked:hover {
+    background-color: rgba(26, 122, 74, 0.18);
+}
+
+.fqf-act-block.conflict-yellow {
+    background-color: rgba(212, 168, 67, 0.15);
+    border-color: var(--mg-gold-rich);
+}
+
+.fqf-act-block.conflict-red {
+    background-color: rgba(180, 40, 40, 0.1);
+    border-color: #b42828;
 }
 
 /* ── Grid background and time column ─────────────────────────────────────── */
 .fqf-grid-bg {
-    background-color: rgba(250, 246, 240, 0.6);
+    background-color: rgba(74, 26, 107, 0.04);
+    background-image: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 59px,
+        rgba(74, 26, 107, 0.06) 59px,
+        rgba(74, 26, 107, 0.06) 60px
+    );
+    background-size: 100% 60px;
 }
 
 .fqf-time-col {
@@ -266,13 +297,30 @@ h3,
 .fqf-list-row {
     background-color: var(--mg-card);
     border-bottom: 1px solid rgba(74, 26, 107, 0.1);
+    border-radius: 0.375rem;
+    margin: 0.25rem 0.5rem;
     transition:
         background-color 0.12s ease,
         transform 0.12s ease;
 }
 
 .fqf-list-row:hover {
-    background-color: #fff9ee;
+    background-color: rgba(26, 122, 74, 0.06);
+}
+
+.fqf-list-row.picked {
+    background-color: rgba(26, 122, 74, 0.1);
+    border-left: 3px solid var(--mg-green-deep);
+}
+
+.fqf-list-row.conflict-yellow {
+    background-color: rgba(212, 168, 67, 0.12);
+    border-left: 3px solid var(--mg-gold-rich);
+}
+
+.fqf-list-row.conflict-red {
+    background-color: rgba(180, 40, 40, 0.08);
+    border-left: 3px solid #b42828;
 }
 
 /* ── Section / group headers (mobile/my-schedule/merge) ─────────────────── */
