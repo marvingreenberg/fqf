@@ -2,9 +2,11 @@
 
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from fqf.api.act_routes import router as act_router
 from fqf.api.schedule_routes import router as schedule_router
@@ -36,5 +38,10 @@ def create_app() -> FastAPI:
 
     app.include_router(act_router)
     app.include_router(schedule_router)
+
+    # Static mount must be last — it catches all remaining paths for SPA routing
+    static_dir = Path(__file__).parent.parent / "static"
+    if static_dir.is_dir():
+        app.mount("/", StaticFiles(directory=str(static_dir), html=True), name="static")
 
     return app
