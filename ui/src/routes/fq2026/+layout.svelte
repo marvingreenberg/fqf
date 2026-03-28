@@ -27,7 +27,8 @@
                 await appState.confirm(appState.token);
                 gateVisible = false;
             } catch {
-                // Token no longer valid — show gate so user can re-identify
+                // Token no longer valid — clear stale identity so gate shows clean
+                appState.clearIdentity();
             }
             return;
         }

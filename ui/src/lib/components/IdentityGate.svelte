@@ -133,19 +133,17 @@
                     {loading ? 'Loading…' : 'Confirm identity'}
                 </button>
 
-                {#if !appState.token}
-                    <!-- Only show Back if user manually chose "enter token" -->
-                    <button
-                        class="fqf-btn-ghost"
-                        onclick={() => {
-                            mode = 'choose';
-                            errorMsg = '';
-                        }}
-                        disabled={loading}
-                    >
-                        Back
-                    </button>
-                {/if}
+                <button
+                    class="fqf-btn-ghost"
+                    onclick={() => {
+                        mode = 'choose';
+                        errorMsg = '';
+                        tokenInput = '';
+                    }}
+                    disabled={loading}
+                >
+                    {errorMsg ? 'Start over' : 'Back'}
+                </button>
             {/if}
 
             {#if appState.pendingShareId}
