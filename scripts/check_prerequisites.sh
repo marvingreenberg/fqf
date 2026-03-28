@@ -72,6 +72,18 @@ fi
 # gcloud CLI (optional — needed for deploy)
 if command -v gcloud &>/dev/null; then
     pass "gcloud $(gcloud --version 2>/dev/null | head -1 | awk '{print $4}')"
+
+    # Check that active project matches pyproject.toml project name
+    gcp_project=$(gcloud config get-value project 2>/dev/null)
+    project_name=$(grep '^name = ' pyproject.toml 2>/dev/null | head -1 | sed 's/name = "//; s/"//')
+    if [[ -z "$gcp_project" ]]; then
+        warn "No GCP project set — run: gcloud config set project ${project_name:-<project-id>}"
+    elif [[ "$gcp_project" != "$project_name" ]]; then
+        warn "GCP project '${gcp_project}' does not match pyproject.toml name '${project_name}'"
+        warn "  Run: gcloud config set project ${project_name}"
+    else
+        pass "GCP project matches pyproject.toml: ${gcp_project}"
+    fi
 else
     warn "gcloud CLI not found — needed for 'make deploy' and 'make dev-firestore'"
     warn "  Install from https://cloud.google.com/sdk/docs/install"
