@@ -4,11 +4,19 @@
  * French Quarter street grid.
  */
 
+import {
+    METERS_TO_FEET,
+    FEET_ROUNDING,
+    MIN_DISPLAY_FEET,
+    CLOSE_DISTANCE_FT,
+    MEDIUM_DISTANCE_FT,
+    DISTANCE_COLORS
+} from '$lib/constants';
+
 const EARTH_RADIUS_M = 6_371_000;
 const WALKING_CORRECTION = 1.25;
 const MAX_ABBREV_LENGTH = 10;
 const ABBREV_CUTOFF = 9;
-const KM_THRESHOLD = 1000;
 
 function toRadians(deg: number): number {
     return (deg * Math.PI) / 180;
@@ -34,11 +42,19 @@ export function walkingDistanceMeters(
     return haversineMeters(lat1, lng1, lat2, lng2) * WALKING_CORRECTION;
 }
 
-/** Format a distance in meters for display: "100m" or "1.2km". */
+/** Format a distance in meters for display as rounded feet. */
 export function formatDistance(meters: number): string {
-    const rounded = Math.round(meters);
-    if (rounded < KM_THRESHOLD) return `${rounded}m`;
-    return `${(rounded / KM_THRESHOLD).toFixed(1)}km`;
+    const feet = meters * METERS_TO_FEET;
+    const rounded = Math.max(MIN_DISPLAY_FEET, Math.round(feet / FEET_ROUNDING) * FEET_ROUNDING);
+    return `${rounded} ft`;
+}
+
+/** Return inline CSS style for distance-based color coding. */
+export function distanceStyle(meters: number): string {
+    const feet = meters * METERS_TO_FEET;
+    if (feet < CLOSE_DISTANCE_FT) return `color: ${DISTANCE_COLORS.close};`;
+    if (feet < MEDIUM_DISTANCE_FT) return `color: ${DISTANCE_COLORS.medium};`;
+    return `color: ${DISTANCE_COLORS.far}; font-weight: 700;`;
 }
 
 /**

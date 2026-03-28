@@ -3,7 +3,12 @@
     import { DAY_LABELS } from '$lib/types';
     import { getWorstConflict, getConflictBetweenActs } from '$lib/conflict';
     import { CONFLICT_COLORS } from '$lib/constants';
-    import { walkingDistanceMeters, formatDistance, shortenStageName } from '$lib/distance';
+    import {
+        walkingDistanceMeters,
+        formatDistance,
+        shortenStageName,
+        distanceStyle
+    } from '$lib/distance';
 
     interface Props {
         allActs: ActSummary[];
@@ -130,7 +135,7 @@
                         </p>
                         {#if distanceInfo.has(act.slug)}
                             {@const d = distanceInfo.get(act.slug)!}
-                            <p class="text-[10px] text-surface-400 mt-0.5">
+                            <p class="text-[10px] mt-0.5" style={distanceStyle(d.distance)}>
                                 {formatDistance(d.distance)} from {shortenStageName(d.fromStage)}
                             </p>
                         {/if}

@@ -12,3 +12,16 @@ export const CONFLICT_COLORS = {
 } as const;
 
 export const MAX_MERGE_TOKENS = 5;
+
+// Distance display (feet)
+export const METERS_TO_FEET = 3.28084;
+export const FEET_ROUNDING = 100;
+export const MIN_DISPLAY_FEET = 100;
+export const CLOSE_DISTANCE_FT = 600;
+export const MEDIUM_DISTANCE_FT = 1200;
+
+export const DISTANCE_COLORS = {
+    close: '#1a7a4a',
+    medium: '#d97706',
+    far: '#991b1b'
+} as const;
