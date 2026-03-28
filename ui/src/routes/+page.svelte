@@ -8,6 +8,7 @@
     import MobileSchedule from '$lib/components/MobileSchedule.svelte';
     import MySchedule from '$lib/components/MySchedule.svelte';
     import MergeView from '$lib/components/MergeView.svelte';
+    import FilterPanel from '$lib/components/FilterPanel.svelte';
 
     const MOBILE_BREAKPOINT = 768;
 
@@ -20,6 +21,10 @@
     let innerWidth = $state(MOBILE_BREAKPOINT + 1);
 
     const isMobile = $derived(innerWidth < MOBILE_BREAKPOINT);
+
+    const uniqueGenres = $derived([...new Set(acts.map((a) => a.genre))].sort());
+    const uniqueStages = $derived([...new Set(acts.map((a) => a.stage))].sort());
+    const visibleActs = $derived(acts.filter((a) => appState.isActVisible(a)));
 
     const SORT_MODES: { value: MobileSortMode; label: string }[] = [
         { value: 'by-time', label: 'By Time' },
@@ -120,6 +125,7 @@
 
     {#if appState.viewMode !== 'my-schedule' && appState.viewMode !== 'merge'}
         <DayTabs bind:selectedDate={appState.selectedDate} />
+        <FilterPanel genres={uniqueGenres} stages={uniqueStages} />
     {/if}
 
     <div class="flex-1 overflow-hidden relative">
@@ -138,7 +144,7 @@
             </div>
         {:else if isMobile}
             <MobileSchedule
-                {acts}
+                acts={visibleActs}
                 picks={appState.picks}
                 sortMode={appState.mobileSortMode}
                 onTogglePick={(slug) => appState.togglePick(slug)}
@@ -146,7 +152,7 @@
             />
         {:else}
             <ScheduleGrid
-                {acts}
+                acts={visibleActs}
                 picks={appState.picks}
                 onTogglePick={(slug) => appState.togglePick(slug)}
                 onActDetail={openDetail}
