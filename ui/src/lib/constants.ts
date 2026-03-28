@@ -36,3 +36,5 @@ export const MAP_BOUNDS = {
 } as const;
 
 export const MAX_LOOKAHEAD_MINUTES = 60;
+
+export const MINUTES_PER_HOUR = 60;

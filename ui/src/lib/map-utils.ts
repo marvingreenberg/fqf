@@ -4,7 +4,7 @@
  */
 
 import type { ActSummary } from '$lib/types';
-import { MAP_BOUNDS, MAX_LOOKAHEAD_MINUTES } from '$lib/constants';
+import { MAP_BOUNDS, MAX_LOOKAHEAD_MINUTES, MINUTES_PER_HOUR } from '$lib/constants';
 
 // Countdown color endpoints: gray (inactive) ↔ dark green (active)
 export const COUNTDOWN_GRAY = '#999999';
@@ -15,7 +15,6 @@ const RGB_SHIFT_R = 16;
 const RGB_SHIFT_G = 8;
 const RGB_MASK = 0xff;
 const HEX_PREFIX_OFFSET = 1;
-const MINUTES_PER_HOUR = 60;
 const NOON_HOUR = 12;
 const PERCENT = 100;
 

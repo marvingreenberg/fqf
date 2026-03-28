@@ -8,6 +8,7 @@
     import MobileSchedule from '$lib/components/MobileSchedule.svelte';
     import MySchedule from '$lib/components/MySchedule.svelte';
     import MergeView from '$lib/components/MergeView.svelte';
+    import MapView from '$lib/components/MapView.svelte';
     import FilterPanel from '$lib/components/FilterPanel.svelte';
 
     const MOBILE_BREAKPOINT = 768;
@@ -34,6 +35,7 @@
 
     const VIEW_TABS: { value: ViewMode; label: () => string }[] = [
         { value: 'grid', label: () => 'All Acts' },
+        { value: 'map', label: () => 'Map' },
         { value: 'my-schedule', label: () => `My Schedule (${appState.picks.size})` },
         { value: 'merge', label: () => 'Merge' }
     ];
@@ -128,6 +130,8 @@
 
     {#if appState.viewMode !== 'my-schedule' && appState.viewMode !== 'merge'}
         <DayTabs bind:selectedDate={appState.selectedDate} />
+    {/if}
+    {#if appState.viewMode !== 'my-schedule' && appState.viewMode !== 'merge' && appState.viewMode !== 'map'}
         <FilterPanel genres={uniqueGenres} stages={uniqueStages} />
     {/if}
 
@@ -140,6 +144,8 @@
                 onTogglePick={(slug) => appState.togglePick(slug)}
                 onActDetail={openDetail}
             />
+        {:else if appState.viewMode === 'map'}
+            <MapView {acts} {stageLocations} />
         {:else if appState.viewMode === 'merge'}
             <MergeView />
         {:else if loading}

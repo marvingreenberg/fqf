@@ -57,7 +57,7 @@ export interface MergeResponse {
 
 export type ConflictLevel = 'none' | 'yellow' | 'red';
 
-export type ViewMode = 'grid' | 'mobile' | 'my-schedule' | 'merge';
+export type ViewMode = 'grid' | 'mobile' | 'my-schedule' | 'merge' | 'map';
 
 export type MobileSortMode = 'by-time' | 'by-stage';
 
