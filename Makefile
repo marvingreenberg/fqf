@@ -1,3 +1,9 @@
+SERVICE_NAME   := fqf
+GCP_PROJECT    ?= $(shell gcloud config get-value project 2>/dev/null)
+GCP_REGION     ?= us-central1
+GCP_REPOSITORY := container-images
+GCP_IMAGE      := $(GCP_REGION)-docker.pkg.dev/$(GCP_PROJECT)/$(GCP_REPOSITORY)/$(SERVICE_NAME)
+
 .PHONY: help setup check-prereqs setup-api setup-ui build build-api build-ui test test-api test-ui \
         lint lint-api lint-ui format format-api format-ui dev dev-firestore clean \
         build-image docker-run deploy e2e
@@ -13,7 +19,7 @@ check-prereqs: ## Check development prerequisites
 	@./scripts/check_prerequisites.sh
 
 setup-api: ## Install Python dependencies
-	uv venv
+	uv venv --clear
 	uv sync --all-extras
 
 setup-ui: ## Install frontend dependencies
@@ -84,14 +90,30 @@ dev-firestore: ## Start dev with Firestore emulator
 
 # ── Docker ─────────────────────────────────────────────────────────────
 build-image: ## Build Docker image locally
-	docker buildx build -t fqf:local .
+	docker buildx build \
+	  -t $(SERVICE_NAME):latest \
+	  -t $(GCP_IMAGE):latest \
+	  .
 
-docker-run: build-image ## Build and run Docker image
-	docker run --rm -p 8000:8000 --env-file .env fqf:local
+docker-run: build-image ## Build and run locally
+	docker run --rm -p 8000:8000 \
+	  -e GCP_PROJECT=$(GCP_PROJECT) \
+	  $(SERVICE_NAME):latest
 
 # ── Deploy ─────────────────────────────────────────────────────────────
-deploy: ## Build, push, deploy to Cloud Run
-	@echo "Deploy target — configure per environment"
+deploy: build-image ## Build, push, and deploy to Cloud Run
+	docker push $(GCP_IMAGE):latest
+	gcloud run deploy $(SERVICE_NAME) \
+	  --image=$(GCP_IMAGE):latest \
+	  --region=$(GCP_REGION) \
+	  --project=$(GCP_PROJECT) \
+	  --port=8000 \
+	  --memory=512Mi \
+	  --cpu=1 \
+	  --min-instances=0 \
+	  --max-instances=3 \
+	  --service-account=fqf-runtime@$(GCP_PROJECT).iam.gserviceaccount.com \
+	  --allow-unauthenticated
 
 # ── E2E ────────────────────────────────────────────────────────────────
 e2e: ## Run E2E tests
