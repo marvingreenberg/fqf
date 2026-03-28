@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Creates GCP service accounts for GitHub Actions deployment:
 #   1. github-deploy   — used by CI to push images and deploy
-#   2. fqf-runtime     — used by Cloud Run at runtime (Firestore access)
+#   2. fqf-SA     — used by Cloud Run at runtime (Firestore access)
 #
 # Also sets the required GitHub repository secrets (GCP_SA_KEY, GCP_PROJECT).
 #
@@ -24,7 +24,7 @@ fi
 
 DEPLOY_SA_NAME="github-deploy"
 DEPLOY_SA_EMAIL="${DEPLOY_SA_NAME}@${PROJECT}.iam.gserviceaccount.com"
-RUNTIME_SA_NAME="fqf-runtime"
+RUNTIME_SA_NAME="fqf-SA"
 RUNTIME_SA_EMAIL="${RUNTIME_SA_NAME}@${PROJECT}.iam.gserviceaccount.com"
 REPO_NAME="container-images"
 REGION="${GCP_REGION:-us-central1}"

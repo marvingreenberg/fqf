@@ -51,7 +51,7 @@ jobs:
 
       - name: Deploy service
         run: |
-          gcloud run deploy fqf \
+          gcloud run deploy fqf2026 \
             --image ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version }} \
             --region us-central1 \
             --project ${{ secrets.GCP_PROJECT }} \
@@ -61,4 +61,4 @@ jobs:
             --max-instances 3 \
             --port 8000 \
             --allow-unauthenticated \
-            --service-account fqf-runtime@${{ secrets.GCP_PROJECT }}.iam.gserviceaccount.com
+            --service-account fqf-SA@${{ secrets.GCP_PROJECT }}.iam.gserviceaccount.com

@@ -1,4 +1,4 @@
-SERVICE_NAME   := fqf
+SERVICE_NAME   := fqf2026
 GCP_PROJECT    ?= $(shell gcloud config get-value project 2>/dev/null)
 GCP_REGION     ?= us-central1
 GCP_REPOSITORY := container-images
@@ -112,7 +112,7 @@ deploy: build-image ## Build, push, and deploy to Cloud Run
 	  --cpu=1 \
 	  --min-instances=0 \
 	  --max-instances=3 \
-	  --service-account=fqf-runtime@$(GCP_PROJECT).iam.gserviceaccount.com \
+	  --service-account=fqf-SA@$(GCP_PROJECT).iam.gserviceaccount.com \
 	  --allow-unauthenticated
 
 # ── E2E ────────────────────────────────────────────────────────────────

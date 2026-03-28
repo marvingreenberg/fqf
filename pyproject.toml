@@ -3,7 +3,7 @@ requires = ["setuptools>=64", "wheel", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "fqf"
+name = "fqf2026"
 dynamic = ["version"]
 description = "French Quarter Festival 2026 Schedule Builder"
 requires-python = ">=3.11"

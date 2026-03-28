@@ -444,7 +444,7 @@ wheels = [
 ]
 
 [[package]]
-name = "fqf"
+name = "fqf2026"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
