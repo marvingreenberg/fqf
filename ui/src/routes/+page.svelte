@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import type { ActSummary, ActDetail, MobileSortMode, ViewMode } from '$lib/types';
-    import { listActs, getAct } from '$lib/api';
+    import { listActs, getAct, listStages } from '$lib/api';
     import { appState } from '$lib/stores.svelte';
     import DayTabs from '$lib/components/DayTabs.svelte';
     import ScheduleGrid from '$lib/components/ScheduleGrid.svelte';
@@ -19,11 +19,12 @@
     let detailAct = $state<ActDetail | null>(null);
     let detailLoading = $state(false);
     let innerWidth = $state(MOBILE_BREAKPOINT + 1);
+    let stageLocations = $state(new Map<string, { lat: number; lng: number }>());
 
     const isMobile = $derived(innerWidth < MOBILE_BREAKPOINT);
 
     const uniqueGenres = $derived([...new Set(acts.map((a) => a.genre))].sort());
-    const uniqueStages = $derived([...new Set(acts.map((a) => a.stage))].sort());
+    const uniqueStages = $derived([...new Set(acts.map((a) => a.stage))]);
     const visibleActs = $derived(acts.filter((a) => appState.isActVisible(a)));
 
     const SORT_MODES: { value: MobileSortMode; label: string }[] = [
@@ -80,8 +81,10 @@
         }
     });
 
-    onMount(() => {
+    onMount(async () => {
         loadActs(appState.selectedDate);
+        const resp = await listStages();
+        stageLocations = new Map(resp.stages.map((s) => [s.name, { lat: s.lat, lng: s.lng }]));
     });
 </script>
 
@@ -133,6 +136,7 @@
             <MySchedule
                 {allActs}
                 picks={appState.picks}
+                {stageLocations}
                 onTogglePick={(slug) => appState.togglePick(slug)}
                 onActDetail={openDetail}
             />
@@ -193,7 +197,35 @@
                 <div class="flex items-start gap-3 mb-4">
                     <div class="flex-1 min-w-0">
                         <h2 class="text-xl font-bold leading-snug">{detailAct.name}</h2>
-                        <p class="text-sm text-surface-500 mt-1">{detailAct.stage}</p>
+                        <p class="text-sm text-surface-500 mt-1 flex items-center gap-1.5">
+                            {detailAct.stage}
+                            {#if stageLocations.has(detailAct.stage)}
+                                {@const loc = stageLocations.get(detailAct.stage)}
+                                <a
+                                    href="https://www.google.com/maps/dir/?api=1&destination={loc?.lat},{loc?.lng}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    title="Directions"
+                                    class="text-surface-400 hover:text-primary-600 transition-colors"
+                                    onclick={(e) => e.stopPropagation()}
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="14"
+                                        height="14"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                                        <circle cx="12" cy="10" r="3" />
+                                    </svg>
+                                </a>
+                            {/if}
+                        </p>
                     </div>
                     <span
                         class="shrink-0 px-2 py-0.5 rounded text-xs font-medium bg-primary-100 text-primary-800"
@@ -206,9 +238,41 @@
                     {detailAct.start}–{detailAct.end}
                 </p>
 
-                <p class="text-sm leading-relaxed whitespace-pre-line">
+                <p class="text-sm leading-relaxed">
                     {detailAct.about || 'No bio available yet.'}
                 </p>
+
+                {#if detailAct.websites.length > 0}
+                    <div class="flex gap-2 mt-3">
+                        {#each detailAct.websites as url}
+                            <a
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title={new URL(url).hostname.replace('www.', '')}
+                                class="text-surface-400 hover:text-primary-600 transition-colors"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="18"
+                                    height="18"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M2 12h20" />
+                                    <path
+                                        d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+                                    />
+                                </svg>
+                            </a>
+                        {/each}
+                    </div>
+                {/if}
             {/if}
         </div>
     </div>

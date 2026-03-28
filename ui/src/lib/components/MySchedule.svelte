@@ -1,17 +1,19 @@
 <script lang="ts">
     import type { ActSummary, ConflictLevel } from '$lib/types';
     import { DAY_LABELS } from '$lib/types';
-    import { getWorstConflict } from '$lib/conflict';
+    import { getWorstConflict, getConflictBetweenActs } from '$lib/conflict';
     import { CONFLICT_COLORS } from '$lib/constants';
+    import { walkingDistanceMeters, formatDistance, shortenStageName } from '$lib/distance';
 
     interface Props {
         allActs: ActSummary[];
         picks: Set<string>;
+        stageLocations: Map<string, { lat: number; lng: number }>;
         onTogglePick: (slug: string) => void;
         onActDetail: (act: ActSummary) => void;
     }
 
-    let { allActs, picks, onTogglePick, onActDetail }: Props = $props();
+    let { allActs, picks, stageLocations, onTogglePick, onActDetail }: Props = $props();
 
     const pickedActs = $derived(
         allActs
@@ -26,6 +28,41 @@
             byDate.get(act.date)!.push(act);
         }
         return [...byDate.entries()].map(([date, acts]) => ({ date, acts }));
+    });
+
+    interface DistanceEntry {
+        distance: number;
+        fromStage: string;
+    }
+
+    const distanceInfo = $derived.by(() => {
+        const info = new Map<string, DistanceEntry>();
+        if (stageLocations.size === 0) return info;
+        for (const group of groupedByDay) {
+            let anchor: ActSummary | null = null;
+            for (let i = 0; i < group.acts.length; i++) {
+                if (i === 0) {
+                    anchor = group.acts[0];
+                    continue;
+                }
+                const prev = group.acts[i - 1];
+                const curr = group.acts[i];
+                const conflict = getConflictBetweenActs(prev, curr);
+                const refAct = conflict === 'red' ? anchor : prev;
+                if (!refAct || refAct.stage === curr.stage) {
+                    if (conflict !== 'red') anchor = curr;
+                    continue;
+                }
+                const from = stageLocations.get(refAct.stage);
+                const to = stageLocations.get(curr.stage);
+                if (from && to) {
+                    const dist = walkingDistanceMeters(from.lat, from.lng, to.lat, to.lng);
+                    info.set(curr.slug, { distance: dist, fromStage: refAct.stage });
+                }
+                if (conflict !== 'red') anchor = curr;
+            }
+        }
+        return info;
     });
 
     function conflictLevel(act: ActSummary): ConflictLevel {
@@ -93,6 +130,12 @@
                         <p class="text-xs text-surface-500 truncate">
                             {act.stage} &middot; {act.start}–{act.end}
                         </p>
+                        {#if distanceInfo.has(act.slug)}
+                            {@const d = distanceInfo.get(act.slug)!}
+                            <p class="text-[10px] text-surface-400 mt-0.5">
+                                {formatDistance(d.distance)} from {shortenStageName(d.fromStage)}
+                            </p>
+                        {/if}
                     </div>
 
                     <div class="shrink-0 flex items-center gap-1.5">

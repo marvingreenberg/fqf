@@ -4,7 +4,8 @@ import type {
     ScheduleResponse,
     ScheduleUpdate,
     TokenResponse,
-    MergeResponse
+    MergeResponse,
+    StageListResponse
 } from '$lib/types';
 
 const BASE = '/api/v1';
@@ -53,4 +54,8 @@ export async function savePicks(token: string, picks: string[]): Promise<Schedul
 
 export async function mergeSchedules(tokens: string[]): Promise<MergeResponse> {
     return fetchJson<MergeResponse>(`${BASE}/schedule/merge?tokens=${tokens.join(',')}`);
+}
+
+export async function listStages(): Promise<StageListResponse> {
+    return fetchJson<StageListResponse>(`${BASE}/stages`);
 }

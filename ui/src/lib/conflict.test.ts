@@ -3,6 +3,7 @@ import {
     timeToMinutes,
     calculateOverlapRatio,
     getConflictLevel,
+    getConflictBetweenActs,
     getWorstConflict
 } from '$lib/conflict';
 import type { ActSummary } from '$lib/types';
@@ -71,6 +72,32 @@ describe('getConflictLevel', () => {
 function makeAct(start: string, end: string, slug: string = 'test'): ActSummary {
     return { slug, name: 'Test', stage: 'Stage', date: '2026-04-16', start, end, genre: 'Unknown' };
 }
+
+describe('getConflictBetweenActs', () => {
+    it('returns none for non-overlapping acts', () => {
+        const a = makeAct('14:00', '15:00', 'a');
+        const b = makeAct('16:00', '17:00', 'b');
+        expect(getConflictBetweenActs(a, b)).toBe('none');
+    });
+
+    it('returns yellow for small overlap', () => {
+        const a = makeAct('14:00', '15:00', 'a');
+        const b = makeAct('14:50', '15:50', 'b');
+        expect(getConflictBetweenActs(a, b)).toBe('yellow');
+    });
+
+    it('returns red for large overlap', () => {
+        const a = makeAct('14:00', '15:00', 'a');
+        const b = makeAct('14:10', '15:30', 'b');
+        expect(getConflictBetweenActs(a, b)).toBe('red');
+    });
+
+    it('returns none for different dates', () => {
+        const a = makeAct('14:00', '15:00', 'a');
+        const b = { ...makeAct('14:00', '15:00', 'b'), date: '2026-04-17' };
+        expect(getConflictBetweenActs(a, b)).toBe('none');
+    });
+});
 
 describe('getWorstConflict', () => {
     it('returns none when no other picks', () => {
