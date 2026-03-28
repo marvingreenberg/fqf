@@ -53,6 +53,7 @@ strict = true
 [tool.pytest.ini_options]
 addopts = ["--cov=src/fqf", "--cov-report=html", "--cov-report=term"]
 testpaths = ["tests"]
+asyncio_mode = "auto"
 
 [tool.coverage.run]
 source = ["src"]
