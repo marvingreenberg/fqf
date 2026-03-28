@@ -43,13 +43,18 @@ fi
 gcloud config set project "$PROJECT_ID"
 
 # ── Link billing account ───────────────────────────────────────
-BILLING_ACCOUNT=$(gcloud billing accounts list --filter="open=true" --format="value(ACCOUNT_ID)" --limit=1)
-if [[ -n "$BILLING_ACCOUNT" ]]; then
-    echo "Linking billing account ${BILLING_ACCOUNT}..."
-    gcloud billing projects link "$PROJECT_ID" --billing-account="$BILLING_ACCOUNT"
+CURRENT_BILLING=$(gcloud billing projects describe "$PROJECT_ID" --format="value(billingEnabled)" 2>/dev/null)
+if [[ "$CURRENT_BILLING" == "True" ]]; then
+    echo "Billing already enabled for ${PROJECT_ID}, skipping."
 else
-    echo "WARNING: No billing account found. Link one manually:"
-    echo "  gcloud billing projects link ${PROJECT_ID} --billing-account=<ACCOUNT_ID>"
+    BILLING_ACCOUNT=$(gcloud billing accounts list --filter="open=true" --format="value(ACCOUNT_ID)" --limit=1)
+    if [[ -n "$BILLING_ACCOUNT" ]]; then
+        echo "Linking billing account ${BILLING_ACCOUNT}..."
+        gcloud billing projects link "$PROJECT_ID" --billing-account="$BILLING_ACCOUNT"
+    else
+        echo "WARNING: No billing account found. Link one manually:"
+        echo "  gcloud billing projects link ${PROJECT_ID} --billing-account=<ACCOUNT_ID>"
+    fi
 fi
 
 # ── Enable required APIs ───────────────────────────────────────
