@@ -227,95 +227,86 @@
                 {#if detailLoading}
                     <p style="color: var(--mg-purple); opacity: 0.6;">Loading…</p>
                 {:else if detailAct}
-                    <div class="flex items-start gap-3 mb-4">
-                        <div class="flex-1 min-w-0">
-                            <h2
-                                class="text-xl font-bold leading-snug"
-                                style="font-family: 'Playfair Display', Georgia, serif; color: var(--mg-purple-deep);"
+                    {@const isPicked = appState.isPicked(detailAct.slug)}
+                    <!-- Header row: fleur + web links + name + genre -->
+                    <div class="flex items-center gap-2 mb-3">
+                        <!-- Fleur-de-lis pick button -->
+                        <button
+                            class="fqf-fleur shrink-0"
+                            style="width: 1.5rem; height: 1.5rem;"
+                            title={isPicked ? 'Remove from picks' : 'Add to picks'}
+                            onclick={() => appState.togglePick(detailAct.slug)}
+                        >
+                            <svg viewBox="0 0 16 16" width="20" height="20"
+                                fill={isPicked ? 'var(--mg-green-deep)' : 'none'}
+                                stroke={isPicked ? 'none' : 'rgba(74, 26, 107, 0.3)'}
+                                stroke-width="0.75"
                             >
-                                {detailAct.name}
-                            </h2>
-                            <p
-                                class="text-sm mt-1 flex items-center gap-1.5"
-                                style="color: rgba(74, 26, 107, 0.55);"
-                            >
-                                {detailAct.stage}
-                                {#if stageLocations.has(detailAct.stage)}
-                                    {@const loc = stageLocations.get(detailAct.stage)}
-                                    <a
-                                        href="https://www.google.com/maps/dir/?api=1&destination={loc?.lat},{loc?.lng}"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        title="Directions"
-                                        style="color: rgba(74, 26, 107, 0.4);"
-                                        class="hover:opacity-80 transition-opacity"
-                                        onclick={(e) => e.stopPropagation()}
-                                    >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="14"
-                                            height="14"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            stroke-width="2"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                        >
-                                            <path
-                                                d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"
-                                            />
-                                            <circle cx="12" cy="10" r="3" />
-                                        </svg>
-                                    </a>
-                                {/if}
-                            </p>
-                        </div>
-                        <span class="fqf-genre-badge shrink-0">
-                            {detailAct.genre}
-                        </span>
-                    </div>
+                                <path d="M8 0C8 0 6.5 3.5 6.5 5.5C6.5 7 7 8 8 9C9 8 9.5 7 9.5 5.5C9.5 3.5 8 0 8 0ZM4.5 6C2.5 6 0 7.5 0 7.5C0 7.5 2 9 4.5 9C5.5 9 6.5 8.5 7 8C6 7.5 5.5 7 4.5 6ZM11.5 6C10.5 7 10 7.5 9 8C9.5 8.5 10.5 9 11.5 9C14 9 16 7.5 16 7.5C16 7.5 13.5 6 11.5 6ZM8 10C7 10 5 10.5 5 12C5 14 8 16 8 16C8 16 11 14 11 12C11 10.5 9 10 8 10Z" />
+                            </svg>
+                        </button>
 
-                    <p class="text-sm mb-4" style="color: rgba(26, 26, 26, 0.55);">
-                        {detailAct.start}–{detailAct.end}
-                    </p>
-
-                    <p class="text-sm leading-relaxed">
-                        {detailAct.about || 'No bio available yet.'}
-                    </p>
-
-                    {#if detailAct.websites.length > 0}
-                        <div class="flex gap-2 mt-3">
+                        <!-- Web links -->
+                        {#if detailAct.websites.length > 0}
                             {#each detailAct.websites as url}
                                 <a
                                     href={url}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     title={new URL(url).hostname.replace('www.', '')}
-                                    style="color: rgba(74, 26, 107, 0.4);"
-                                    class="hover:opacity-80 transition-opacity"
+                                    class="shrink-0 hover:scale-110 transition-transform"
+                                    style="color: var(--mg-purple);"
                                 >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="18"
-                                        height="18"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                    >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <circle cx="12" cy="12" r="10" />
                                         <path d="M2 12h20" />
-                                        <path
-                                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
-                                        />
+                                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                                     </svg>
                                 </a>
                             {/each}
-                        </div>
-                    {/if}
+                        {/if}
+
+                        <!-- Map link -->
+                        {#if stageLocations.has(detailAct.stage)}
+                            {@const loc = stageLocations.get(detailAct.stage)}
+                            <a
+                                href="https://www.google.com/maps/dir/?api=1&destination={loc?.lat},{loc?.lng}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title="Directions to {detailAct.stage}"
+                                class="shrink-0 hover:scale-110 transition-transform"
+                                style="color: var(--mg-green-deep);"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                                    <circle cx="12" cy="10" r="3" />
+                                </svg>
+                            </a>
+                        {/if}
+
+                        <!-- Band name -->
+                        <h2
+                            class="flex-1 min-w-0 text-xl font-bold leading-snug"
+                            style="font-family: 'Playfair Display', Georgia, serif; color: var(--mg-purple-deep);"
+                        >
+                            {detailAct.name}
+                        </h2>
+
+                        <!-- Genre badge -->
+                        <span class="fqf-genre-badge shrink-0">
+                            {detailAct.genre}
+                        </span>
+                    </div>
+
+                    <p class="text-sm mb-3 flex items-center gap-1.5" style="color: rgba(74, 26, 107, 0.55);">
+                        {detailAct.stage} &middot; {detailAct.start}&#8211;{detailAct.end}
+                    </p>
+
+                    <p class="text-sm leading-relaxed whitespace-pre-line">
+                        {detailAct.about || 'No bio available yet.'}
+                    </p>
                 {/if}
             </div>
         </div>
