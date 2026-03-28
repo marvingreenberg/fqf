@@ -1,15 +1,26 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import type { ActSummary, ActDetail } from '$lib/types';
+    import type { ActSummary, ActDetail, MobileSortMode } from '$lib/types';
     import { listActs, getAct } from '$lib/api';
     import { appState } from '$lib/stores.svelte';
     import DayTabs from '$lib/components/DayTabs.svelte';
     import ScheduleGrid from '$lib/components/ScheduleGrid.svelte';
+    import MobileSchedule from '$lib/components/MobileSchedule.svelte';
+
+    const MOBILE_BREAKPOINT = 768;
 
     let acts = $state<ActSummary[]>([]);
     let loading = $state(false);
     let detailAct = $state<ActDetail | null>(null);
     let detailLoading = $state(false);
+    let innerWidth = $state(MOBILE_BREAKPOINT + 1);
+
+    const isMobile = $derived(innerWidth < MOBILE_BREAKPOINT);
+
+    const SORT_MODES: { value: MobileSortMode; label: string }[] = [
+        { value: 'by-time', label: 'By Time' },
+        { value: 'by-stage', label: 'By Stage' }
+    ];
 
     async function loadActs(date: string): Promise<void> {
         loading = true;
@@ -44,9 +55,28 @@
     });
 </script>
 
+<svelte:window bind:innerWidth />
+
 <div class="flex flex-col h-screen overflow-hidden">
     <header class="shrink-0 bg-surface-100 border-b border-surface-300 px-4 py-2">
-        <h1 class="text-xl font-bold">FQF 2026 Schedule Builder</h1>
+        <div class="flex items-center justify-between">
+            <h1 class="text-xl font-bold">FQF 2026 Schedule Builder</h1>
+            {#if isMobile}
+                <div class="flex gap-1">
+                    {#each SORT_MODES as mode (mode.value)}
+                        <button
+                            class="px-2 py-1 text-xs rounded font-medium transition-colors
+                                   {appState.mobileSortMode === mode.value
+                                ? 'bg-primary-600 text-white'
+                                : 'bg-surface-200 text-surface-700 hover:bg-surface-300'}"
+                            onclick={() => (appState.mobileSortMode = mode.value)}
+                        >
+                            {mode.label}
+                        </button>
+                    {/each}
+                </div>
+            {/if}
+        </div>
     </header>
 
     <DayTabs bind:selectedDate={appState.selectedDate} />
@@ -56,6 +86,14 @@
             <div class="flex items-center justify-center h-full">
                 <p class="text-surface-500">Loading schedule…</p>
             </div>
+        {:else if isMobile}
+            <MobileSchedule
+                {acts}
+                picks={appState.picks}
+                sortMode={appState.mobileSortMode}
+                onTogglePick={(slug) => appState.togglePick(slug)}
+                onActDetail={openDetail}
+            />
         {:else}
             <ScheduleGrid
                 {acts}
