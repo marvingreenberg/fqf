@@ -24,6 +24,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Derive version from git tag
+        id: version
+        run: |
+          VERSION=$(git describe --tags --always | sed 's/^v//')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Version: $VERSION"
+
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:
@@ -40,11 +47,10 @@ jobs:
 
       - name: Build and push
         uses: docker/build-push-action@v6
-        env:
-          GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
         with:
           context: .
           push: true
+          build-args: VERSION=${{ steps.version.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           tags: |

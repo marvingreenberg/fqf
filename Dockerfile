@@ -8,14 +8,16 @@ COPY ui/ ./
 RUN pnpm build
 
 # Stage 2: Build backend + bundle
-FROM python:3.11-slim AS backend
+FROM python:3.11-slim
+
+ARG VERSION=0.0.0
+ENV SETUPTOOLS_SCM_PRETEND_VERSION=${VERSION}
+
 WORKDIR /app
-RUN pip install --no-cache-dir uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 COPY pyproject.toml uv.lock ./
 COPY src/ ./src/
 COPY --from=frontend /app/ui/build ./src/fqf/static/
-# setuptools-scm needs a version when no .git is present
-ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0
-RUN uv pip install --system .
+RUN uv pip install --system --no-cache-dir .
 EXPOSE 8000
 CMD ["uvicorn", "fqf.api.app:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000"]

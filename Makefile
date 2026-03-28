@@ -1,3 +1,4 @@
+VERSION        := $(shell git describe --tags --always 2>/dev/null | sed 's/^v//; s/-\([0-9]*\)-g\(.*\)/.dev\1+g\2/' || echo "0.0.0")
 SERVICE_NAME   := fqf2026
 GCP_PROJECT    ?= $(shell gcloud config get-value project 2>/dev/null)
 GCP_REGION     ?= us-central1
@@ -91,6 +92,7 @@ dev-firestore: ## Start dev with Firestore emulator
 # ── Docker ─────────────────────────────────────────────────────────────
 build-image: ## Build Docker image locally
 	docker buildx build \
+	  --build-arg VERSION=$(VERSION) \
 	  -t $(SERVICE_NAME):latest \
 	  -t $(GCP_IMAGE):latest \
 	  .
