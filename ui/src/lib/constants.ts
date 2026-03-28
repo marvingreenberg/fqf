@@ -25,3 +25,14 @@ export const DISTANCE_COLORS = {
     medium: '#d97706',
     far: '#991b1b'
 } as const;
+
+// Map view — bounds must match the static image in ui/static/fqf-map.png
+// Computed for center 29.95626,-90.06250 zoom 16, 900x750px
+export const MAP_BOUNDS = {
+    north: 29.9635,
+    south: 29.949,
+    east: -90.053,
+    west: -90.072
+} as const;
+
+export const MAX_LOOKAHEAD_MINUTES = 60;
