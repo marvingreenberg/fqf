@@ -1,80 +1,166 @@
 #!/usr/bin/env bash
-# Creates GCP service accounts for deploy and runtime, then sets GitHub secrets.
-# Usage: ./scripts/set-gcloud-creds-for-deploy <PROJECT_ID> <GITHUB_REPO>
-#   GITHUB_REPO  owner/repo format, e.g. mgreenberg/fqf
+# Creates GCP service accounts for GitHub Actions deployment:
+#   1. github-deploy   — used by CI to push images and deploy
+#   2. fqf-runtime     — used by Cloud Run at runtime (Firestore access)
+#
+# Also sets the required GitHub repository secrets (GCP_SA_KEY, GCP_PROJECT).
+#
+# Prerequisites:
+#   - gcloud CLI authenticated with project owner permissions
+#   - gh CLI authenticated with repo access
+#   - GCP project already created (run setup-gcp-project first)
+#
+# Usage:
+#   ./scripts/set-gcloud-creds-for-deploy          # create (idempotent)
+#   ./scripts/set-gcloud-creds-for-deploy --new    # delete and recreate
+#   ./scripts/set-gcloud-creds-for-deploy --clear  # delete only
 set -euo pipefail
 
-PROJECT_ID="${1:-}"
-GITHUB_REPO="${2:-}"
-REGION="${3:-us-central1}"
-
-DEPLOY_SA="github-deploy"
-RUNTIME_SA="fqf-runtime"
-ARTIFACT_REPO="fqf"
-
-if [[ -z "$PROJECT_ID" || -z "$GITHUB_REPO" ]]; then
-    echo "Usage: $0 <PROJECT_ID> <GITHUB_REPO> [REGION]"
-    echo "  PROJECT_ID   GCP project ID"
-    echo "  GITHUB_REPO  GitHub repo in owner/repo format"
-    echo "  REGION       GCP region (default: us-central1)"
+PROJECT=$(gcloud config get-value project 2>/dev/null)
+if [[ -z "$PROJECT" ]]; then
+    echo "ERROR: No GCP project set. Run: gcloud config set project <project-id>"
     exit 1
 fi
 
-DEPLOY_SA_EMAIL="${DEPLOY_SA}@${PROJECT_ID}.iam.gserviceaccount.com"
-RUNTIME_SA_EMAIL="${RUNTIME_SA}@${PROJECT_ID}.iam.gserviceaccount.com"
+DEPLOY_SA_NAME="github-deploy"
+DEPLOY_SA_EMAIL="${DEPLOY_SA_NAME}@${PROJECT}.iam.gserviceaccount.com"
+RUNTIME_SA_NAME="fqf-runtime"
+RUNTIME_SA_EMAIL="${RUNTIME_SA_NAME}@${PROJECT}.iam.gserviceaccount.com"
+REPO_NAME="container-images"
+REGION="${GCP_REGION:-us-central1}"
+KEY_FILE=$(mktemp)
 
-echo "==> Creating deploy service account: $DEPLOY_SA_EMAIL"
-gcloud iam service-accounts create "$DEPLOY_SA" \
-    --project="$PROJECT_ID" \
-    --display-name="GitHub Deploy SA" \
-    || echo "Service account already exists — continuing"
+DEPLOY_ROLES=(
+    "roles/run.admin"
+    "roles/iam.serviceAccountUser"
+)
 
-echo "==> Granting deploy SA roles..."
-for role in "roles/run.admin" "roles/iam.serviceAccountUser"; do
-    gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+usage() {
+    echo "Usage: $(basename "$0") [--new | --clear]"
+    echo ""
+    echo "  (no args)  Create SAs and set GitHub secrets (idempotent)"
+    echo "  --new      Delete existing SAs and secrets, then recreate"
+    echo "  --clear    Delete existing SAs and secrets only"
+    exit 1
+}
+
+cleanup() { rm -f "$KEY_FILE"; }
+trap cleanup EXIT
+
+# ── Helpers ──────────────────────────────────────────────────────
+
+sa_exists() {
+    gcloud iam service-accounts describe "$1" --project="$PROJECT" &>/dev/null
+}
+
+secrets_exist() {
+    gh secret list 2>/dev/null | grep -q "GCP_SA_KEY"
+}
+
+create_deploy_sa() {
+    echo "Creating deploy service account ${DEPLOY_SA_NAME}..."
+    gcloud iam service-accounts create "$DEPLOY_SA_NAME" \
+        --project="$PROJECT" \
+        --display-name="GitHub Actions Deploy"
+
+    for role in "${DEPLOY_ROLES[@]}"; do
+        echo "  Granting ${role}..."
+        gcloud projects add-iam-policy-binding "$PROJECT" \
+            --member="serviceAccount:${DEPLOY_SA_EMAIL}" \
+            --role="$role" \
+            --quiet &>/dev/null
+    done
+
+    echo "  Granting Artifact Registry writer on ${REPO_NAME}..."
+    gcloud artifacts repositories add-iam-policy-binding "$REPO_NAME" \
+        --location="$REGION" \
+        --project="$PROJECT" \
         --member="serviceAccount:${DEPLOY_SA_EMAIL}" \
-        --role="$role" \
-        --quiet
-done
+        --role="roles/artifactregistry.writer" \
+        --quiet &>/dev/null
+}
 
-gcloud artifacts repositories add-iam-policy-binding "$ARTIFACT_REPO" \
-    --location="$REGION" \
-    --project="$PROJECT_ID" \
-    --member="serviceAccount:${DEPLOY_SA_EMAIL}" \
-    --role="roles/artifactregistry.writer" \
-    --quiet
+create_runtime_sa() {
+    echo "Creating runtime service account ${RUNTIME_SA_NAME}..."
+    gcloud iam service-accounts create "$RUNTIME_SA_NAME" \
+        --project="$PROJECT" \
+        --display-name="FQF Cloud Run Runtime"
 
-echo "==> Creating runtime service account: $RUNTIME_SA_EMAIL"
-gcloud iam service-accounts create "$RUNTIME_SA" \
-    --project="$PROJECT_ID" \
-    --display-name="FQF Runtime SA" \
-    || echo "Service account already exists — continuing"
+    echo "  Granting Firestore (datastore.user)..."
+    gcloud projects add-iam-policy-binding "$PROJECT" \
+        --member="serviceAccount:${RUNTIME_SA_EMAIL}" \
+        --role="roles/datastore.user" \
+        --quiet &>/dev/null
+}
 
-echo "==> Granting runtime SA Firestore access..."
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-    --member="serviceAccount:${RUNTIME_SA_EMAIL}" \
-    --role="roles/datastore.user" \
-    --quiet
+delete_sa() {
+    local email=$1 name=$2
+    if sa_exists "$email"; then
+        echo "Deleting service account ${name}..."
+        gcloud iam service-accounts delete "$email" \
+            --project="$PROJECT" --quiet
+    fi
+}
 
-echo "==> Generating deploy SA key..."
-KEY_FILE=$(mktemp /tmp/gcp-sa-key-XXXXXX.json)
-gcloud iam service-accounts keys create "$KEY_FILE" \
-    --iam-account="$DEPLOY_SA_EMAIL" \
-    --project="$PROJECT_ID"
+set_secrets() {
+    echo "Generating key and setting GitHub secrets..."
+    gcloud iam service-accounts keys create "$KEY_FILE" \
+        --iam-account="$DEPLOY_SA_EMAIL" --quiet
 
-echo "==> Setting GitHub secrets for repo: $GITHUB_REPO"
-gh secret set GCP_SA_KEY --repo "$GITHUB_REPO" < "$KEY_FILE"
-gh secret set GCP_PROJECT --repo "$GITHUB_REPO" --body "$PROJECT_ID"
+    gh secret set GCP_SA_KEY < "$KEY_FILE"
+    gh secret set GCP_PROJECT --body "$PROJECT"
+    echo "GitHub secrets GCP_SA_KEY and GCP_PROJECT set."
+}
 
-rm -f "$KEY_FILE"
-echo "  Key file deleted."
+clear_secrets() {
+    echo "Removing GitHub secrets..."
+    gh secret delete GCP_SA_KEY 2>/dev/null && echo "  Deleted GCP_SA_KEY" || echo "  GCP_SA_KEY not found"
+    gh secret delete GCP_PROJECT 2>/dev/null && echo "  Deleted GCP_PROJECT" || echo "  GCP_PROJECT not found"
+}
 
-echo ""
-echo "Service account setup complete."
-echo "  Deploy SA:   $DEPLOY_SA_EMAIL"
-echo "  Runtime SA:  $RUNTIME_SA_EMAIL"
-echo ""
-echo "GitHub secrets set: GCP_SA_KEY, GCP_PROJECT"
-echo ""
-echo "In Cloud Run deploy, pass --service-account=${RUNTIME_SA_EMAIL} so the"
-echo "runtime SA (not the deploy SA) is used for Firestore access."
+# ── Main ─────────────────────────────────────────────────────────
+
+MODE="${1:-}"
+
+case "$MODE" in
+    --clear)
+        clear_secrets
+        delete_sa "$DEPLOY_SA_EMAIL" "$DEPLOY_SA_NAME"
+        delete_sa "$RUNTIME_SA_EMAIL" "$RUNTIME_SA_NAME"
+        echo "Done. Credentials cleared."
+        ;;
+    --new)
+        clear_secrets
+        delete_sa "$DEPLOY_SA_EMAIL" "$DEPLOY_SA_NAME"
+        delete_sa "$RUNTIME_SA_EMAIL" "$RUNTIME_SA_NAME"
+        create_deploy_sa
+        create_runtime_sa
+        set_secrets
+        echo "Done. Fresh credentials created."
+        ;;
+    "")
+        all_exist=true
+        if ! sa_exists "$DEPLOY_SA_EMAIL"; then
+            create_deploy_sa
+            all_exist=false
+        else
+            echo "Deploy SA ${DEPLOY_SA_NAME} already exists, reusing."
+        fi
+        if ! sa_exists "$RUNTIME_SA_EMAIL"; then
+            create_runtime_sa
+            all_exist=false
+        else
+            echo "Runtime SA ${RUNTIME_SA_NAME} already exists, reusing."
+        fi
+        if $all_exist && secrets_exist; then
+            echo "All service accounts and GitHub secrets already set."
+            echo "Use --new to recreate, or --clear to remove."
+            exit 0
+        fi
+        set_secrets
+        echo "Done."
+        ;;
+    *)
+        usage
+        ;;
+esac
