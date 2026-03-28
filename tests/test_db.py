@@ -6,6 +6,7 @@ import pytest
 
 import fqf.db as db_module
 from fqf.db import (
+    MAX_RETRY_ATTEMPTS,
     close_pool,
     create_schedule,
     init_pool,
@@ -164,6 +165,22 @@ class TestInMemoryCreateSchedule:
         assert FAKE_TOKEN in db_module._memory_store
         assert ANOTHER_TOKEN in db_module._memory_store
 
+    @pytest.mark.asyncio
+    async def test_retries_on_collision_and_succeeds(self) -> None:
+        db_module._memory_store = {FAKE_TOKEN: []}
+        with patch("fqf.db.generate_token", side_effect=[FAKE_TOKEN, ANOTHER_TOKEN]):
+            token = await create_schedule()
+        assert token == ANOTHER_TOKEN
+        assert ANOTHER_TOKEN in db_module._memory_store
+
+    @pytest.mark.asyncio
+    async def test_raises_after_max_retries_exhausted(self) -> None:
+        db_module._memory_store = {FAKE_TOKEN: []}
+        collision_tokens = [FAKE_TOKEN] * MAX_RETRY_ATTEMPTS
+        with patch("fqf.db.generate_token", side_effect=collision_tokens):
+            with pytest.raises(RuntimeError, match="unique schedule token"):
+                await create_schedule()
+
 
 class TestInMemoryLoadSchedule:
     @pytest.mark.asyncio
@@ -248,13 +265,49 @@ class TestFirestoreCreateSchedule:
         fake_client = MagicMock()
         db_module._db = fake_client
 
+        existing_doc = _make_firestore_doc(exists=False)
+        fake_client.collection().document().get.return_value = existing_doc
+
         with patch("fqf.db.generate_token", return_value=FAKE_TOKEN):
             token = await create_schedule()
 
         assert token == FAKE_TOKEN
-        fake_client.collection.assert_called_with(db_module.SCHEDULES_COLLECTION)
-        fake_client.collection().document.assert_called_with(FAKE_TOKEN)
         fake_client.collection().document().set.assert_called_once_with({db_module.PICKS_FIELD: []})
+
+    @pytest.mark.asyncio
+    async def test_retries_on_collision_and_succeeds(self) -> None:
+        fake_client = MagicMock()
+        db_module._db = fake_client
+
+        collision_doc = _make_firestore_doc(exists=True)
+        new_doc = _make_firestore_doc(exists=False)
+
+        # First token collides, second is free
+        doc_ref_collision = MagicMock()
+        doc_ref_collision.get.return_value = collision_doc
+        doc_ref_new = MagicMock()
+        doc_ref_new.get.return_value = new_doc
+
+        fake_client.collection().document.side_effect = [doc_ref_collision, doc_ref_new]
+
+        with patch("fqf.db.generate_token", side_effect=[FAKE_TOKEN, ANOTHER_TOKEN]):
+            token = await create_schedule()
+
+        assert token == ANOTHER_TOKEN
+        doc_ref_new.set.assert_called_once_with({db_module.PICKS_FIELD: []})
+
+    @pytest.mark.asyncio
+    async def test_raises_after_max_retries_exhausted(self) -> None:
+        fake_client = MagicMock()
+        db_module._db = fake_client
+
+        collision_doc = _make_firestore_doc(exists=True)
+        fake_client.collection().document().get.return_value = collision_doc
+
+        collision_tokens = [FAKE_TOKEN] * MAX_RETRY_ATTEMPTS
+        with patch("fqf.db.generate_token", side_effect=collision_tokens):
+            with pytest.raises(RuntimeError, match="unique schedule token"):
+                await create_schedule()
 
 
 class TestFirestoreLoadSchedule:

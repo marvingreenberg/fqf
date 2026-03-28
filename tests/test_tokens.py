@@ -5,7 +5,7 @@ import re
 from fqf.tokens.generator import generate_token, validate_token_format
 from fqf.tokens.words import POOL_MUSIC, POOL_NOLA, POOL_PLACES
 
-EXPECTED_MIN_POOL_SIZE = 40
+EXPECTED_MIN_POOL_SIZE = 90
 TOKEN_PATTERN = re.compile(r"^[a-z]+-[a-z]+-[a-z]+$")
 
 
@@ -41,11 +41,10 @@ class TestGenerateToken:
         assert TOKEN_PATTERN.match(token), f"Token doesn't match pattern: {token}"
 
     def test_uniqueness_over_many_generations(self) -> None:
-        # Pool has 50^3 = 125,000 combinations; 50 draws have negligible collision probability.
-        # Using 200 draws risks ~15% collision chance per run, making the test flaky.
-        GENERATION_COUNT = 50
+        # Pool has ~100^3 = 1,000,000 combinations; 100 draws have negligible collision probability.
+        GENERATION_COUNT = 100
         tokens = {generate_token() for _ in range(GENERATION_COUNT)}
-        assert len(tokens) == GENERATION_COUNT
+        assert len(tokens) == GENERATION_COUNT  # no collisions expected at this scale
 
     def test_words_from_pools(self) -> None:
         token = generate_token()

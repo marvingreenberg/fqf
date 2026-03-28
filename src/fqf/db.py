@@ -18,6 +18,7 @@ GCP_PROJECT_ENV = "GCP_PROJECT"
 FALLBACK_PROJECT_ID = "fqf2026-local"
 SCHEDULES_COLLECTION = "schedules"
 PICKS_FIELD = "picks"
+MAX_RETRY_ATTEMPTS = 10
 
 # Firestore client (lazy init). Typed as Any — the SDK's base class returns
 # DocumentSnapshot | Awaitable[DocumentSnapshot] from .get(), but the sync
@@ -79,15 +80,28 @@ async def close_pool() -> None:
 
 
 async def create_schedule() -> str:
-    """Generate a new token and create an empty schedule document."""
-    token = generate_token()
-    if _using_memory():
-        assert _memory_store is not None
-        _memory_store[token] = []
-        return token
-    assert _db is not None
-    _db.collection(SCHEDULES_COLLECTION).document(token).set({PICKS_FIELD: []})
-    return token
+    """Generate a unique token and create an empty schedule document.
+
+    Retries up to MAX_RETRY_ATTEMPTS times on token collision before raising.
+    """
+    for attempt in range(MAX_RETRY_ATTEMPTS):
+        token = generate_token()
+        if _using_memory():
+            assert _memory_store is not None
+            if token not in _memory_store:
+                _memory_store[token] = []
+                return token
+        else:
+            assert _db is not None
+            doc_ref = _db.collection(SCHEDULES_COLLECTION).document(token)
+            if not doc_ref.get().exists:
+                doc_ref.set({PICKS_FIELD: []})
+                return token
+        logger.warning("Token collision on attempt %d: %s", attempt + 1, token)
+
+    raise RuntimeError(
+        f"Failed to generate a unique schedule token after {MAX_RETRY_ATTEMPTS} attempts"
+    )
 
 
 async def load_schedule(token: str) -> list[str] | None:
