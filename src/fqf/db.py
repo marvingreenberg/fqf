@@ -7,6 +7,7 @@ when neither Firestore nor emulator is available.
 
 import logging
 import os
+import secrets
 from typing import Any
 
 from fqf.tokens.generator import generate_token
@@ -18,14 +19,17 @@ GCP_PROJECT_ENV = "GCP_PROJECT"
 FALLBACK_PROJECT_ID = "fqf2026-local"
 SCHEDULES_COLLECTION = "schedules"
 PICKS_FIELD = "picks"
+NAME_FIELD = "name"
+SHARE_ID_FIELD = "share_id"
+SHARE_ID_BYTES = 4
 MAX_RETRY_ATTEMPTS = 10
 
 # Firestore client (lazy init). Typed as Any — the SDK's base class returns
 # DocumentSnapshot | Awaitable[DocumentSnapshot] from .get(), but the sync
 # client always returns DocumentSnapshot; Any avoids spurious union-attr errors.
 _db: Any = None
-# In-memory fallback
-_memory_store: dict[str, list[str]] | None = None
+# In-memory fallback: maps token -> {"picks": [...], "name": "...", "share_id": "..."}
+_memory_store: dict[str, dict[str, Any]] | None = None
 
 
 def _using_memory() -> bool:
@@ -79,7 +83,7 @@ async def close_pool() -> None:
     _memory_store = None
 
 
-async def create_schedule() -> str:
+async def create_schedule(name: str = "") -> str:
     """Generate a unique token and create an empty schedule document.
 
     Retries up to MAX_RETRY_ATTEMPTS times on token collision before raising.
@@ -89,13 +93,13 @@ async def create_schedule() -> str:
         if _using_memory():
             assert _memory_store is not None
             if token not in _memory_store:
-                _memory_store[token] = []
+                _memory_store[token] = {PICKS_FIELD: [], NAME_FIELD: name, SHARE_ID_FIELD: ""}
                 return token
         else:
             assert _db is not None
             doc_ref = _db.collection(SCHEDULES_COLLECTION).document(token)
             if not doc_ref.get().exists:
-                doc_ref.set({PICKS_FIELD: []})
+                doc_ref.set({PICKS_FIELD: [], NAME_FIELD: name, SHARE_ID_FIELD: ""})
                 return token
         logger.warning("Token collision on attempt %d: %s", attempt + 1, token)
 
@@ -104,43 +108,96 @@ async def create_schedule() -> str:
     )
 
 
-async def load_schedule(token: str) -> list[str] | None:
-    """Load picks for a token. Returns None if token doesn't exist."""
+async def load_schedule(token: str) -> tuple[list[str], str] | None:
+    """Load picks and name for a token. Returns (picks, name) or None if token doesn't exist."""
     if _using_memory():
         assert _memory_store is not None
         if token not in _memory_store:
             return None
-        return list(_memory_store[token])
+        doc = _memory_store[token]
+        return list(doc[PICKS_FIELD]), doc.get(NAME_FIELD, "")
     assert _db is not None
     doc = _db.collection(SCHEDULES_COLLECTION).document(token).get()
     if not doc.exists:
         return None
     data = doc.to_dict()
-    return list(data.get(PICKS_FIELD, [])) if data else []
+    if not data:
+        return [], ""
+    return list(data.get(PICKS_FIELD, [])), data.get(NAME_FIELD, "")
 
 
-async def save_picks(token: str, picks: list[str]) -> bool:
-    """Update picks for an existing token. Returns False if token not found."""
+async def save_picks(token: str, picks: list[str], name: str | None = None) -> bool:
+    """Update picks (and optionally name) for an existing token. Returns False if not found."""
     if _using_memory():
         assert _memory_store is not None
         if token not in _memory_store:
             return False
-        _memory_store[token] = list(picks)
+        _memory_store[token][PICKS_FIELD] = list(picks)
+        if name is not None:
+            _memory_store[token][NAME_FIELD] = name
         return True
     assert _db is not None
     doc_ref = _db.collection(SCHEDULES_COLLECTION).document(token)
     doc = doc_ref.get()
     if not doc.exists:
         return False
-    doc_ref.update({PICKS_FIELD: list(picks)})
+    update: dict[str, Any] = {PICKS_FIELD: list(picks)}
+    if name is not None:
+        update[NAME_FIELD] = name
+    doc_ref.update(update)
     return True
+
+
+async def create_share_id(token: str) -> str:
+    """Generate and store a share_id for a schedule, returning the existing one if present."""
+    if _using_memory():
+        assert _memory_store is not None
+        if token not in _memory_store:
+            raise KeyError(f"Token not found: {token}")
+        existing: str = str(_memory_store[token].get(SHARE_ID_FIELD, ""))
+        if existing:
+            return existing
+        share_id = secrets.token_hex(SHARE_ID_BYTES)
+        _memory_store[token][SHARE_ID_FIELD] = share_id
+        return share_id
+    assert _db is not None
+    doc_ref = _db.collection(SCHEDULES_COLLECTION).document(token)
+    doc = doc_ref.get()
+    if not doc.exists:
+        raise KeyError(f"Token not found: {token}")
+    data = doc.to_dict() or {}
+    fs_existing: str = str(data.get(SHARE_ID_FIELD, ""))
+    if fs_existing:
+        return fs_existing
+    share_id = secrets.token_hex(SHARE_ID_BYTES)
+    doc_ref.update({SHARE_ID_FIELD: share_id})
+    return share_id
+
+
+async def load_schedule_by_share(share_id: str) -> tuple[str, list[str], str] | None:
+    """Look up a schedule by share_id. Returns (token, picks, name) or None if not found."""
+    if _using_memory():
+        assert _memory_store is not None
+        for token, doc in _memory_store.items():
+            if doc.get(SHARE_ID_FIELD) == share_id:
+                return token, list(doc[PICKS_FIELD]), doc.get(NAME_FIELD, "")
+        return None
+    assert _db is not None
+    results = (
+        _db.collection(SCHEDULES_COLLECTION).where(SHARE_ID_FIELD, "==", share_id).limit(1).get()
+    )
+    for doc in results:
+        data = doc.to_dict() or {}
+        name: str = str(data.get(NAME_FIELD, ""))
+        return doc.id, list(data.get(PICKS_FIELD, [])), name
+    return None
 
 
 async def load_multiple_schedules(tokens: list[str]) -> dict[str, list[str]]:
     """Load picks for multiple tokens at once."""
     if _using_memory():
         assert _memory_store is not None
-        return {t: list(_memory_store[t]) for t in tokens if t in _memory_store}
+        return {t: list(_memory_store[t][PICKS_FIELD]) for t in tokens if t in _memory_store}
     assert _db is not None
     result: dict[str, list[str]] = {}
     for token in tokens:

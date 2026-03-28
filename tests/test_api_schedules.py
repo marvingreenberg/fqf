@@ -12,6 +12,7 @@ MERGE_URL = "/api/v1/schedule/merge"
 
 FAKE_TOKEN = "tremé-jazz-laissez"
 OTHER_TOKEN = "bywater-funk-krewe"
+SHARE_ID = "abcd1234"
 
 # Real slugs from SCHEDULE so _slug_to_summary can resolve them
 REAL_SLUG_1 = "kermit-ruffins-the-barbecue-swingers"
@@ -20,6 +21,7 @@ UNKNOWN_SLUG = "not-a-real-act"
 
 SAMPLE_PICKS = [REAL_SLUG_1, REAL_SLUG_2]
 ONE_UNKNOWN_PICK = [REAL_SLUG_1, UNKNOWN_SLUG]
+SAMPLE_NAME = "My FQF Weekend"
 
 MAX_MERGE_TOKENS = 5
 TOO_MANY_TOKENS = ",".join(f"tok-{i}" for i in range(MAX_MERGE_TOKENS + 1))
@@ -65,30 +67,38 @@ class TestCreateSchedule:
 
 class TestLoadSchedule:
     @pytest.mark.asyncio
-    async def test_returns_200_with_picks_and_acts(self, client: AsyncClient) -> None:
-        with patch(f"{DB_MODULE}.load_schedule", new=AsyncMock(return_value=SAMPLE_PICKS)):
+    async def test_returns_200_with_picks_acts_and_name(self, client: AsyncClient) -> None:
+        with patch(
+            f"{DB_MODULE}.load_schedule",
+            new=AsyncMock(return_value=(SAMPLE_PICKS, SAMPLE_NAME)),
+        ):
             resp = await client.get(f"{SCHEDULE_URL}/{FAKE_TOKEN}")
 
         assert resp.status_code == 200
         data = resp.json()
         assert data["token"] == FAKE_TOKEN
+        assert data["name"] == SAMPLE_NAME
         assert data["picks"] == SAMPLE_PICKS
-        # Both slugs are real acts — acts list should have 2 entries
         assert len(data["acts"]) == len(SAMPLE_PICKS)
 
     @pytest.mark.asyncio
     async def test_unknown_slugs_omitted_from_acts(self, client: AsyncClient) -> None:
-        with patch(f"{DB_MODULE}.load_schedule", new=AsyncMock(return_value=ONE_UNKNOWN_PICK)):
+        with patch(
+            f"{DB_MODULE}.load_schedule",
+            new=AsyncMock(return_value=(ONE_UNKNOWN_PICK, "")),
+        ):
             resp = await client.get(f"{SCHEDULE_URL}/{FAKE_TOKEN}")
 
         data = resp.json()
-        # picks includes unknown slug, acts only has the resolvable one
         assert len(data["picks"]) == 2
         assert len(data["acts"]) == 1
 
     @pytest.mark.asyncio
     async def test_act_summary_shape(self, client: AsyncClient) -> None:
-        with patch(f"{DB_MODULE}.load_schedule", new=AsyncMock(return_value=SAMPLE_PICKS)):
+        with patch(
+            f"{DB_MODULE}.load_schedule",
+            new=AsyncMock(return_value=(SAMPLE_PICKS, "")),
+        ):
             resp = await client.get(f"{SCHEDULE_URL}/{FAKE_TOKEN}")
 
         act = resp.json()["acts"][0]
@@ -103,7 +113,7 @@ class TestLoadSchedule:
 
     @pytest.mark.asyncio
     async def test_empty_picks_returns_empty_acts(self, client: AsyncClient) -> None:
-        with patch(f"{DB_MODULE}.load_schedule", new=AsyncMock(return_value=[])):
+        with patch(f"{DB_MODULE}.load_schedule", new=AsyncMock(return_value=([], ""))):
             resp = await client.get(f"{SCHEDULE_URL}/{FAKE_TOKEN}")
         data = resp.json()
         assert data["picks"] == []
@@ -116,7 +126,13 @@ class TestLoadSchedule:
 class TestSaveSchedule:
     @pytest.mark.asyncio
     async def test_returns_200_with_updated_picks(self, client: AsyncClient) -> None:
-        with patch(f"{DB_MODULE}.save_picks", new=AsyncMock(return_value=True)):
+        with (
+            patch(f"{DB_MODULE}.save_picks", new=AsyncMock(return_value=True)),
+            patch(
+                f"{DB_MODULE}.load_schedule",
+                new=AsyncMock(return_value=(SAMPLE_PICKS, "")),
+            ),
+        ):
             resp = await client.put(f"{SCHEDULE_URL}/{FAKE_TOKEN}", json={"picks": SAMPLE_PICKS})
 
         assert resp.status_code == 200
@@ -126,6 +142,23 @@ class TestSaveSchedule:
         assert len(data["acts"]) == len(SAMPLE_PICKS)
 
     @pytest.mark.asyncio
+    async def test_name_field_in_body_is_passed_to_save_picks(self, client: AsyncClient) -> None:
+        mock_save = AsyncMock(return_value=True)
+        mock_load = AsyncMock(return_value=(SAMPLE_PICKS, SAMPLE_NAME))
+        with (
+            patch(f"{DB_MODULE}.save_picks", new=mock_save),
+            patch(f"{DB_MODULE}.load_schedule", new=mock_load),
+        ):
+            resp = await client.put(
+                f"{SCHEDULE_URL}/{FAKE_TOKEN}",
+                json={"picks": SAMPLE_PICKS, "name": SAMPLE_NAME},
+            )
+
+        assert resp.status_code == 200
+        mock_save.assert_awaited_once_with(FAKE_TOKEN, SAMPLE_PICKS, SAMPLE_NAME)
+        assert resp.json()["name"] == SAMPLE_NAME
+
+    @pytest.mark.asyncio
     async def test_returns_404_when_token_not_found(self, client: AsyncClient) -> None:
         with patch(f"{DB_MODULE}.save_picks", new=AsyncMock(return_value=False)):
             resp = await client.put(f"{SCHEDULE_URL}/{FAKE_TOKEN}", json={"picks": SAMPLE_PICKS})
@@ -133,10 +166,90 @@ class TestSaveSchedule:
 
     @pytest.mark.asyncio
     async def test_unknown_slugs_omitted_from_acts(self, client: AsyncClient) -> None:
-        with patch(f"{DB_MODULE}.save_picks", new=AsyncMock(return_value=True)):
+        with (
+            patch(f"{DB_MODULE}.save_picks", new=AsyncMock(return_value=True)),
+            patch(
+                f"{DB_MODULE}.load_schedule",
+                new=AsyncMock(return_value=(ONE_UNKNOWN_PICK, "")),
+            ),
+        ):
             resp = await client.put(
                 f"{SCHEDULE_URL}/{FAKE_TOKEN}", json={"picks": ONE_UNKNOWN_PICK}
             )
+        data = resp.json()
+        assert len(data["picks"]) == 2
+        assert len(data["acts"]) == 1
+
+
+# ── POST /api/v1/schedule/{token}/share ───────────────────────────────────────
+
+
+class TestShareSchedule:
+    @pytest.mark.asyncio
+    async def test_returns_200_with_share_id_and_url(self, client: AsyncClient) -> None:
+        with patch(f"{DB_MODULE}.create_share_id", new=AsyncMock(return_value=SHARE_ID)):
+            resp = await client.post(f"{SCHEDULE_URL}/{FAKE_TOKEN}/share")
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["share_id"] == SHARE_ID
+        assert SHARE_ID in data["share_url"]
+
+    @pytest.mark.asyncio
+    async def test_returns_404_when_token_not_found(self, client: AsyncClient) -> None:
+        with patch(
+            f"{DB_MODULE}.create_share_id", new=AsyncMock(side_effect=KeyError("not found"))
+        ):
+            resp = await client.post(f"{SCHEDULE_URL}/{FAKE_TOKEN}/share")
+
+        assert resp.status_code == 404
+
+    @pytest.mark.asyncio
+    async def test_share_url_contains_share_path(self, client: AsyncClient) -> None:
+        with patch(f"{DB_MODULE}.create_share_id", new=AsyncMock(return_value=SHARE_ID)):
+            resp = await client.post(f"{SCHEDULE_URL}/{FAKE_TOKEN}/share")
+
+        data = resp.json()
+        assert "/s/" in data["share_url"]
+
+
+# ── GET /api/v1/schedule/by-share/{share_id} ─────────────────────────────────
+
+
+class TestLoadByShare:
+    @pytest.mark.asyncio
+    async def test_returns_200_with_picks_and_name(self, client: AsyncClient) -> None:
+        load_result = (FAKE_TOKEN, SAMPLE_PICKS, SAMPLE_NAME)
+        with patch(f"{DB_MODULE}.load_schedule_by_share", new=AsyncMock(return_value=load_result)):
+            resp = await client.get(f"{SCHEDULE_URL}/by-share/{SHARE_ID}")
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["name"] == SAMPLE_NAME
+        assert data["picks"] == SAMPLE_PICKS
+        assert len(data["acts"]) == len(SAMPLE_PICKS)
+
+    @pytest.mark.asyncio
+    async def test_does_not_expose_token(self, client: AsyncClient) -> None:
+        load_result = (FAKE_TOKEN, SAMPLE_PICKS, SAMPLE_NAME)
+        with patch(f"{DB_MODULE}.load_schedule_by_share", new=AsyncMock(return_value=load_result)):
+            resp = await client.get(f"{SCHEDULE_URL}/by-share/{SHARE_ID}")
+
+        assert "token" not in resp.json()
+
+    @pytest.mark.asyncio
+    async def test_returns_404_when_share_id_not_found(self, client: AsyncClient) -> None:
+        with patch(f"{DB_MODULE}.load_schedule_by_share", new=AsyncMock(return_value=None)):
+            resp = await client.get(f"{SCHEDULE_URL}/by-share/{SHARE_ID}")
+
+        assert resp.status_code == 404
+
+    @pytest.mark.asyncio
+    async def test_unknown_slugs_omitted_from_acts(self, client: AsyncClient) -> None:
+        load_result = (FAKE_TOKEN, ONE_UNKNOWN_PICK, "")
+        with patch(f"{DB_MODULE}.load_schedule_by_share", new=AsyncMock(return_value=load_result)):
+            resp = await client.get(f"{SCHEDULE_URL}/by-share/{SHARE_ID}")
+
         data = resp.json()
         assert len(data["picks"]) == 2
         assert len(data["acts"]) == 1
@@ -164,7 +277,6 @@ class TestMergeSchedules:
 
     @pytest.mark.asyncio
     async def test_missing_token_gets_empty_picks(self, client: AsyncClient) -> None:
-        # Only FAKE_TOKEN in db; OTHER_TOKEN is absent
         schedules_map = {FAKE_TOKEN: [REAL_SLUG_1]}
         with patch(
             f"{DB_MODULE}.load_multiple_schedules", new=AsyncMock(return_value=schedules_map)

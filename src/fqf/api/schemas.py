@@ -57,6 +57,7 @@ class ScheduleUpdate(BaseModel):
     """Request body for saving picks."""
 
     picks: list[str]
+    name: str | None = None
 
 
 class TokenResponse(BaseModel):
@@ -69,6 +70,22 @@ class ScheduleResponse(BaseModel):
     """Response for loading a schedule."""
 
     token: str
+    name: str
+    picks: list[str]
+    acts: list[ActSummary]
+
+
+class ShareResponse(BaseModel):
+    """Response when generating a share link."""
+
+    share_id: str
+    share_url: str
+
+
+class SharedScheduleResponse(BaseModel):
+    """Read-only schedule view accessed via share link."""
+
+    name: str
     picks: list[str]
     acts: list[ActSummary]
 
