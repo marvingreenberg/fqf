@@ -9,10 +9,11 @@
     const sortedStages = $derived([...stages].sort());
 </script>
 
-<div class="border-b border-surface-300 bg-surface-50">
+<div class="fqf-filter-panel border-b">
     <div class="flex items-center gap-3 px-4 py-2">
         <button
-            class="text-sm font-medium text-surface-700 hover:text-surface-900 transition-colors"
+            class="text-sm font-medium transition-colors"
+            style="color: var(--mg-purple-deep);"
             onclick={() => (expanded = !expanded)}
             aria-expanded={expanded}
         >
@@ -21,20 +22,21 @@
 
         {#if !expanded}
             <label
-                class="flex items-center gap-1.5 text-sm text-surface-600 cursor-pointer select-none"
+                class="flex items-center gap-1.5 text-sm cursor-pointer select-none"
+                style="color: rgba(74, 26, 107, 0.65);"
             >
                 <input
                     type="checkbox"
                     checked={appState.showAll}
                     onchange={() => (appState.showAll = !appState.showAll)}
-                    class="accent-primary-600"
+                    class="accent-purple-700"
                 />
                 Show All
             </label>
         {/if}
 
         {#if !appState.showAll && (appState.hiddenGenres.size > 0 || appState.hiddenStages.size > 0)}
-            <span class="text-xs text-warning-600 font-medium">
+            <span class="text-xs font-medium" style="color: var(--mg-gold-rich);">
                 {appState.hiddenGenres.size + appState.hiddenStages.size} filter(s) active
             </span>
         {/if}
@@ -45,17 +47,16 @@
             <!-- Genres column -->
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 mb-2">
-                    <p class="text-xs font-semibold text-surface-500 uppercase tracking-wide">
-                        Genres
-                    </p>
+                    <p class="fqf-filter-section-label">Genres</p>
                     <label
-                        class="flex items-center gap-1 text-xs text-surface-600 cursor-pointer select-none ml-auto"
+                        class="flex items-center gap-1 text-xs cursor-pointer select-none ml-auto"
+                        style="color: rgba(74, 26, 107, 0.65);"
                     >
                         <input
                             type="checkbox"
                             checked={appState.showAll}
                             onchange={() => (appState.showAll = !appState.showAll)}
-                            class="accent-primary-600"
+                            class="accent-purple-700"
                         />
                         Show All
                     </label>
@@ -63,14 +64,15 @@
                 <div class="flex flex-col gap-0.5">
                     {#each sortedGenres as genre (genre)}
                         <label
-                            class="flex items-center gap-1.5 text-sm text-surface-700 cursor-pointer select-none hover:text-surface-900"
+                            class="flex items-center gap-1.5 text-sm cursor-pointer select-none"
+                            style="color: var(--mg-text);"
                         >
                             <input
                                 type="checkbox"
                                 checked={!appState.hiddenGenres.has(genre)}
                                 onchange={() => appState.toggleGenre(genre)}
                                 disabled={appState.showAll}
-                                class="accent-primary-600"
+                                class="accent-purple-700"
                             />
                             {genre}
                         </label>
@@ -80,20 +82,19 @@
 
             <!-- Stages column -->
             <div class="flex-1 min-w-0">
-                <p class="text-xs font-semibold text-surface-500 uppercase tracking-wide mb-2">
-                    Stages
-                </p>
+                <p class="fqf-filter-section-label mb-2">Stages</p>
                 <div class="flex flex-col gap-0.5">
                     {#each sortedStages as stage (stage)}
                         <label
-                            class="flex items-center gap-1.5 text-sm text-surface-700 cursor-pointer select-none hover:text-surface-900"
+                            class="flex items-center gap-1.5 text-sm cursor-pointer select-none"
+                            style="color: var(--mg-text);"
                         >
                             <input
                                 type="checkbox"
                                 checked={!appState.hiddenStages.has(stage)}
                                 onchange={() => appState.toggleStage(stage)}
                                 disabled={appState.showAll}
-                                class="accent-primary-600"
+                                class="accent-purple-700"
                             />
                             {stage}
                         </label>

@@ -78,22 +78,18 @@
         aria-modal="true"
         aria-label="Schedule dialog"
     >
-        <div class="bg-surface-50 rounded-xl shadow-xl w-full max-w-sm mx-4 p-6">
+        <div class="fqf-dialog-card w-full max-w-sm mx-4">
             {#if mode === 'choose'}
-                <h2 class="text-xl font-bold mb-2">My Schedule</h2>
-                <p class="text-sm text-surface-600 mb-6">
-                    Save picks across devices with a set of secret words.
-                </p>
-                <div class="flex flex-col gap-3">
-                    <button
-                        class="btn preset-filled-primary-500 w-full"
-                        onclick={handleNewSchedule}
-                        disabled={loading}
-                    >
+                <div class="fqf-dialog-header">
+                    <h2>My Schedule</h2>
+                    <p>Save picks across devices with a set of secret words.</p>
+                </div>
+                <div class="fqf-dialog-body flex flex-col gap-3">
+                    <button class="fqf-btn-gold" onclick={handleNewSchedule} disabled={loading}>
                         {loading ? 'Creating…' : 'New Schedule'}
                     </button>
                     <button
-                        class="btn preset-outlined-surface-500 w-full"
+                        class="fqf-btn-outline"
                         onclick={() => {
                             mode = 'load';
                         }}
@@ -101,56 +97,57 @@
                     >
                         I Have Secret Words
                     </button>
-                    <button class="btn preset-ghost w-full text-sm" onclick={close}>Cancel</button>
+                    <button class="fqf-btn-ghost" onclick={close}>Cancel</button>
                 </div>
             {:else if mode === 'create'}
-                <h2 class="text-xl font-bold mb-2">Your Secret Words</h2>
-                <p class="text-sm text-surface-600 mb-4">
-                    Write these down — you'll need them to reload your schedule on another device.
-                </p>
-                <div
-                    class="bg-primary-50 border border-primary-200 rounded-lg px-4 py-6 text-center mb-6"
-                >
-                    <span class="text-2xl font-bold tracking-wide text-primary-700 break-all">
-                        {appState.token}
-                    </span>
+                <div class="fqf-dialog-header">
+                    <h2>Your Secret Words</h2>
+                    <p>
+                        Write these down — you'll need them to reload your schedule on another
+                        device.
+                    </p>
                 </div>
-                <button class="btn preset-filled-primary-500 w-full" onclick={close}>
-                    Got It
-                </button>
+                <div class="fqf-dialog-body">
+                    <div class="fqf-token-box">
+                        <span class="fqf-token-text">{appState.token}</span>
+                    </div>
+                    <button class="fqf-btn-primary" onclick={close}>Got It</button>
+                </div>
             {:else if mode === 'load'}
-                <h2 class="text-xl font-bold mb-2">Load Schedule</h2>
-                <p class="text-sm text-surface-600 mb-4">
-                    Enter your secret words to restore picks.
-                </p>
-                <input
-                    class="input mb-2 w-full"
-                    type="text"
-                    placeholder="Your secret words…"
-                    bind:value={tokenInput}
-                    onkeydown={(e) => e.key === 'Enter' && handleLoadSchedule()}
-                />
-                {#if errorMsg}
-                    <p class="text-error-600 text-sm mb-3">{errorMsg}</p>
-                {/if}
-                <div class="flex flex-col gap-2 mt-3">
-                    <button
-                        class="btn preset-filled-primary-500 w-full"
-                        onclick={handleLoadSchedule}
-                        disabled={loading}
-                    >
-                        {loading ? 'Loading…' : 'Load Schedule'}
-                    </button>
-                    <button
-                        class="btn preset-outlined-surface-500 w-full"
-                        onclick={() => {
-                            mode = 'choose';
-                            errorMsg = '';
-                        }}
-                        disabled={loading}
-                    >
-                        Back
-                    </button>
+                <div class="fqf-dialog-header">
+                    <h2>Load Schedule</h2>
+                    <p>Enter your secret words to restore picks.</p>
+                </div>
+                <div class="fqf-dialog-body">
+                    <input
+                        class="input mb-2 w-full"
+                        type="text"
+                        placeholder="Your secret words…"
+                        bind:value={tokenInput}
+                        onkeydown={(e) => e.key === 'Enter' && handleLoadSchedule()}
+                    />
+                    {#if errorMsg}
+                        <p class="text-sm mb-3" style="color: #dc2626;">{errorMsg}</p>
+                    {/if}
+                    <div class="flex flex-col gap-2 mt-3">
+                        <button
+                            class="fqf-btn-primary"
+                            onclick={handleLoadSchedule}
+                            disabled={loading}
+                        >
+                            {loading ? 'Loading…' : 'Load Schedule'}
+                        </button>
+                        <button
+                            class="fqf-btn-outline"
+                            onclick={() => {
+                                mode = 'choose';
+                                errorMsg = '';
+                            }}
+                            disabled={loading}
+                        >
+                            Back
+                        </button>
+                    </div>
                 </div>
             {/if}
         </div>

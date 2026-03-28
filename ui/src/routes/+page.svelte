@@ -88,17 +88,18 @@
 <svelte:window bind:innerWidth />
 
 <div class="flex flex-col h-screen overflow-hidden">
-    <header class="shrink-0 bg-surface-100 border-b border-surface-300 px-4 py-2">
+    <header class="shrink-0 fqf-controls-bar px-4 py-2">
         <div class="flex items-center justify-between">
-            <h1 class="text-xl font-bold">FQF 2026 Schedule Builder</h1>
+            <h1 class="text-base font-semibold" style="color: var(--mg-purple-deep);">
+                FQF 2026 Schedule Builder
+            </h1>
             {#if isMobile && appState.viewMode !== 'my-schedule' && appState.viewMode !== 'merge'}
                 <div class="flex gap-1">
                     {#each SORT_MODES as mode (mode.value)}
                         <button
-                            class="px-2 py-1 text-xs rounded font-medium transition-colors
-                                   {appState.mobileSortMode === mode.value
-                                ? 'bg-primary-600 text-white'
-                                : 'bg-surface-200 text-surface-700 hover:bg-surface-300'}"
+                            class="fqf-sort-pill {appState.mobileSortMode === mode.value
+                                ? 'fqf-sort-pill-active'
+                                : 'fqf-sort-pill-inactive'}"
                             onclick={() => (appState.mobileSortMode = mode.value)}
                         >
                             {mode.label}
@@ -108,13 +109,12 @@
             {/if}
         </div>
 
-        <div class="flex gap-1 mt-2">
+        <div class="flex gap-1.5 mt-2">
             {#each VIEW_TABS as tab (tab.value)}
                 <button
-                    class="px-3 py-1 text-sm rounded font-medium transition-colors
-                           {appState.viewMode === tab.value
-                        ? 'bg-primary-600 text-white'
-                        : 'bg-surface-200 text-surface-700 hover:bg-surface-300'}"
+                    class="fqf-view-pill {appState.viewMode === tab.value
+                        ? 'fqf-view-pill-active'
+                        : 'fqf-view-pill-inactive'}"
                     onclick={() => (appState.viewMode = tab.value)}
                 >
                     {tab.label()}
@@ -140,7 +140,7 @@
             <MergeView />
         {:else if loading}
             <div class="flex items-center justify-center h-full">
-                <p class="text-surface-500">Loading schedule…</p>
+                <p style="color: var(--mg-purple); opacity: 0.6;">Loading schedule…</p>
             </div>
         {:else if isMobile}
             <MobileSchedule
@@ -175,41 +175,52 @@
         <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <div
-            class="bg-surface-50 rounded-xl shadow-xl max-w-lg w-full mx-4 p-6 relative"
+            class="fqf-modal-card max-w-lg w-full mx-4 relative"
             onclick={(e) => e.stopPropagation()}
             role="document"
         >
-            <button
-                class="absolute top-4 right-4 text-surface-500 hover:text-surface-900 text-xl leading-none"
-                onclick={closeDetail}
-                aria-label="Close"
-            >
-                ✕
-            </button>
+            <!-- Purple accent strip -->
+            <div class="fqf-modal-header-strip"></div>
 
-            {#if detailLoading}
-                <p class="text-surface-500">Loading…</p>
-            {:else if detailAct}
-                <div class="flex items-start gap-3 mb-4">
-                    <div class="flex-1 min-w-0">
-                        <h2 class="text-xl font-bold leading-snug">{detailAct.name}</h2>
-                        <p class="text-sm text-surface-500 mt-1">{detailAct.stage}</p>
+            <div class="p-6">
+                <button
+                    class="absolute top-5 right-4 text-xl leading-none"
+                    style="color: rgba(74, 26, 107, 0.5);"
+                    onclick={closeDetail}
+                    aria-label="Close"
+                >
+                    ✕
+                </button>
+
+                {#if detailLoading}
+                    <p style="color: var(--mg-purple); opacity: 0.6;">Loading…</p>
+                {:else if detailAct}
+                    <div class="flex items-start gap-3 mb-4">
+                        <div class="flex-1 min-w-0">
+                            <h2
+                                class="text-xl font-bold leading-snug"
+                                style="font-family: 'Playfair Display', Georgia, serif; color: var(--mg-purple-deep);"
+                            >
+                                {detailAct.name}
+                            </h2>
+                            <p class="text-sm mt-1" style="color: rgba(74, 26, 107, 0.55);">
+                                {detailAct.stage}
+                            </p>
+                        </div>
+                        <span class="fqf-genre-badge shrink-0">
+                            {detailAct.genre}
+                        </span>
                     </div>
-                    <span
-                        class="shrink-0 px-2 py-0.5 rounded text-xs font-medium bg-primary-100 text-primary-800"
-                    >
-                        {detailAct.genre}
-                    </span>
-                </div>
 
-                <p class="text-sm text-surface-600 mb-4">
-                    {detailAct.start}–{detailAct.end}
-                </p>
+                    <p class="text-sm mb-4" style="color: rgba(26, 26, 26, 0.55);">
+                        {detailAct.start}–{detailAct.end}
+                    </p>
 
-                <p class="text-sm leading-relaxed whitespace-pre-line">
-                    {detailAct.about || 'No bio available yet.'}
-                </p>
-            {/if}
+                    <p class="text-sm leading-relaxed whitespace-pre-line">
+                        {detailAct.about || 'No bio available yet.'}
+                    </p>
+                {/if}
+            </div>
         </div>
     </div>
 {/if}

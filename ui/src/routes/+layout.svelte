@@ -9,21 +9,19 @@
 </script>
 
 <div class="min-h-screen flex flex-col">
-    <header class="bg-primary-500 text-white p-4 flex items-center justify-between">
-        <strong class="text-xl">FQF 2026</strong>
+    <header class="fqf-header shrink-0 px-4 py-3 flex items-center justify-between">
+        <div class="flex flex-col">
+            <span class="fqf-header-title">FQF 2026</span>
+            <span class="fqf-header-subtitle">Schedule Builder</span>
+        </div>
         <div class="flex items-center gap-3">
             {#if appState.token}
-                <span
-                    class="hidden sm:inline-block bg-primary-700 text-white text-xs font-mono
-                           px-2 py-1 rounded-full truncate max-w-40"
-                    title={appState.token}
-                >
+                <span class="fqf-token-display hidden sm:inline-block" title={appState.token}>
                     {appState.token}
                 </span>
             {/if}
             <button
-                class="btn btn-sm preset-outlined-surface-50 text-white border-white/40
-                       hover:bg-white/10 text-sm"
+                class="fqf-btn-switch"
                 onclick={() => {
                     dialogOpen = true;
                 }}

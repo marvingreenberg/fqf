@@ -4,13 +4,13 @@
     let { selectedDate = $bindable() }: { selectedDate: string } = $props();
 </script>
 
-<div class="flex gap-1 p-2">
+<div
+    class="flex gap-1 px-3 pt-2 pb-0"
+    style="background-color: rgba(250, 246, 240, 0.95); border-bottom: 1px solid rgba(74, 26, 107, 0.12);"
+>
     {#each FESTIVAL_DATES as d}
         <button
-            class="px-6 py-2 text-lg font-semibold rounded-lg transition-colors"
-            class:bg-primary-500={selectedDate === d}
-            class:text-white={selectedDate === d}
-            class:bg-surface-200={selectedDate !== d}
+            class="fqf-day-tab {selectedDate === d ? 'fqf-day-tab-active' : ''}"
             onclick={() => (selectedDate = d)}
         >
             {DAY_LABELS[d]}

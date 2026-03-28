@@ -82,7 +82,7 @@
         <div class="relative" style="height: {GRID_HEIGHT}px;">
             {#each timeLabels as { label, top }}
                 <span
-                    class="absolute right-2 text-xs font-medium text-surface-600 -translate-y-2"
+                    class="absolute right-2 text-xs font-medium fqf-time-label -translate-y-2"
                     style="top: {top}px;"
                 >
                     {label}

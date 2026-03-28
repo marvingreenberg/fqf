@@ -6,25 +6,483 @@
 @import 'skeleton-theme/seafoam.css';
 @import 'skeleton-base/index.css';
 
-/* FQF schedule grid styling */
-.fqf-stage-header {
-    background-color: #1a7a6d;
-    color: white;
+/* ── Mardi Gras palette ─────────────────────────────────────────────────── */
+:root {
+    --mg-purple-deep: #4a1a6b;
+    --mg-purple: #7b2fa0;
+    --mg-gold-rich: #d4a843;
+    --mg-gold-bright: #f5d76e;
+    --mg-green-deep: #1a7a4a;
+    --mg-green: #2ecc71;
+    --mg-cream: #faf6f0;
+    --mg-card: #fffdf7;
+    --mg-text: #1a1a1a;
 }
 
+/* ── Global typography ───────────────────────────────────────────────────── */
+body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background-color: var(--mg-cream);
+    color: var(--mg-text);
+    /* Subtle diagonal stripe texture */
+    background-image: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 24px,
+        rgba(74, 26, 107, 0.025) 24px,
+        rgba(74, 26, 107, 0.025) 25px,
+        transparent 25px,
+        transparent 49px,
+        rgba(212, 168, 67, 0.02) 49px,
+        rgba(212, 168, 67, 0.02) 50px
+    );
+}
+
+h1,
+h2,
+h3,
+.fqf-display {
+    font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+.fqf-header {
+    background: linear-gradient(135deg, var(--mg-purple-deep) 0%, var(--mg-purple) 100%);
+    /* Mardi Gras bead pattern overlay */
+    background-image:
+        radial-gradient(circle, rgba(212, 168, 67, 0.35) 2px, transparent 2px),
+        radial-gradient(circle, rgba(46, 204, 113, 0.2) 2px, transparent 2px),
+        radial-gradient(circle, rgba(245, 215, 110, 0.25) 1.5px, transparent 1.5px),
+        linear-gradient(135deg, var(--mg-purple-deep) 0%, var(--mg-purple) 100%);
+    background-size:
+        40px 40px,
+        40px 40px,
+        20px 20px,
+        100% 100%;
+    background-position:
+        0 0,
+        20px 20px,
+        10px 10px,
+        0 0;
+}
+
+.fqf-header-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--mg-gold-bright);
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.fqf-header-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.fqf-token-display {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(212, 168, 67, 0.4);
+    border-radius: 9999px;
+    color: var(--mg-gold-bright);
+    font-family: 'Courier New', monospace;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.75rem;
+}
+
+.fqf-btn-switch {
+    border: 1px solid rgba(212, 168, 67, 0.6);
+    color: var(--mg-gold-bright);
+    background: rgba(212, 168, 67, 0.1);
+    border-radius: 9999px;
+    padding: 0.25rem 0.875rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: background 0.15s ease;
+}
+
+.fqf-btn-switch:hover {
+    background: rgba(212, 168, 67, 0.2);
+}
+
+/* ── Stage header (grid) ─────────────────────────────────────────────────── */
+.fqf-stage-header {
+    background: linear-gradient(180deg, var(--mg-purple) 0%, var(--mg-purple-deep) 100%);
+    color: white;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-weight: 700;
+}
+
+/* ── Act blocks ──────────────────────────────────────────────────────────── */
 .fqf-act-block {
-    background-color: #f0f7f6;
-    border: 1px solid #c8ddd9;
+    background-color: var(--mg-card);
+    border: 1px solid rgba(74, 26, 107, 0.12);
+    box-shadow: 0 1px 3px rgba(74, 26, 107, 0.08);
+    transition:
+        transform 0.12s ease,
+        box-shadow 0.12s ease,
+        background-color 0.12s ease;
 }
 
 .fqf-act-block:hover {
-    background-color: #e0efed;
+    background-color: #fff9ee;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(74, 26, 107, 0.15);
 }
 
+/* ── Grid background and time column ─────────────────────────────────────── */
 .fqf-grid-bg {
-    background-color: #fafcfb;
+    background-color: rgba(250, 246, 240, 0.6);
 }
 
 .fqf-time-col {
-    background-color: #f5f8f7;
+    background-color: rgba(74, 26, 107, 0.04);
+}
+
+.fqf-time-label {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--mg-purple-deep);
+    opacity: 0.7;
+}
+
+/* ── Day tabs ────────────────────────────────────────────────────────────── */
+.fqf-day-tab {
+    position: relative;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.5rem 0.5rem 0 0;
+    color: var(--mg-purple-deep);
+    background: transparent;
+    transition:
+        background 0.15s ease,
+        color 0.15s ease;
+}
+
+.fqf-day-tab::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 25%;
+    right: 25%;
+    height: 2px;
+    background: var(--mg-gold-rich);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.fqf-day-tab:hover::after {
+    opacity: 1;
+}
+
+.fqf-day-tab-active {
+    background: var(--mg-gold-bright);
+    color: var(--mg-purple-deep);
+}
+
+.fqf-day-tab-active::after {
+    opacity: 0 !important;
+}
+
+/* ── View mode pills ─────────────────────────────────────────────────────── */
+.fqf-view-pill {
+    border-radius: 9999px;
+    padding: 0.25rem 0.875rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border: 1.5px solid transparent;
+    transition:
+        background 0.15s ease,
+        color 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.fqf-view-pill-inactive {
+    color: var(--mg-purple);
+    border-color: rgba(123, 47, 160, 0.3);
+    background: transparent;
+}
+
+.fqf-view-pill-inactive:hover {
+    border-color: var(--mg-gold-rich);
+    color: var(--mg-purple-deep);
+    background: rgba(212, 168, 67, 0.08);
+}
+
+.fqf-view-pill-active {
+    background: var(--mg-purple);
+    color: white;
+    border-color: var(--mg-purple);
+}
+
+/* ── Sort mode mini-pills ────────────────────────────────────────────────── */
+.fqf-sort-pill {
+    border-radius: 9999px;
+    padding: 0.2rem 0.625rem;
+    font-size: 0.7rem;
+    font-weight: 500;
+    transition: background 0.15s ease;
+}
+
+.fqf-sort-pill-active {
+    background: var(--mg-purple);
+    color: white;
+}
+
+.fqf-sort-pill-inactive {
+    background: rgba(74, 26, 107, 0.08);
+    color: var(--mg-purple-deep);
+}
+
+.fqf-sort-pill-inactive:hover {
+    background: rgba(74, 26, 107, 0.14);
+}
+
+/* ── Fleur-de-lis pick button ────────────────────────────────────────────── */
+.fqf-fleur {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+        opacity 0.15s ease,
+        transform 0.15s ease;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.fqf-fleur:hover {
+    transform: scale(1.15);
+}
+
+.fqf-fleur svg {
+    display: block;
+}
+
+/* ── Mobile list rows ────────────────────────────────────────────────────── */
+.fqf-list-row {
+    background-color: var(--mg-card);
+    border-bottom: 1px solid rgba(74, 26, 107, 0.1);
+    transition:
+        background-color 0.12s ease,
+        transform 0.12s ease;
+}
+
+.fqf-list-row:hover {
+    background-color: #fff9ee;
+}
+
+/* ── Section / group headers (mobile/my-schedule/merge) ─────────────────── */
+.fqf-group-header {
+    background: linear-gradient(90deg, rgba(74, 26, 107, 0.12) 0%, transparent 100%);
+    border-bottom: 1px solid rgba(74, 26, 107, 0.15);
+    color: var(--mg-purple-deep);
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+/* ── Token dialog ────────────────────────────────────────────────────────── */
+.fqf-dialog-card {
+    background-color: var(--mg-cream);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(74, 26, 107, 0.25);
+}
+
+.fqf-dialog-header {
+    background: linear-gradient(135deg, var(--mg-purple-deep) 0%, var(--mg-purple) 100%);
+    color: white;
+    padding: 1rem 1.5rem;
+}
+
+.fqf-dialog-header h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--mg-gold-bright);
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.fqf-dialog-header p {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
+
+.fqf-dialog-body {
+    padding: 1.5rem;
+}
+
+.fqf-token-box {
+    background: rgba(74, 26, 107, 0.06);
+    border: 1.5px solid rgba(212, 168, 67, 0.5);
+    border-radius: 0.5rem;
+    padding: 1.25rem 1rem;
+    text-align: center;
+    margin-bottom: 1.25rem;
+}
+
+.fqf-token-text {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--mg-gold-rich);
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    word-break: break-all;
+}
+
+.fqf-btn-primary {
+    background: linear-gradient(135deg, var(--mg-purple) 0%, var(--mg-purple-deep) 100%);
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    padding: 0.625rem 1rem;
+    font-weight: 600;
+    width: 100%;
+    transition: opacity 0.15s ease;
+    cursor: pointer;
+}
+
+.fqf-btn-primary:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.fqf-btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.fqf-btn-gold {
+    background: linear-gradient(135deg, var(--mg-gold-rich) 0%, var(--mg-gold-bright) 100%);
+    color: var(--mg-purple-deep);
+    border: none;
+    border-radius: 0.375rem;
+    padding: 0.625rem 1rem;
+    font-weight: 700;
+    width: 100%;
+    transition: opacity 0.15s ease;
+    cursor: pointer;
+}
+
+.fqf-btn-gold:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.fqf-btn-outline {
+    background: transparent;
+    color: var(--mg-purple);
+    border: 1.5px solid rgba(123, 47, 160, 0.4);
+    border-radius: 0.375rem;
+    padding: 0.625rem 1rem;
+    font-weight: 500;
+    width: 100%;
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease;
+    cursor: pointer;
+}
+
+.fqf-btn-outline:hover:not(:disabled) {
+    background: rgba(123, 47, 160, 0.06);
+    border-color: var(--mg-purple);
+}
+
+.fqf-btn-ghost {
+    background: transparent;
+    color: rgba(26, 26, 26, 0.5);
+    border: none;
+    border-radius: 0.375rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    width: 100%;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.fqf-btn-ghost:hover {
+    color: var(--mg-text);
+}
+
+/* ── Detail modal ────────────────────────────────────────────────────────── */
+.fqf-modal-card {
+    background-color: var(--mg-cream);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.fqf-modal-header-strip {
+    background: linear-gradient(135deg, var(--mg-purple-deep) 0%, var(--mg-purple) 100%);
+    height: 0.4rem;
+}
+
+.fqf-genre-badge {
+    background: rgba(212, 168, 67, 0.2);
+    color: var(--mg-purple-deep);
+    border: 1px solid rgba(212, 168, 67, 0.5);
+    border-radius: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+/* ── Filter panel ────────────────────────────────────────────────────────── */
+.fqf-filter-panel {
+    background-color: rgba(250, 246, 240, 0.95);
+    border-bottom: 1px solid rgba(74, 26, 107, 0.15);
+}
+
+.fqf-filter-section-label {
+    color: var(--mg-purple-deep);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+/* ── Merge view token badges ─────────────────────────────────────────────── */
+.fqf-merge-badge-0 {
+    background: rgba(74, 26, 107, 0.15);
+    color: var(--mg-purple-deep);
+    border: 1px solid rgba(74, 26, 107, 0.3);
+}
+
+.fqf-merge-badge-1 {
+    background: rgba(212, 168, 67, 0.2);
+    color: #7a5a00;
+    border: 1px solid rgba(212, 168, 67, 0.5);
+}
+
+.fqf-merge-badge-2 {
+    background: rgba(26, 122, 74, 0.15);
+    color: var(--mg-green-deep);
+    border: 1px solid rgba(26, 122, 74, 0.3);
+}
+
+.fqf-merge-badge-3 {
+    background: rgba(123, 47, 160, 0.12);
+    color: var(--mg-purple);
+    border: 1px solid rgba(123, 47, 160, 0.3);
+}
+
+.fqf-emoji-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    line-height: 1;
+}
+
+/* ── Controls bar (page header below main header) ────────────────────────── */
+.fqf-controls-bar {
+    background-color: rgba(255, 253, 247, 0.95);
+    border-bottom: 1px solid rgba(74, 26, 107, 0.12);
 }

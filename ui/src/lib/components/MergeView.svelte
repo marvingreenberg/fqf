@@ -7,6 +7,8 @@
     import { CONFLICT_COLORS, MAX_MERGE_TOKENS } from '$lib/constants';
     import { appState } from '$lib/stores.svelte';
 
+    const BADGE_COUNT = 4;
+
     let inputToken = $state('');
     let extraTokens = $state<string[]>([]);
     let mergeData = $state<{ schedules: MergeEntry[]; acts: ActSummary[] } | null>(null);
@@ -21,6 +23,13 @@
     const emojiMap = $derived(assignEmojis(allTokens));
 
     const atCapacity = $derived(allTokens.length >= MAX_MERGE_TOKENS);
+
+    // Map each token to a badge index (cycles through 0..BADGE_COUNT-1)
+    const tokenBadgeIndex = $derived.by(() => {
+        const map = new Map<string, number>();
+        allTokens.forEach((token, i) => map.set(token, i % BADGE_COUNT));
+        return map;
+    });
 
     function addToken(): void {
         const trimmed = inputToken.trim();
@@ -96,31 +105,42 @@
         const level: ConflictLevel = getWorstConflict(act, mergeData.acts, allPickSets);
         return CONFLICT_COLORS[level];
     }
+
+    function badgeClass(token: string): string {
+        const idx = tokenBadgeIndex.get(token) ?? 0;
+        return `fqf-merge-badge-${idx}`;
+    }
 </script>
 
 <div class="flex flex-col overflow-y-auto h-full">
     <!-- Token bar -->
-    <div class="shrink-0 px-3 py-2 border-b border-surface-300 bg-surface-50">
+    <div class="shrink-0 px-3 py-2 border-b fqf-filter-panel">
         <div class="flex flex-wrap gap-1.5 items-center mb-2">
             {#if appState.token}
                 <span
-                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium
-                           bg-primary-100 text-primary-800"
+                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium {badgeClass(
+                        appState.token
+                    )}"
                 >
-                    {emojiMap[appState.token]}
+                    <span class="fqf-emoji-circle {badgeClass(appState.token)}">
+                        {emojiMap[appState.token]}
+                    </span>
                     {appState.token}
-                    <span class="text-primary-500 text-xs">(you)</span>
+                    <span class="text-xs opacity-60">(you)</span>
                 </span>
             {/if}
             {#each extraTokens as token (token)}
                 <span
-                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium
-                           bg-surface-200 text-surface-800"
+                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium {badgeClass(
+                        token
+                    )}"
                 >
-                    {emojiMap[token]}
+                    <span class="fqf-emoji-circle {badgeClass(token)}">
+                        {emojiMap[token]}
+                    </span>
                     {token}
                     <button
-                        class="ml-0.5 hover:text-error-600 transition-colors leading-none"
+                        class="ml-0.5 leading-none opacity-60 hover:opacity-100 transition-opacity"
                         onclick={() => removeToken(token)}
                         aria-label="Remove {token}"
                     >
@@ -137,20 +157,20 @@
                 bind:value={inputToken}
                 onkeydown={handleKeydown}
                 disabled={atCapacity}
-                class="flex-1 text-sm px-2 py-1 rounded border border-surface-300
-                       bg-white disabled:opacity-50 focus:outline-none focus:border-primary-400"
+                class="flex-1 text-sm px-2 py-1 rounded border disabled:opacity-50 focus:outline-none"
+                style="border-color: rgba(74, 26, 107, 0.25); background: var(--mg-card); focus:border-color: var(--mg-purple);"
             />
             <button
                 onclick={addToken}
                 disabled={atCapacity || !inputToken.trim()}
-                class="px-3 py-1 text-sm rounded font-medium bg-primary-600 text-white
-                       hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                class="px-3 py-1 text-sm rounded font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                style="background: var(--mg-purple); color: white;"
             >
                 Add
             </button>
         </div>
         {#if atCapacity}
-            <p class="text-xs text-surface-500 mt-1">
+            <p class="text-xs mt-1" style="color: rgba(74, 26, 107, 0.5);">
                 Maximum of {MAX_MERGE_TOKENS} tokens reached.
             </p>
         {/if}
@@ -158,43 +178,41 @@
 
     <!-- Content area -->
     {#if allTokens.length === 0}
-        <div class="flex flex-col items-center justify-center h-full text-surface-500 gap-2">
+        <div
+            class="flex flex-col items-center justify-center h-full gap-2"
+            style="color: rgba(74, 26, 107, 0.5);"
+        >
             <p class="text-lg font-medium">No tokens added</p>
             <p class="text-sm">Add your token or a friend's to see merged picks.</p>
         </div>
     {:else if loading}
         <div class="flex items-center justify-center h-full">
-            <p class="text-surface-500">Loading merged schedule…</p>
+            <p style="color: var(--mg-purple); opacity: 0.6;">Loading merged schedule…</p>
         </div>
     {:else if error}
         <div class="flex items-center justify-center h-full">
-            <p class="text-error-600">{error}</p>
+            <p style="color: #dc2626;">{error}</p>
         </div>
     {:else if mergeData && mergeData.acts.length === 0}
-        <div class="flex items-center justify-center h-full text-surface-500">
+        <div class="flex items-center justify-center h-full" style="color: rgba(74, 26, 107, 0.5);">
             <p>No acts picked across these schedules.</p>
         </div>
     {:else if mergeData}
         <div class="flex-1 overflow-y-auto">
             {#each groupedByDay as group (group.date)}
-                <div
-                    class="sticky top-0 z-10 bg-surface-200 px-3 py-1.5 border-b border-surface-300"
-                >
-                    <span class="text-xs font-bold uppercase tracking-wider text-surface-600">
-                        {DAY_LABELS[group.date] ?? group.date}
-                    </span>
+                <div class="sticky top-0 z-10 fqf-group-header px-3 py-1.5">
+                    <span>{DAY_LABELS[group.date] ?? group.date}</span>
                 </div>
 
                 {#each group.acts as act (act.slug)}
                     {@const pickers = pickersBySlug.get(act.slug) ?? []}
                     <div
-                        class="flex items-center gap-3 px-3 py-2.5 border-b border-surface-200
-                               hover:bg-surface-100 transition-colors border-l-4"
+                        class="fqf-list-row flex items-center gap-3 px-3 py-2.5 border-l-4"
                         style="border-left-color: {conflictColor(act)};"
                     >
                         <div class="flex-1 min-w-0">
                             <p class="text-sm font-semibold truncate">{act.name}</p>
-                            <p class="text-xs text-surface-500 truncate">
+                            <p class="text-xs truncate" style="color: rgba(74, 26, 107, 0.5);">
                                 {act.stage} &middot; {act.start}–{act.end}
                             </p>
                         </div>
@@ -203,7 +221,7 @@
                             <div class="flex gap-0.5">
                                 {#each pickers as token (token)}
                                     <span
-                                        class="text-base leading-none"
+                                        class="fqf-emoji-circle {badgeClass(token)}"
                                         title={token}
                                         aria-label={token}
                                     >
@@ -211,7 +229,9 @@
                                     </span>
                                 {/each}
                             </div>
-                            <span class="text-xs text-surface-400 italic">{act.genre}</span>
+                            <span class="text-xs italic" style="color: rgba(74, 26, 107, 0.45);">
+                                {act.genre}
+                            </span>
                         </div>
                     </div>
                 {/each}
@@ -220,14 +240,17 @@
 
         <!-- Legend -->
         <div
-            class="shrink-0 border-t border-surface-300 px-3 py-2 bg-surface-50 flex flex-wrap gap-x-4 gap-y-1"
+            class="shrink-0 border-t px-3 py-2 flex flex-wrap gap-x-4 gap-y-1"
+            style="border-color: rgba(74, 26, 107, 0.12); background: rgba(250, 246, 240, 0.95);"
         >
             {#each allTokens as token (token)}
-                <span class="text-xs text-surface-600">
-                    {emojiMap[token]}
+                <span class="inline-flex items-center gap-1 text-xs" style="color: var(--mg-text);">
+                    <span class="fqf-emoji-circle {badgeClass(token)}">
+                        {emojiMap[token]}
+                    </span>
                     {token}
                     {#if token === appState.token}
-                        <span class="text-surface-400">(you)</span>
+                        <span style="color: rgba(74, 26, 107, 0.4);">(you)</span>
                     {/if}
                 </span>
             {/each}
