@@ -1,15 +1,18 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import type { ActSummary, ActDetail, MobileSortMode } from '$lib/types';
+    import type { ActSummary, ActDetail, MobileSortMode, ViewMode } from '$lib/types';
     import { listActs, getAct } from '$lib/api';
     import { appState } from '$lib/stores.svelte';
     import DayTabs from '$lib/components/DayTabs.svelte';
     import ScheduleGrid from '$lib/components/ScheduleGrid.svelte';
     import MobileSchedule from '$lib/components/MobileSchedule.svelte';
+    import MySchedule from '$lib/components/MySchedule.svelte';
 
     const MOBILE_BREAKPOINT = 768;
 
     let acts = $state<ActSummary[]>([]);
+    let allActs = $state<ActSummary[]>([]);
+    let allActsLoaded = $state(false);
     let loading = $state(false);
     let detailAct = $state<ActDetail | null>(null);
     let detailLoading = $state(false);
@@ -22,6 +25,12 @@
         { value: 'by-stage', label: 'By Stage' }
     ];
 
+    const VIEW_TABS: { value: ViewMode; label: () => string }[] = [
+        { value: 'grid', label: () => 'All Acts' },
+        { value: 'my-schedule', label: () => `My Schedule (${appState.picks.size})` },
+        { value: 'merge', label: () => 'Merge' }
+    ];
+
     async function loadActs(date: string): Promise<void> {
         loading = true;
         try {
@@ -30,6 +39,13 @@
         } finally {
             loading = false;
         }
+    }
+
+    async function loadAllActs(): Promise<void> {
+        if (allActsLoaded) return;
+        const resp = await listActs();
+        allActs = resp.acts;
+        allActsLoaded = true;
     }
 
     async function openDetail(act: ActSummary): Promise<void> {
@@ -47,7 +63,15 @@
     }
 
     $effect(() => {
-        loadActs(appState.selectedDate);
+        if (appState.viewMode === 'my-schedule') {
+            loadAllActs();
+        }
+    });
+
+    $effect(() => {
+        if (appState.viewMode !== 'my-schedule') {
+            loadActs(appState.selectedDate);
+        }
     });
 
     onMount(() => {
@@ -61,7 +85,7 @@
     <header class="shrink-0 bg-surface-100 border-b border-surface-300 px-4 py-2">
         <div class="flex items-center justify-between">
             <h1 class="text-xl font-bold">FQF 2026 Schedule Builder</h1>
-            {#if isMobile}
+            {#if isMobile && appState.viewMode !== 'my-schedule' && appState.viewMode !== 'merge'}
                 <div class="flex gap-1">
                     {#each SORT_MODES as mode (mode.value)}
                         <button
@@ -77,12 +101,39 @@
                 </div>
             {/if}
         </div>
+
+        <div class="flex gap-1 mt-2">
+            {#each VIEW_TABS as tab (tab.value)}
+                <button
+                    class="px-3 py-1 text-sm rounded font-medium transition-colors
+                           {appState.viewMode === tab.value
+                        ? 'bg-primary-600 text-white'
+                        : 'bg-surface-200 text-surface-700 hover:bg-surface-300'}"
+                    onclick={() => (appState.viewMode = tab.value)}
+                >
+                    {tab.label()}
+                </button>
+            {/each}
+        </div>
     </header>
 
-    <DayTabs bind:selectedDate={appState.selectedDate} />
+    {#if appState.viewMode !== 'my-schedule' && appState.viewMode !== 'merge'}
+        <DayTabs bind:selectedDate={appState.selectedDate} />
+    {/if}
 
     <div class="flex-1 overflow-hidden relative">
-        {#if loading}
+        {#if appState.viewMode === 'my-schedule'}
+            <MySchedule
+                {allActs}
+                picks={appState.picks}
+                onTogglePick={(slug) => appState.togglePick(slug)}
+                onActDetail={openDetail}
+            />
+        {:else if appState.viewMode === 'merge'}
+            <div class="flex items-center justify-center h-full text-surface-500">
+                <p>Merge view coming soon.</p>
+            </div>
+        {:else if loading}
             <div class="flex items-center justify-center h-full">
                 <p class="text-surface-500">Loading schedule…</p>
             </div>
