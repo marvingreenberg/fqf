@@ -71,48 +71,57 @@
         detailAct = null;
     }
 
-    async function loadPendingShare(): Promise<void> {
-        const shareId = appState.pendingShareId;
-        if (!shareId) return;
+    async function loadPendingShare(shareId: string, shareName: string | null): Promise<void> {
         try {
             const resp = await loadSharedSchedule(shareId);
             await appState.addSharedSchedule({
                 share_id: shareId,
-                name: appState.pendingShareName ?? resp.name,
+                name: shareName ?? resp.name,
                 picks: resp.picks,
                 acts: resp.acts
             });
-            appState.pendingShareId = null;
-            appState.pendingShareName = null;
             appState.viewMode = 'share';
         } catch {
-            // Share not found — silently drop the pending share
-            appState.pendingShareId = null;
-            appState.pendingShareName = null;
+            // Share not found — silently ignore
         }
     }
 
+    // Reload acts when day or relevant view mode changes
+    let prevDate = $state('');
+    let prevViewMode = $state<ViewMode>('grid');
+
     $effect(() => {
-        if (appState.viewMode === 'my-schedule') {
+        const date = appState.selectedDate;
+        const mode = appState.viewMode;
+
+        if (mode === 'my-schedule' && !allActsLoaded) {
             loadAllActs();
+        } else if (
+            (mode === 'grid' || mode === 'mobile') &&
+            (date !== prevDate || mode !== prevViewMode)
+        ) {
+            prevDate = date;
+            prevViewMode = mode;
+            loadActs(date);
         }
+        prevViewMode = mode;
     });
 
+    // Load pending share once confirmed — capture and clear to prevent re-entry
     $effect(() => {
-        if (appState.viewMode !== 'my-schedule') {
-            loadActs(appState.selectedDate);
-        }
-    });
-
-    // Load pending share once confirmed
-    $effect(() => {
-        if (appState.confirmed && appState.pendingShareId) {
-            loadPendingShare();
+        const confirmed = appState.confirmed;
+        const shareId = appState.pendingShareId;
+        const shareName = appState.pendingShareName;
+        if (confirmed && shareId) {
+            appState.pendingShareId = null;
+            appState.pendingShareName = null;
+            loadPendingShare(shareId, shareName);
         }
     });
 
     onMount(async () => {
         loadActs(appState.selectedDate);
+        prevDate = appState.selectedDate;
         const resp = await listStages();
         stageLocations = new Map(resp.stages.map((s) => [s.name, { lat: s.lat, lng: s.lng }]));
     });
