@@ -217,6 +217,62 @@ class TestInMemoryCreateSchedule:
                 await create_schedule()
 
 
+DETERMINISTIC_FINGERPRINT = "test-fingerprint-abc123"
+DETERMINISTIC_COUNTER = 0
+
+
+class TestInMemoryCreateScheduleDeterministic:
+    @pytest.mark.asyncio
+    async def test_deterministic_token_is_stored(self) -> None:
+        db_module._memory_store = {}
+        token = await create_schedule(fingerprint_hash=DETERMINISTIC_FINGERPRINT)
+        assert token in db_module._memory_store
+
+    @pytest.mark.asyncio
+    async def test_deterministic_same_inputs_return_same_token(self) -> None:
+        db_module._memory_store = {}
+        t1 = await create_schedule(
+            fingerprint_hash=DETERMINISTIC_FINGERPRINT, counter=DETERMINISTIC_COUNTER
+        )
+        t2 = await create_schedule(
+            fingerprint_hash=DETERMINISTIC_FINGERPRINT, counter=DETERMINISTIC_COUNTER
+        )
+        assert t1 == t2
+
+    @pytest.mark.asyncio
+    async def test_deterministic_idempotent_no_error_on_existing_token(self) -> None:
+        db_module._memory_store = {}
+        t1 = await create_schedule(fingerprint_hash=DETERMINISTIC_FINGERPRINT)
+        # Second call with same inputs should succeed without error
+        t2 = await create_schedule(fingerprint_hash=DETERMINISTIC_FINGERPRINT)
+        assert t1 == t2
+        # Still only one entry in memory store for this token
+        assert db_module._memory_store[t1][PICKS_FIELD] == []
+
+    @pytest.mark.asyncio
+    async def test_deterministic_different_counters_produce_different_tokens(self) -> None:
+        db_module._memory_store = {}
+        t1 = await create_schedule(fingerprint_hash=DETERMINISTIC_FINGERPRINT, counter=0)
+        t2 = await create_schedule(fingerprint_hash=DETERMINISTIC_FINGERPRINT, counter=1)
+        assert t1 != t2
+
+    @pytest.mark.asyncio
+    async def test_random_fallback_when_no_fingerprint(self) -> None:
+        db_module._memory_store = {}
+        with patch("fqf.db.generate_token", return_value=FAKE_TOKEN) as mock_gen:
+            token = await create_schedule()
+        mock_gen.assert_called_once()
+        assert token == FAKE_TOKEN
+
+    @pytest.mark.asyncio
+    async def test_random_fallback_when_fingerprint_is_none(self) -> None:
+        db_module._memory_store = {}
+        with patch("fqf.db.generate_token", return_value=FAKE_TOKEN) as mock_gen:
+            token = await create_schedule(fingerprint_hash=None)
+        mock_gen.assert_called_once()
+        assert token == FAKE_TOKEN
+
+
 class TestInMemoryLoadSchedule:
     @pytest.mark.asyncio
     async def test_returns_picks_and_name_for_existing_token(self) -> None:

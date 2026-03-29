@@ -74,6 +74,27 @@ class AddShareRequest(BaseModel):
     name: str
 
 
+class CreateScheduleRequest(BaseModel):
+    """Request body for creating a new schedule."""
+
+    name: str
+    fingerprint_hash: str | None = None
+    counter: int = 0
+
+
+class FuzzyLookupRequest(BaseModel):
+    """Request body for fuzzy triple lookup."""
+
+    raw_triple: str
+
+
+class FuzzyLookupResponse(BaseModel):
+    """Response for fuzzy lookup endpoint."""
+
+    token: str
+    suggestion: str | None = None
+
+
 class TokenResponse(BaseModel):
     """Response when creating a new schedule."""
 

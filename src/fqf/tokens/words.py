@@ -5,6 +5,26 @@ Format: <place>-<music-adjective>-<nola-noun>
 Example: "treme-funky-crawfish", "marigny-brassy-beignet"
 """
 
+from itertools import combinations
+
+
+def _levenshtein(a: str, b: str) -> int:
+    """Compute Levenshtein edit distance between two strings."""
+    if a == b:
+        return 0
+    if not a:
+        return len(b)
+    if not b:
+        return len(a)
+    prev = list(range(len(b) + 1))
+    for i, ca in enumerate(a, 1):
+        curr = [i] + [0] * len(b)
+        for j, cb in enumerate(b, 1):
+            curr[j] = min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + (ca != cb))
+        prev = curr
+    return prev[len(b)]
+
+
 POOL_PLACES: list[str] = [
     "treme",
     "marigny",
@@ -12,7 +32,6 @@ POOL_PLACES: list[str] = [
     "frenchmen",
     "bourbon",
     "magazine",
-    "congo",
     "decatur",
     "rampart",
     "esplanade",
@@ -113,7 +132,6 @@ POOL_MUSIC: list[str] = [
     "funky",
     "jazzy",
     "stomping",
-    "swinging",
     "rolling",
     "syncopated",
     "groovy",
@@ -187,16 +205,13 @@ POOL_MUSIC: list[str] = [
     "chanting",
     "hollering",
     "calling",
-    "ringing",
     "pounding",
     "throbbing",
     "churning",
     "stompy",
-    "snaking",
     "spiraling",
     "echoing",
     "reverbing",
-    "swirling",
     "pumping",
     "shaking",
     "rattling",
@@ -316,3 +331,24 @@ POOL_NOLA: list[str] = [
     "masque",
     "reveler",
 ]
+
+
+_MAX_SAFE_LEVENSHTEIN_DISTANCE = 1
+
+
+def validate_word_pools() -> list[tuple[str, str, int]]:
+    """Check for ambiguous word pairs across all pools.
+
+    Returns list of (word1, word2, distance) pairs where distance <= 1,
+    meaning the fuzzy resolver might confuse them.
+    """
+    all_words = POOL_PLACES + POOL_MUSIC + POOL_NOLA
+    return [
+        (w1, w2, _levenshtein(w1, w2))
+        for w1, w2 in combinations(all_words, 2)
+        if _levenshtein(w1, w2) <= _MAX_SAFE_LEVENSHTEIN_DISTANCE
+    ]
+
+
+# Backward-compatible alias
+validate_pools = validate_word_pools

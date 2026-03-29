@@ -10,7 +10,7 @@ import os
 import secrets
 from typing import Any
 
-from fqf.tokens.generator import generate_token
+from fqf.tokens.generator import generate_token, generate_token_deterministic
 
 logger = logging.getLogger(__name__)
 
@@ -84,11 +84,39 @@ async def close_pool() -> None:
     _memory_store = None
 
 
-async def create_schedule(name: str = "") -> str:
+async def create_schedule(
+    name: str = "", fingerprint_hash: str | None = None, counter: int = 0
+) -> str:
     """Generate a unique token and create an empty schedule document.
 
-    Retries up to MAX_RETRY_ATTEMPTS times on token collision before raising.
+    If fingerprint_hash is provided, generates a deterministic token via
+    generate_token_deterministic(). If that token already exists (same device,
+    same counter), returns the existing token — idempotent for the same input.
+    Falls back to random generation when fingerprint_hash is None.
+    Retries up to MAX_RETRY_ATTEMPTS times on token collision before raising
+    (random path only; deterministic path never increments the counter).
     """
+    if fingerprint_hash is not None:
+        token = generate_token_deterministic(fingerprint_hash, counter)
+        if _using_memory():
+            assert _memory_store is not None
+            if token not in _memory_store:
+                _memory_store[token] = {
+                    PICKS_FIELD: [],
+                    NAME_FIELD: name,
+                    SHARE_ID_FIELD: "",
+                    SHARES_FIELD: [],
+                }
+            return token
+        else:
+            assert _db is not None
+            doc_ref = _db.collection(SCHEDULES_COLLECTION).document(token)
+            if not doc_ref.get().exists:
+                doc_ref.set(
+                    {PICKS_FIELD: [], NAME_FIELD: name, SHARE_ID_FIELD: "", SHARES_FIELD: []}
+                )
+            return token
+
     for attempt in range(MAX_RETRY_ATTEMPTS):
         token = generate_token()
         if _using_memory():
