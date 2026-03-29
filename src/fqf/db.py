@@ -116,10 +116,12 @@ async def create_schedule(name: str = "") -> str:
     )
 
 
-async def load_schedule(token: str) -> tuple[list[str], str, list[dict[str, str]]] | None:
-    """Load picks, name, and shares for a token.
+async def load_schedule(
+    token: str,
+) -> tuple[list[str], str, list[dict[str, str]], str] | None:
+    """Load picks, name, shares, and share_id for a token.
 
-    Returns (picks, name, shares) or None if token doesn't exist.
+    Returns (picks, name, shares, share_id) or None if token doesn't exist.
     """
     if _using_memory():
         assert _memory_store is not None
@@ -127,16 +129,18 @@ async def load_schedule(token: str) -> tuple[list[str], str, list[dict[str, str]
             return None
         doc = _memory_store[token]
         shares: list[dict[str, str]] = list(doc.get(SHARES_FIELD, []))
-        return list(doc[PICKS_FIELD]), doc.get(NAME_FIELD, ""), shares
+        own_share_id: str = str(doc.get(SHARE_ID_FIELD, ""))
+        return list(doc[PICKS_FIELD]), doc.get(NAME_FIELD, ""), shares, own_share_id
     assert _db is not None
     doc = _db.collection(SCHEDULES_COLLECTION).document(token).get()
     if not doc.exists:
         return None
     data = doc.to_dict()
     if not data:
-        return [], "", []
+        return [], "", [], ""
     fs_shares: list[dict[str, str]] = list(data.get(SHARES_FIELD, []))
-    return list(data.get(PICKS_FIELD, [])), data.get(NAME_FIELD, ""), fs_shares
+    fs_share_id: str = str(data.get(SHARE_ID_FIELD, ""))
+    return list(data.get(PICKS_FIELD, [])), data.get(NAME_FIELD, ""), fs_shares, fs_share_id
 
 
 async def save_picks(token: str, picks: list[str], name: str | None = None) -> bool:

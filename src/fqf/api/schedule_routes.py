@@ -104,10 +104,12 @@ async def load(token: str) -> ScheduleResponse:
     result = await load_schedule(token)
     if result is None:
         raise HTTPException(status_code=404, detail=NOT_FOUND_DETAIL)
-    picks, name, raw_shares = result
+    picks, name, raw_shares, own_share_id = result
     acts = [s for slug in picks if (s := _slug_to_summary(slug)) is not None]
     shares = [ShareRef(share_id=s["share_id"], name=s["name"]) for s in raw_shares]
-    return ScheduleResponse(token=token, name=name, picks=picks, acts=acts, shares=shares)
+    return ScheduleResponse(
+        token=token, name=name, picks=picks, acts=acts, shares=shares, share_id=own_share_id
+    )
 
 
 @router.put("/{token}", response_model=ScheduleResponse)
@@ -120,9 +122,12 @@ async def save(token: str, body: ScheduleUpdate) -> ScheduleResponse:
     result = await load_schedule(token)
     name = result[1] if result is not None else (body.name or "")
     raw_shares = result[2] if result is not None else []
+    own_share_id = result[3] if result is not None else ""
     acts = [s for slug in body.picks if (s := _slug_to_summary(slug)) is not None]
     shares = [ShareRef(share_id=s["share_id"], name=s["name"]) for s in raw_shares]
-    return ScheduleResponse(token=token, name=name, picks=body.picks, acts=acts, shares=shares)
+    return ScheduleResponse(
+        token=token, name=name, picks=body.picks, acts=acts, shares=shares, share_id=own_share_id
+    )
 
 
 @router.post("/{token}/add-share", response_model=ScheduleResponse)
@@ -134,10 +139,12 @@ async def add_share(token: str, body: AddShareRequest) -> ScheduleResponse:
     result = await load_schedule(token)
     if result is None:
         raise HTTPException(status_code=404, detail=NOT_FOUND_DETAIL)
-    picks, name, raw_shares = result
+    picks, name, raw_shares, own_share_id = result
     acts = [s for slug in picks if (s := _slug_to_summary(slug)) is not None]
     shares = [ShareRef(share_id=s["share_id"], name=s["name"]) for s in raw_shares]
-    return ScheduleResponse(token=token, name=name, picks=picks, acts=acts, shares=shares)
+    return ScheduleResponse(
+        token=token, name=name, picks=picks, acts=acts, shares=shares, share_id=own_share_id
+    )
 
 
 @router.delete("/{token}/remove-share/{share_id}", response_model=ScheduleResponse)
@@ -149,7 +156,9 @@ async def remove_share(token: str, share_id: str) -> ScheduleResponse:
     result = await load_schedule(token)
     if result is None:
         raise HTTPException(status_code=404, detail=NOT_FOUND_DETAIL)
-    picks, name, raw_shares = result
+    picks, name, raw_shares, own_share_id = result
     acts = [s for slug in picks if (s := _slug_to_summary(slug)) is not None]
     shares = [ShareRef(share_id=s["share_id"], name=s["name"]) for s in raw_shares]
-    return ScheduleResponse(token=token, name=name, picks=picks, acts=acts, shares=shares)
+    return ScheduleResponse(
+        token=token, name=name, picks=picks, acts=acts, shares=shares, share_id=own_share_id
+    )

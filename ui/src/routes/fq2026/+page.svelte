@@ -72,6 +72,11 @@
     }
 
     async function loadPendingShare(shareId: string, shareName: string | null): Promise<void> {
+        // Skip if this is our own share link
+        if (appState.ownShareId && shareId === appState.ownShareId) {
+            appState.viewMode = 'my-schedule';
+            return;
+        }
         try {
             const resp = await loadSharedSchedule(shareId);
             await appState.addSharedSchedule({

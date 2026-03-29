@@ -42,6 +42,7 @@ export interface ScheduleResponse {
     picks: string[];
     acts: ActSummary[];
     shares: ShareRef[];
+    share_id: string;
 }
 
 export interface ScheduleUpdate {

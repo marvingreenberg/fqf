@@ -88,6 +88,7 @@ class ScheduleResponse(BaseModel):
     picks: list[str]
     acts: list[ActSummary]
     shares: list[ShareRef] = []
+    share_id: str = ""
 
 
 class ShareResponse(BaseModel):

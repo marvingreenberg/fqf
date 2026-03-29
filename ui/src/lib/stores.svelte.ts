@@ -14,6 +14,7 @@ class AppState {
     mobileSortMode = $state<MobileSortMode>('by-time');
     token = $state<string | null>(null);
     name = $state<string>('');
+    ownShareId = $state<string>('');
     confirmed = $state<boolean>(false);
     picks = $state<Set<string>>(new Set());
     acts = $state<ActSummary[]>([]);
@@ -60,6 +61,7 @@ class AppState {
         const resp = await loadSchedule(token);
         this.token = resp.token;
         this.name = name ?? resp.name ?? '';
+        this.ownShareId = resp.share_id ?? '';
         this.picks = new Set(resp.picks);
         this.confirmed = true;
         this.saveToStorage();

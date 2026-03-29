@@ -222,7 +222,7 @@ class TestInMemoryLoadSchedule:
     async def test_returns_picks_and_name_for_existing_token(self) -> None:
         db_module._memory_store = {FAKE_TOKEN: _mem_doc(list(SAMPLE_PICKS), name=SAMPLE_NAME)}
         result = await load_schedule(FAKE_TOKEN)
-        assert result == (SAMPLE_PICKS, SAMPLE_NAME, [])
+        assert result == (SAMPLE_PICKS, SAMPLE_NAME, [], "")
 
     @pytest.mark.asyncio
     async def test_returns_none_for_missing_token(self) -> None:
@@ -234,7 +234,7 @@ class TestInMemoryLoadSchedule:
     async def test_returns_empty_picks_and_empty_name_for_blank_doc(self) -> None:
         db_module._memory_store = {FAKE_TOKEN: _mem_doc([])}
         result = await load_schedule(FAKE_TOKEN)
-        assert result == ([], "", [])
+        assert result == ([], "", [], "")
 
     @pytest.mark.asyncio
     async def test_returns_shares_when_present(self) -> None:
@@ -242,7 +242,7 @@ class TestInMemoryLoadSchedule:
         db_module._memory_store = {FAKE_TOKEN: _mem_doc(list(SAMPLE_PICKS), shares=[share_entry])}
         result = await load_schedule(FAKE_TOKEN)
         assert result is not None
-        picks, name, shares = result
+        picks, name, shares, _own_share_id = result
         assert shares == [share_entry]
 
     @pytest.mark.asyncio
@@ -250,7 +250,7 @@ class TestInMemoryLoadSchedule:
         db_module._memory_store = {FAKE_TOKEN: _mem_doc(list(SAMPLE_PICKS))}
         result = await load_schedule(FAKE_TOKEN)
         assert result is not None
-        picks, _, _shares = result
+        picks, _, _shares, _sid = result
         picks.append("mutated")
         assert db_module._memory_store[FAKE_TOKEN][PICKS_FIELD] == SAMPLE_PICKS
 
@@ -441,7 +441,7 @@ class TestFirestoreLoadSchedule:
         db_module._db = fake_client
 
         result = await load_schedule(FAKE_TOKEN)
-        assert result == (SAMPLE_PICKS, SAMPLE_NAME, [])
+        assert result == (SAMPLE_PICKS, SAMPLE_NAME, [], "")
 
     @pytest.mark.asyncio
     async def test_returns_shares_when_present(self) -> None:
@@ -458,7 +458,7 @@ class TestFirestoreLoadSchedule:
 
         result = await load_schedule(FAKE_TOKEN)
         assert result is not None
-        picks, name, shares = result
+        picks, name, shares, _own_share_id = result
         assert shares == [share_entry]
 
     @pytest.mark.asyncio
@@ -479,7 +479,7 @@ class TestFirestoreLoadSchedule:
         db_module._db = fake_client
 
         result = await load_schedule(FAKE_TOKEN)
-        assert result == ([], "", [])
+        assert result == ([], "", [], "")
 
     @pytest.mark.asyncio
     async def test_returns_empty_when_data_is_none(self) -> None:
@@ -489,7 +489,7 @@ class TestFirestoreLoadSchedule:
         db_module._db = fake_client
 
         result = await load_schedule(FAKE_TOKEN)
-        assert result == ([], "", [])
+        assert result == ([], "", [], "")
 
 
 class TestFirestoreSavePicks:
