@@ -115,7 +115,7 @@
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-semibold truncate">{act.name}</p>
                     <p class="text-xs truncate" style="color: rgba(74, 26, 107, 0.5);">
-                        {act.stage} &middot; {act.start}–{act.end}
+                        {act.start}&#8211;{act.end} &middot; {act.stage}
                     </p>
                 </div>
 
