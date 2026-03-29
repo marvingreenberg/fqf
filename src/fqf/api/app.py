@@ -4,18 +4,20 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from fqf.api.act_routes import router as act_router
+from fqf.api.rate_limit import check_general_limit
 from fqf.api.schedule_routes import router as schedule_router
 from fqf.api.stage_routes import router as stage_router
 from fqf.db import close_pool, init_pool
 
 API_TITLE = "FQF 2026 Schedule Builder"
 CORS_ALLOW_ORIGINS = ["http://localhost:5173", "http://localhost:8000"]
+API_PATH_PREFIX = "/api/"
 
 
 @asynccontextmanager
@@ -38,9 +40,10 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    app.include_router(act_router)
+    general_limit_dep = [Depends(check_general_limit)]
+    app.include_router(act_router, dependencies=general_limit_dep)
     app.include_router(schedule_router)
-    app.include_router(stage_router)
+    app.include_router(stage_router, dependencies=general_limit_dep)
 
     static_dir = Path(__file__).parent.parent / "static"
     if static_dir.is_dir():

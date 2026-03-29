@@ -74,6 +74,12 @@ class AddShareRequest(BaseModel):
     name: str
 
 
+class CreateScheduleRequest(BaseModel):
+    """Request body for creating a new schedule."""
+
+    counter: int = 0
+
+
 class TokenResponse(BaseModel):
     """Response when creating a new schedule."""
 

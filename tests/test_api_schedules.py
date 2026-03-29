@@ -48,18 +48,21 @@ async def client(app):  # type: ignore[no-untyped-def]
 # ── POST /api/v1/schedule ─────────────────────────────────────────────────────
 
 
+CREATE_BODY = {"counter": 0}
+
+
 class TestCreateSchedule:
     @pytest.mark.asyncio
     async def test_returns_201_with_token(self, client: AsyncClient) -> None:
         with patch(f"{DB_MODULE}.create_schedule", new=AsyncMock(return_value=FAKE_TOKEN)):
-            resp = await client.post(SCHEDULE_URL)
+            resp = await client.post(SCHEDULE_URL, json=CREATE_BODY)
         assert resp.status_code == 201
         assert resp.json() == {"token": FAKE_TOKEN}
 
     @pytest.mark.asyncio
     async def test_token_field_present(self, client: AsyncClient) -> None:
         with patch(f"{DB_MODULE}.create_schedule", new=AsyncMock(return_value=FAKE_TOKEN)):
-            resp = await client.post(SCHEDULE_URL)
+            resp = await client.post(SCHEDULE_URL, json=CREATE_BODY)
         assert "token" in resp.json()
 
 

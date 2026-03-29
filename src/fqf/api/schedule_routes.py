@@ -1,10 +1,17 @@
 """Schedule persistence API endpoints."""
 
-from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
+from fqf.api.rate_limit import (
+    check_create_ip_limit,
+    check_fingerprint_limit,
+    check_general_limit,
+    check_load_limit,
+)
 from fqf.api.schemas import (
     ActSummary,
     AddShareRequest,
+    CreateScheduleRequest,
     FuzzyLookupRequest,
     FuzzyLookupResponse,
     MergeEntry,
@@ -59,7 +66,7 @@ INVALID_TRIPLE_DETAIL = "Invalid triple"
 
 # IMPORTANT: /merge, /by-share/..., and /fuzzy-lookup must be defined before /{token} to avoid
 # those literal path segments being captured as a token parameter.
-@router.get("/merge", response_model=MergeResponse)
+@router.get("/merge", response_model=MergeResponse, dependencies=[Depends(check_general_limit)])
 async def merge(tokens: str = Query(..., description="Comma-separated tokens")) -> MergeResponse:
     """Merge multiple schedules for comparison."""
     token_list = [t.strip() for t in tokens.split(",") if t.strip()]
@@ -75,7 +82,11 @@ async def merge(tokens: str = Query(..., description="Comma-separated tokens")) 
     return MergeResponse(schedules=entries, acts=acts)
 
 
-@router.get("/by-share/{share_id}", response_model=SharedScheduleResponse)
+@router.get(
+    "/by-share/{share_id}",
+    response_model=SharedScheduleResponse,
+    dependencies=[Depends(check_general_limit)],
+)
 async def load_by_share(share_id: str) -> SharedScheduleResponse:
     """Load a read-only schedule view by its share_id."""
     result = await load_schedule_by_share(share_id)
@@ -86,14 +97,22 @@ async def load_by_share(share_id: str) -> SharedScheduleResponse:
     return SharedScheduleResponse(name=name, picks=picks, acts=acts)
 
 
-@router.post("", response_model=TokenResponse, status_code=201)
-async def create() -> TokenResponse:
+@router.post(
+    "",
+    response_model=TokenResponse,
+    status_code=201,
+    dependencies=[Depends(check_create_ip_limit)],
+)
+async def create(body: CreateScheduleRequest) -> TokenResponse:
     """Generate a new schedule with a NOLA-themed token."""
+    check_fingerprint_limit(body.counter)
     token = await create_schedule()
     return TokenResponse(token=token)
 
 
-@router.post("/{token}/share", response_model=ShareResponse)
+@router.post(
+    "/{token}/share", response_model=ShareResponse, dependencies=[Depends(check_general_limit)]
+)
 async def share(token: str, request: Request) -> ShareResponse:
     """Generate (or retrieve) a share_id for a schedule."""
     try:
@@ -105,7 +124,11 @@ async def share(token: str, request: Request) -> ShareResponse:
     return ShareResponse(share_id=share_id, share_url=share_url)
 
 
-@router.post(FUZZY_LOOKUP_PATH, response_model=FuzzyLookupResponse)
+@router.post(
+    FUZZY_LOOKUP_PATH,
+    response_model=FuzzyLookupResponse,
+    dependencies=[Depends(check_load_limit)],
+)
 async def fuzzy_lookup(body: FuzzyLookupRequest) -> FuzzyLookupResponse:
     """Resolve a fuzzy triple string to a schedule token, correcting minor typos."""
     try:
@@ -141,7 +164,7 @@ async def fuzzy_lookup(body: FuzzyLookupRequest) -> FuzzyLookupResponse:
     )
 
 
-@router.get("/{token}", response_model=ScheduleResponse)
+@router.get("/{token}", response_model=ScheduleResponse, dependencies=[Depends(check_load_limit)])
 async def load(token: str) -> ScheduleResponse:
     """Load a schedule by its token."""
     result = await load_schedule(token)
@@ -155,7 +178,9 @@ async def load(token: str) -> ScheduleResponse:
     )
 
 
-@router.put("/{token}", response_model=ScheduleResponse)
+@router.put(
+    "/{token}", response_model=ScheduleResponse, dependencies=[Depends(check_general_limit)]
+)
 async def save(token: str, body: ScheduleUpdate) -> ScheduleResponse:
     """Save picks (and optionally name) for an existing schedule."""
     success = await save_picks(token, body.picks, body.name)
@@ -173,7 +198,11 @@ async def save(token: str, body: ScheduleUpdate) -> ScheduleResponse:
     )
 
 
-@router.post("/{token}/add-share", response_model=ScheduleResponse)
+@router.post(
+    "/{token}/add-share",
+    response_model=ScheduleResponse,
+    dependencies=[Depends(check_general_limit)],
+)
 async def add_share(token: str, body: AddShareRequest) -> ScheduleResponse:
     """Add a share reference to the user's schedule."""
     success = await add_share_to_schedule(token, body.share_id, body.name)
@@ -190,7 +219,11 @@ async def add_share(token: str, body: AddShareRequest) -> ScheduleResponse:
     )
 
 
-@router.delete("/{token}/remove-share/{share_id}", response_model=ScheduleResponse)
+@router.delete(
+    "/{token}/remove-share/{share_id}",
+    response_model=ScheduleResponse,
+    dependencies=[Depends(check_general_limit)],
+)
 async def remove_share(token: str, share_id: str) -> ScheduleResponse:
     """Remove a share reference from the user's schedule."""
     success = await remove_share_from_schedule(token, share_id)
