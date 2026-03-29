@@ -316,3 +316,17 @@ POOL_NOLA: list[str] = [
     "masque",
     "reveler",
 ]
+
+
+def levenshtein_distance(a: str, b: str) -> int:
+    """Compute the Levenshtein edit distance between two strings."""
+    rows = len(a) + 1
+    cols = len(b) + 1
+    matrix = list(range(cols))
+    for i in range(1, rows):
+        prev_row = matrix[:]
+        matrix[0] = i
+        for j in range(1, cols):
+            cost = 0 if a[i - 1] == b[j - 1] else 1
+            matrix[j] = min(prev_row[j] + 1, matrix[j - 1] + 1, prev_row[j - 1] + cost)
+    return matrix[cols - 1]

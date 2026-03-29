@@ -9,6 +9,7 @@ from fqf.api.app import create_app
 
 SCHEDULE_URL = "/api/v1/schedule"
 MERGE_URL = "/api/v1/schedule/merge"
+FUZZY_LOOKUP_URL = "/api/v1/schedule/fuzzy-lookup"
 
 FAKE_TOKEN = "tremé-jazz-laissez"
 OTHER_TOKEN = "bywater-funk-krewe"
@@ -382,3 +383,81 @@ class TestRemoveShare:
         with patch(f"{DB_MODULE}.remove_share_from_schedule", new=AsyncMock(return_value=False)):
             resp = await client.delete(f"{SCHEDULE_URL}/{FAKE_TOKEN}/remove-share/{SHARE_ID}")
         assert resp.status_code == 404
+
+
+# ── POST /api/v1/schedule/fuzzy-lookup ───────────────────────────────────────
+
+# Valid pool words for a resolvable triple
+FUZZY_EXACT_TRIPLE = "treme-funky-crawfish"
+FUZZY_SORTED_TOKEN = "crawfish-funky-treme"
+FUZZY_TYPO_TRIPLE = "treme-funku-crawfish"  # "funku" → "funky"
+FUZZY_OWNER_NAME = "Jazz Fan"
+
+# A triple that's valid words but no schedule stored under that token
+FUZZY_VALID_BUT_MISSING = "treme-jazzy-beignet"
+FUZZY_SORTED_MISSING = "beignet-jazzy-treme"
+
+# A triple with a word that can't be matched
+FUZZY_BAD_WORD_TRIPLE = "treme-zzzzzzz-crawfish"
+
+
+FUZZY_MODULE = "fqf.tokens.fuzzy"
+
+
+class TestFuzzyLookup:
+    @pytest.mark.asyncio
+    async def test_exact_match_found(self, client: AsyncClient) -> None:
+        """Exact triple that resolves to an existing schedule."""
+        schedule_data = (SAMPLE_PICKS, FUZZY_OWNER_NAME, [], "")
+        with patch(f"{DB_MODULE}.load_schedule", new=AsyncMock(return_value=schedule_data)):
+            resp = await client.post(FUZZY_LOOKUP_URL, json={"raw_triple": FUZZY_EXACT_TRIPLE})
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["found"] is True
+        assert data["corrected"] is False
+        assert data["name"] == FUZZY_OWNER_NAME
+        assert data["token"] in (FUZZY_EXACT_TRIPLE, FUZZY_SORTED_TOKEN)
+
+    @pytest.mark.asyncio
+    async def test_typo_corrected_and_found(self, client: AsyncClient) -> None:
+        """Triple with 1-char typo gets corrected and schedule is found."""
+        schedule_data = (SAMPLE_PICKS, FUZZY_OWNER_NAME, [], "")
+        # as_entered (corrected to treme-funky-crawfish) is found on first try
+        with patch(f"{DB_MODULE}.load_schedule", new=AsyncMock(return_value=schedule_data)):
+            resp = await client.post(FUZZY_LOOKUP_URL, json={"raw_triple": FUZZY_TYPO_TRIPLE})
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["found"] is True
+        assert data["corrected"] is True
+        assert data["name"] == FUZZY_OWNER_NAME
+
+    @pytest.mark.asyncio
+    async def test_valid_words_but_schedule_not_found(self, client: AsyncClient) -> None:
+        """Valid pool words but no schedule stored under that token."""
+        with patch(f"{DB_MODULE}.load_schedule", new=AsyncMock(return_value=None)):
+            resp = await client.post(FUZZY_LOOKUP_URL, json={"raw_triple": FUZZY_VALID_BUT_MISSING})
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["found"] is False
+        assert data["name"] == ""
+        assert data["token"] in (FUZZY_VALID_BUT_MISSING, FUZZY_SORTED_MISSING)
+
+    @pytest.mark.asyncio
+    async def test_unresolvable_word_returns_400(self, client: AsyncClient) -> None:
+        """Word with edit distance > 1 from all pool words returns 400."""
+        resp = await client.post(FUZZY_LOOKUP_URL, json={"raw_triple": FUZZY_BAD_WORD_TRIPLE})
+        assert resp.status_code == 400
+
+    @pytest.mark.asyncio
+    async def test_response_shape(self, client: AsyncClient) -> None:
+        """Response always has all required fields."""
+        with patch(f"{DB_MODULE}.load_schedule", new=AsyncMock(return_value=None)):
+            resp = await client.post(FUZZY_LOOKUP_URL, json={"raw_triple": FUZZY_VALID_BUT_MISSING})
+
+        assert resp.status_code == 200
+        data = resp.json()
+        for field in ("token", "corrected", "suggestion", "name", "found"):
+            assert field in data

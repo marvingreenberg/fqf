@@ -118,3 +118,19 @@ class MergeResponse(BaseModel):
 
     schedules: list[MergeEntry]
     acts: list[ActSummary]
+
+
+class FuzzyLookupRequest(BaseModel):
+    """Request body for fuzzy token lookup."""
+
+    raw_triple: str
+
+
+class FuzzyLookupResponse(BaseModel):
+    """Response for fuzzy token lookup."""
+
+    token: str
+    corrected: bool
+    suggestion: str
+    name: str
+    found: bool

@@ -5,6 +5,8 @@ from fastapi import APIRouter, HTTPException, Query, Request
 from fqf.api.schemas import (
     ActSummary,
     AddShareRequest,
+    FuzzyLookupRequest,
+    FuzzyLookupResponse,
     MergeEntry,
     MergeResponse,
     ScheduleResponse,
@@ -25,6 +27,7 @@ from fqf.db import (
     save_picks,
 )
 from fqf.schedule import get_by_slug
+from fqf.tokens.fuzzy import fuzzy_resolve_triple
 
 router = APIRouter(prefix="/api/v1/schedule", tags=["schedule"])
 
@@ -50,7 +53,11 @@ def _slug_to_summary(slug: str) -> ActSummary | None:
     )
 
 
-# IMPORTANT: /merge and /by-share/... must be defined before /{token} to avoid
+FUZZY_LOOKUP_PATH = "/fuzzy-lookup"
+INVALID_TRIPLE_DETAIL = "Invalid triple"
+
+
+# IMPORTANT: /merge, /by-share/..., and /fuzzy-lookup must be defined before /{token} to avoid
 # those literal path segments being captured as a token parameter.
 @router.get("/merge", response_model=MergeResponse)
 async def merge(tokens: str = Query(..., description="Comma-separated tokens")) -> MergeResponse:
@@ -96,6 +103,42 @@ async def share(token: str, request: Request) -> ShareResponse:
     base_url = str(request.base_url).rstrip("/")
     share_url = f"{base_url}{SHARE_PATH_PREFIX}/{share_id}"
     return ShareResponse(share_id=share_id, share_url=share_url)
+
+
+@router.post(FUZZY_LOOKUP_PATH, response_model=FuzzyLookupResponse)
+async def fuzzy_lookup(body: FuzzyLookupRequest) -> FuzzyLookupResponse:
+    """Resolve a fuzzy triple string to a schedule token, correcting minor typos."""
+    try:
+        as_entered, sorted_token, was_corrected = fuzzy_resolve_triple(body.raw_triple)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    result = await load_schedule(as_entered)
+    if result is not None:
+        token = as_entered
+        name = result[1]
+        return FuzzyLookupResponse(
+            token=token, corrected=was_corrected, suggestion=as_entered, name=name, found=True
+        )
+
+    result = await load_schedule(sorted_token)
+    if result is not None:
+        name = result[1]
+        return FuzzyLookupResponse(
+            token=sorted_token,
+            corrected=was_corrected,
+            suggestion=sorted_token,
+            name=name,
+            found=True,
+        )
+
+    return FuzzyLookupResponse(
+        token=sorted_token,
+        corrected=was_corrected,
+        suggestion=sorted_token,
+        name="",
+        found=False,
+    )
 
 
 @router.get("/{token}", response_model=ScheduleResponse)
