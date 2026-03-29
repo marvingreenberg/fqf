@@ -3,6 +3,7 @@ import {
     haversineMeters,
     walkingDistanceMeters,
     formatDistance,
+    distanceStyle,
     shortenStageName
 } from '$lib/distance';
 
@@ -35,20 +36,48 @@ describe('walkingDistanceMeters', () => {
 });
 
 describe('formatDistance', () => {
-    it('formats meters below 1km', () => {
-        expect(formatDistance(350)).toBe('350m');
+    it('converts meters to feet rounded to nearest 100', () => {
+        // 100m * 3.28084 = 328ft → rounds to 300
+        expect(formatDistance(100)).toBe('300 ft');
     });
 
-    it('formats kilometers', () => {
-        expect(formatDistance(1200)).toBe('1.2km');
+    it('rounds up to nearest 100', () => {
+        // 200m * 3.28084 = 656ft → rounds to 700
+        expect(formatDistance(200)).toBe('700 ft');
     });
 
-    it('rounds meters', () => {
-        expect(formatDistance(349.7)).toBe('350m');
+    it('handles large distances', () => {
+        // 1000m * 3.28084 = 3281ft → rounds to 3300
+        expect(formatDistance(1000)).toBe('3300 ft');
     });
 
-    it('formats exactly 1km', () => {
-        expect(formatDistance(1000)).toBe('1.0km');
+    it('enforces minimum of 100 ft for very short distances', () => {
+        // 10m * 3.28084 = 33ft → rounds to 0 → clamped to 100
+        expect(formatDistance(10)).toBe('100 ft');
+    });
+});
+
+describe('distanceStyle', () => {
+    it('returns green style for close distances', () => {
+        // 100m = 328ft < 600
+        expect(distanceStyle(100)).toContain('#1a7a4a');
+    });
+
+    it('returns orange style for medium distances', () => {
+        // 250m = 820ft, between 600 and 1200
+        expect(distanceStyle(250)).toContain('#d97706');
+    });
+
+    it('returns dark red bold style for far distances', () => {
+        // 400m = 1312ft >= 1200
+        const style = distanceStyle(400);
+        expect(style).toContain('#991b1b');
+        expect(style).toContain('font-weight: 700');
+    });
+
+    it('returns green for distances right at zero', () => {
+        // 0m = 0ft < 600
+        expect(distanceStyle(0)).toContain('#1a7a4a');
     });
 });
 

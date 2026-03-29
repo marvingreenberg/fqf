@@ -8,6 +8,7 @@
     import MobileSchedule from '$lib/components/MobileSchedule.svelte';
     import MySchedule from '$lib/components/MySchedule.svelte';
     import ShareView from '$lib/components/ShareView.svelte';
+    import MapView from '$lib/components/MapView.svelte';
     import FilterPanel from '$lib/components/FilterPanel.svelte';
 
     const MOBILE_BREAKPOINT = 768;
@@ -34,6 +35,7 @@
 
     const VIEW_TABS: { value: ViewMode; label: () => string }[] = [
         { value: 'grid', label: () => 'All Acts' },
+        { value: 'map', label: () => 'Map' },
         { value: 'my-schedule', label: () => `My Schedule (${appState.picks.size})` },
         { value: 'share', label: () => `Share (${appState.sharedSchedules.length})` }
     ];
@@ -154,7 +156,7 @@
         </div>
     </header>
 
-    {#if appState.viewMode !== 'my-schedule' && appState.viewMode !== 'share'}
+    {#if appState.viewMode !== 'my-schedule' && appState.viewMode !== 'share' && appState.viewMode !== 'map'}
         <DayTabs bind:selectedDate={appState.selectedDate} />
         <FilterPanel genres={uniqueGenres} stages={uniqueStages} />
     {/if}
@@ -168,6 +170,8 @@
                 onTogglePick={(slug) => appState.togglePick(slug)}
                 onActDetail={openDetail}
             />
+        {:else if appState.viewMode === 'map'}
+            <MapView {acts} {stageLocations} onActDetail={openDetail} />
         {:else if appState.viewMode === 'share'}
             <ShareView />
         {:else if loading}
