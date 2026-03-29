@@ -9,6 +9,12 @@
     const BADGE_COUNT = 4;
     const SELF_LABEL = 'Self';
 
+    interface Props {
+        selfActs: ActSummary[];
+    }
+
+    let { selfActs }: Props = $props();
+
     interface ScheduleEntry {
         id: string; // token for self, share_id for shared
         label: string;
@@ -65,9 +71,12 @@
         return union;
     });
 
-    // All acts from all shared schedules (union, deduped by slug)
+    // All acts: self picks + shared schedules, deduped by slug
     const allActs = $derived.by((): ActSummary[] => {
         const bySlug = new Map<string, ActSummary>();
+        for (const act of selfActs) {
+            bySlug.set(act.slug, act);
+        }
         for (const schedule of appState.sharedSchedules) {
             for (const act of schedule.acts) {
                 bySlug.set(act.slug, act);

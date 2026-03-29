@@ -99,7 +99,7 @@
         const date = appState.selectedDate;
         const mode = appState.viewMode;
 
-        if (mode === 'my-schedule' && !allActsLoaded) {
+        if ((mode === 'my-schedule' || mode === 'share') && !allActsLoaded) {
             loadAllActs();
         } else if (
             (mode === 'grid' || mode === 'mobile') &&
@@ -187,7 +187,7 @@
         {:else if appState.viewMode === 'map'}
             <MapView {acts} {stageLocations} onActDetail={openDetail} />
         {:else if appState.viewMode === 'share'}
-            <ShareView />
+            <ShareView selfActs={allActs} />
         {:else if loading}
             <div class="flex items-center justify-center h-full">
                 <p style="color: var(--mg-purple); opacity: 0.6;">Loading schedule…</p>
