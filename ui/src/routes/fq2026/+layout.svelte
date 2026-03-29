@@ -68,5 +68,9 @@
 </div>
 
 {#if gateVisible}
-    <IdentityGate onconfirmed={handleConfirmed} />
+    <IdentityGate
+        onconfirmed={handleConfirmed}
+        pendingShareId={appState.pendingShareId}
+        pendingShareName={appState.pendingShareName}
+    />
 {/if}

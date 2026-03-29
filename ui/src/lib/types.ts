@@ -54,6 +54,14 @@ export interface TokenResponse {
     token: string;
 }
 
+export interface FuzzyLookupResponse {
+    token: string;
+    corrected: boolean;
+    suggestion: string;
+    name: string;
+    found: boolean;
+}
+
 export interface ShareResponse {
     share_id: string;
     share_url: string;
@@ -98,3 +106,4 @@ export const DAY_LABELS: Record<string, string> = {
 };
 
 export const IDENTITY_STORAGE_KEY = 'fqf_identity';
+export const FINGERPRINT_COUNTER_KEY = 'fqf_fingerprint_counter';

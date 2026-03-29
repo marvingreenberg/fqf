@@ -1,13 +1,13 @@
 import type { ActSummary, SharedSchedule, ViewMode, MobileSortMode, ShareRef } from '$lib/types';
-import { FESTIVAL_DATES, IDENTITY_STORAGE_KEY } from '$lib/types';
+import { FESTIVAL_DATES, FINGERPRINT_COUNTER_KEY, IDENTITY_STORAGE_KEY } from '$lib/types';
 
 const SAVE_AFTER_CHANGES = 4;
 const SAVE_DEBOUNCE_MS = 10_000;
-const CACHE_TTL_MS = 10 * 60 * 1000;
 
 interface StoredIdentity {
     token: string;
     name: string;
+    counter: number;
 }
 
 class AppState {
@@ -16,6 +16,7 @@ class AppState {
     mobileSortMode = $state<MobileSortMode>('by-time');
     token = $state<string | null>(null);
     name = $state<string>('');
+    counter = $state<number>(0);
     ownShareId = $state<string>('');
     confirmed = $state<boolean>(false);
     picks = $state<Set<string>>(new Set());
@@ -42,24 +43,37 @@ class AppState {
     loadFromStorage(): void {
         if (typeof localStorage === 'undefined') return;
         const raw = localStorage.getItem(IDENTITY_STORAGE_KEY);
-        if (!raw) return;
-        try {
-            const stored = JSON.parse(raw) as StoredIdentity;
-            this.token = stored.token ?? null;
-            this.name = stored.name ?? '';
-        } catch {
-            // Corrupt storage — ignore and start fresh
+        if (raw) {
+            try {
+                const stored = JSON.parse(raw) as StoredIdentity;
+                this.token = stored.token ?? null;
+                this.name = stored.name ?? '';
+                this.counter = stored.counter ?? 0;
+            } catch {
+                // Corrupt storage — ignore and start fresh
+            }
+        }
+        // Counter persists independently across identity clears
+        const rawCounter = localStorage.getItem(FINGERPRINT_COUNTER_KEY);
+        if (rawCounter !== null) {
+            const parsed = parseInt(rawCounter, 10);
+            if (!isNaN(parsed)) this.counter = parsed;
         }
     }
 
     saveToStorage(): void {
         if (typeof localStorage === 'undefined') return;
         if (!this.token) return;
-        const stored: StoredIdentity = { token: this.token, name: this.name };
+        const stored: StoredIdentity = {
+            token: this.token,
+            name: this.name,
+            counter: this.counter
+        };
         localStorage.setItem(IDENTITY_STORAGE_KEY, JSON.stringify(stored));
+        localStorage.setItem(FINGERPRINT_COUNTER_KEY, String(this.counter));
     }
 
-    async confirm(token: string, name?: string): Promise<void> {
+    async confirm(token: string, name?: string, counter?: number): Promise<void> {
         const { loadSchedule, loadSharedSchedule } = await import('$lib/api');
         const resp = await loadSchedule(token);
         this.token = resp.token;
@@ -67,6 +81,7 @@ class AppState {
         this.ownShareId = resp.share_id ?? '';
         this.picks = new Set(resp.picks);
         this.confirmed = true;
+        if (counter !== undefined) this.counter = counter;
         this.saveToStorage();
 
         // Restore persisted shared schedules from the API response
@@ -93,6 +108,7 @@ class AppState {
     clearIdentity(): void {
         if (typeof localStorage !== 'undefined') {
             localStorage.removeItem(IDENTITY_STORAGE_KEY);
+            // FINGERPRINT_COUNTER_KEY intentionally retained across clears
         }
         this.token = null;
         this.name = '';
