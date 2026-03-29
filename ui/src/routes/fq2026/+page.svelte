@@ -12,6 +12,7 @@
     import FilterPanel from '$lib/components/FilterPanel.svelte';
 
     const MOBILE_BREAKPOINT = 768;
+    const CACHE_TTL_MS = 10 * 60 * 1000;
 
     let acts = $state<ActSummary[]>([]);
     let allActs = $state<ActSummary[]>([]);
@@ -40,20 +41,35 @@
         { value: 'share', label: () => `Share (${appState.sharedSchedules.length})` }
     ];
 
+    // Cache acts per date with TTL to avoid redundant API calls
+    const actsCache = new Map<string, { acts: ActSummary[]; fetchedAt: number }>();
+
+    function isCacheFresh(key: string): boolean {
+        const entry = actsCache.get(key);
+        if (!entry) return false;
+        return Date.now() - entry.fetchedAt < CACHE_TTL_MS;
+    }
+
     async function loadActs(date: string): Promise<void> {
+        if (isCacheFresh(date)) {
+            acts = actsCache.get(date)!.acts;
+            return;
+        }
         loading = true;
         try {
             const resp = await listActs({ date });
             acts = resp.acts;
+            actsCache.set(date, { acts: resp.acts, fetchedAt: Date.now() });
         } finally {
             loading = false;
         }
     }
 
     async function loadAllActs(): Promise<void> {
-        if (allActsLoaded) return;
+        if (allActsLoaded && isCacheFresh('all')) return;
         const resp = await listActs();
         allActs = resp.acts;
+        actsCache.set('all', { acts: resp.acts, fetchedAt: Date.now() });
         allActsLoaded = true;
     }
 

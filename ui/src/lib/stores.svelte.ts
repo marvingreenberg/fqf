@@ -1,7 +1,9 @@
 import type { ActSummary, SharedSchedule, ViewMode, MobileSortMode, ShareRef } from '$lib/types';
 import { FESTIVAL_DATES, IDENTITY_STORAGE_KEY } from '$lib/types';
 
-const SAVE_DEBOUNCE_MS = 1000;
+const SAVE_AFTER_CHANGES = 4;
+const SAVE_DEBOUNCE_MS = 10_000;
+const CACHE_TTL_MS = 10 * 60 * 1000;
 
 interface StoredIdentity {
     token: string;
@@ -31,6 +33,7 @@ class AppState {
     showAll = $state<boolean>(false);
 
     private _saveTimeout: ReturnType<typeof setTimeout> | null = null;
+    private _unsavedChanges = 0;
 
     get picksArray(): string[] {
         return [...this.picks];
@@ -117,15 +120,25 @@ class AppState {
         this.picks = new Set();
     }
 
+    private async _flushSave(): Promise<void> {
+        if (this._saveTimeout) clearTimeout(this._saveTimeout);
+        this._saveTimeout = null;
+        this._unsavedChanges = 0;
+        if (this.token) {
+            const { savePicks } = await import('$lib/api');
+            await savePicks(this.token, this.picksArray, this.name || undefined);
+        }
+    }
+
     scheduleSave(): void {
         if (!this.token) return;
+        this._unsavedChanges++;
+        if (this._unsavedChanges >= SAVE_AFTER_CHANGES) {
+            this._flushSave();
+            return;
+        }
         if (this._saveTimeout) clearTimeout(this._saveTimeout);
-        this._saveTimeout = setTimeout(async () => {
-            if (this.token) {
-                const { savePicks } = await import('$lib/api');
-                await savePicks(this.token, this.picksArray, this.name || undefined);
-            }
-        }, SAVE_DEBOUNCE_MS);
+        this._saveTimeout = setTimeout(() => this._flushSave(), SAVE_DEBOUNCE_MS);
     }
 
     async addSharedSchedule(schedule: SharedSchedule): Promise<void> {
