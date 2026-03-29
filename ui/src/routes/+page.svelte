@@ -95,7 +95,7 @@
 <div class="flex flex-col h-screen overflow-hidden">
     <header class="shrink-0 fqf-controls-bar px-4 py-2">
         <div class="flex items-center justify-between">
-            <h1 class="text-base font-semibold" style="color: var(--mg-purple-deep);">
+            <h1 class="text-base font-semibold" style="color: var(--mg-gold-bright);">
                 FQF 2026 Schedule Builder
             </h1>
             {#if isMobile && appState.viewMode !== 'my-schedule' && appState.viewMode !== 'merge'}
@@ -145,7 +145,7 @@
                 onActDetail={openDetail}
             />
         {:else if appState.viewMode === 'map'}
-            <MapView {acts} {stageLocations} />
+            <MapView {acts} {stageLocations} onActDetail={openDetail} />
         {:else if appState.viewMode === 'merge'}
             <MergeView />
         {:else if loading}

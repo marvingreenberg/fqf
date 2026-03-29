@@ -1,67 +1,71 @@
 <script lang="ts">
+    import type { ActSummary } from '$lib/types';
     import type { StageStatus } from '$lib/map-utils';
     import { countdownColor } from '$lib/map-utils';
-    import { shortenStageName } from '$lib/distance';
+    import { SHOW_NEXT_THRESHOLD_MINUTES } from '$lib/constants';
 
     interface Props {
         status: StageStatus;
         style: string;
+        onActDetail?: (act: ActSummary) => void;
     }
 
-    let { status, style }: Props = $props();
+    let { status, style, onActDetail }: Props = $props();
 
-    const stageAbbrev = $derived(shortenStageName(status.stage));
-
-    const currentColor = $derived(
-        status.current ? countdownColor(status.currentFractionRemaining) : null
+    // Show current act unless <15 min remaining, then switch to next
+    const showNext = $derived(
+        !status.current ||
+            (status.currentMinutesRemaining < SHOW_NEXT_THRESHOLD_MINUTES && status.next !== null)
     );
-    const nextColor = $derived(status.next ? countdownColor(status.nextFractionApproaching) : null);
+
+    const displayAct = $derived(showNext ? status.next : status.current);
+
+    const dotColor = $derived.by(() => {
+        if (showNext && status.next) return countdownColor(status.nextFractionApproaching);
+        if (!showNext && status.current) return countdownColor(status.currentFractionRemaining);
+        return null;
+    });
+
+    const timeText = $derived.by(() => {
+        if (showNext && status.next) return `${status.nextMinutesUntil}m`;
+        if (!showNext && status.current) return `${status.currentMinutesRemaining}m`;
+        return '';
+    });
 </script>
 
-<div class="absolute -translate-x-1/2 -translate-y-full" {style}>
-    <div class="fqf-map-marker" class:fqf-map-marker-idle={!status.current && !status.next}>
-        <div
-            class="text-[9px] font-bold truncate"
-            style="color: var(--mg-purple-deep); max-width: 120px;"
-        >
-            {stageAbbrev}
+{#if displayAct}
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div
+        class="absolute -translate-x-1/2 -translate-y-full"
+        {style}
+        onclick={(e) => {
+            e.stopPropagation();
+            onActDetail?.(displayAct);
+        }}
+    >
+        <div class="fqf-map-marker fqf-map-act-row flex items-center gap-1">
+            {#if showNext}
+                <span class="text-[9px] shrink-0">&#9203;</span>
+                <span class="text-[8px] shrink-0" style="color: var(--mg-purple-deep);">
+                    {timeText}
+                </span>
+            {/if}
+            <span class="inline-block w-2 h-2 rounded-full shrink-0" style="background: {dotColor};"
+            ></span>
+            <span
+                class="text-[9px] font-medium truncate"
+                style="max-width: 110px; color: var(--mg-text);"
+            >
+                {displayAct.name}
+            </span>
+            {#if !showNext}
+                <span class="text-[8px] shrink-0" style="color: var(--mg-purple-deep);">
+                    {timeText}
+                </span>
+                <span class="text-[9px] shrink-0">&#9834;</span>
+            {/if}
         </div>
-
-        {#if status.current}
-            <div class="flex items-center gap-1">
-                <span
-                    class="inline-block w-2 h-2 rounded-full shrink-0"
-                    style="background: {currentColor};"
-                ></span>
-                <span class="text-[8px] truncate" style="max-width: 90px;">
-                    {status.current.name}
-                </span>
-                <span class="text-[8px] opacity-60 shrink-0">
-                    {status.currentMinutesRemaining}m
-                </span>
-            </div>
-        {/if}
-
-        {#if status.next}
-            <div class="flex items-center gap-1">
-                <span
-                    class="inline-block w-2 h-2 rounded-full shrink-0"
-                    style="background: {nextColor};"
-                ></span>
-                <span class="text-[8px] truncate opacity-60" style="max-width: 90px;">
-                    {status.next.name}
-                </span>
-                <span class="text-[8px] opacity-40 shrink-0">
-                    in {status.nextMinutesUntil}m
-                </span>
-            </div>
-        {/if}
-
-        {#if !status.current && !status.next}
-            <div class="text-[8px] opacity-30">idle</div>
-        {/if}
+        <div class="fqf-map-pin"></div>
     </div>
-
-    <!-- Pin point connecting marker to map location -->
-    <div class="fqf-map-pin"></div>
-</div>
+{/if}

@@ -14,8 +14,8 @@
     --mg-gold-bright: #f5d76e;
     --mg-green-deep: #1a7a4a;
     --mg-green: #2ecc71;
-    --mg-cream: #faf6f0;
-    --mg-card: #fffdf7;
+    --mg-cream: #ebe3d0;
+    --mg-card: #f2ecdb;
     --mg-text: #1a1a1a;
 }
 
@@ -24,17 +24,17 @@ body {
     font-family: 'DM Sans', system-ui, sans-serif;
     background-color: var(--mg-cream);
     color: var(--mg-text);
-    /* Subtle diagonal stripe texture */
+    /* Diagonal stripe texture in purple and gold */
     background-image: repeating-linear-gradient(
         -45deg,
         transparent,
         transparent 24px,
-        rgba(74, 26, 107, 0.025) 24px,
-        rgba(74, 26, 107, 0.025) 25px,
+        rgba(74, 26, 107, 0.05) 24px,
+        rgba(74, 26, 107, 0.05) 25px,
         transparent 25px,
         transparent 49px,
-        rgba(212, 168, 67, 0.02) 49px,
-        rgba(212, 168, 67, 0.02) 50px
+        rgba(212, 168, 67, 0.04) 49px,
+        rgba(212, 168, 67, 0.04) 50px
     );
 }
 
@@ -129,20 +129,20 @@ h3,
 }
 
 .fqf-act-block:hover {
-    background-color: rgba(26, 122, 74, 0.08);
-    border-color: rgba(26, 122, 74, 0.3);
+    background-color: rgba(26, 122, 74, 0.14);
+    border-color: rgba(26, 122, 74, 0.4);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(26, 122, 74, 0.15);
+    box-shadow: 0 4px 12px rgba(26, 122, 74, 0.2);
 }
 
 .fqf-act-block.picked {
-    background-color: rgba(26, 122, 74, 0.12);
+    background-color: rgba(26, 122, 74, 0.2);
     border-color: var(--mg-green-deep);
     border-width: 1.5px;
 }
 
 .fqf-act-block.picked:hover {
-    background-color: rgba(26, 122, 74, 0.18);
+    background-color: rgba(26, 122, 74, 0.28);
 }
 
 .fqf-act-block.conflict-yellow {
@@ -157,19 +157,19 @@ h3,
 
 /* ── Grid background and time column ─────────────────────────────────────── */
 .fqf-grid-bg {
-    background-color: rgba(74, 26, 107, 0.04);
+    background-color: #d6e6d0;
     background-image: repeating-linear-gradient(
         0deg,
         transparent,
         transparent 59px,
-        rgba(74, 26, 107, 0.06) 59px,
-        rgba(74, 26, 107, 0.06) 60px
+        rgba(26, 122, 74, 0.15) 59px,
+        rgba(26, 122, 74, 0.15) 60px
     );
     background-size: 100% 60px;
 }
 
 .fqf-time-col {
-    background-color: rgba(74, 26, 107, 0.04);
+    background-color: #d8cfe0;
 }
 
 .fqf-time-label {
@@ -179,6 +179,11 @@ h3,
 }
 
 /* ── Day tabs ────────────────────────────────────────────────────────────── */
+
+.fqf-day-tabs {
+    background: linear-gradient(180deg, rgba(212, 168, 67, 0.25) 0%, rgba(212, 168, 67, 0.12) 100%);
+    border-bottom: 1px solid rgba(212, 168, 67, 0.3);
+}
 .fqf-day-tab {
     position: relative;
     font-weight: 600;
@@ -231,21 +236,22 @@ h3,
 }
 
 .fqf-view-pill-inactive {
-    color: var(--mg-purple);
-    border-color: rgba(123, 47, 160, 0.3);
+    color: rgba(255, 255, 255, 0.8);
+    border-color: rgba(212, 168, 67, 0.35);
     background: transparent;
 }
 
 .fqf-view-pill-inactive:hover {
     border-color: var(--mg-gold-rich);
-    color: var(--mg-purple-deep);
-    background: rgba(212, 168, 67, 0.08);
+    color: var(--mg-gold-bright);
+    background: rgba(212, 168, 67, 0.12);
 }
 
 .fqf-view-pill-active {
-    background: var(--mg-purple);
-    color: white;
-    border-color: var(--mg-purple);
+    background: var(--mg-gold-rich);
+    color: var(--mg-purple-deep);
+    border-color: var(--mg-gold-rich);
+    font-weight: 600;
 }
 
 /* ── Sort mode mini-pills ────────────────────────────────────────────────── */
@@ -258,17 +264,17 @@ h3,
 }
 
 .fqf-sort-pill-active {
-    background: var(--mg-purple);
-    color: white;
-}
-
-.fqf-sort-pill-inactive {
-    background: rgba(74, 26, 107, 0.08);
+    background: var(--mg-gold-rich);
     color: var(--mg-purple-deep);
 }
 
+.fqf-sort-pill-inactive {
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.7);
+}
+
 .fqf-sort-pill-inactive:hover {
-    background: rgba(74, 26, 107, 0.14);
+    background: rgba(255, 255, 255, 0.2);
 }
 
 /* ── Fleur-de-lis pick button ────────────────────────────────────────────── */
@@ -305,11 +311,11 @@ h3,
 }
 
 .fqf-list-row:hover {
-    background-color: rgba(26, 122, 74, 0.06);
+    background-color: rgba(26, 122, 74, 0.12);
 }
 
 .fqf-list-row.picked {
-    background-color: rgba(26, 122, 74, 0.1);
+    background-color: rgba(26, 122, 74, 0.18);
     border-left: 3px solid var(--mg-green-deep);
 }
 
@@ -325,9 +331,9 @@ h3,
 
 /* ── Section / group headers (mobile/my-schedule/merge) ─────────────────── */
 .fqf-group-header {
-    background: linear-gradient(90deg, rgba(74, 26, 107, 0.12) 0%, transparent 100%);
-    border-bottom: 1px solid rgba(74, 26, 107, 0.15);
-    color: var(--mg-purple-deep);
+    background: linear-gradient(90deg, rgba(26, 122, 74, 0.15) 0%, rgba(212, 168, 67, 0.06) 100%);
+    border-bottom: 1px solid rgba(26, 122, 74, 0.2);
+    color: var(--mg-green-deep);
     font-family: 'DM Sans', system-ui, sans-serif;
     font-size: 0.7rem;
     font-weight: 700;
@@ -481,8 +487,8 @@ h3,
 
 /* ── Filter panel ────────────────────────────────────────────────────────── */
 .fqf-filter-panel {
-    background-color: rgba(250, 246, 240, 0.95);
-    border-bottom: 1px solid rgba(74, 26, 107, 0.15);
+    background-color: #c8ddc4;
+    border-bottom: 1px solid rgba(26, 122, 74, 0.25);
 }
 
 .fqf-filter-section-label {
@@ -531,8 +537,8 @@ h3,
 
 /* ── Controls bar (page header below main header) ────────────────────────── */
 .fqf-controls-bar {
-    background-color: rgba(255, 253, 247, 0.95);
-    border-bottom: 1px solid rgba(74, 26, 107, 0.12);
+    background: linear-gradient(180deg, rgba(74, 26, 107, 0.88) 0%, rgba(74, 26, 107, 0.78) 100%);
+    border-bottom: 1px solid rgba(212, 168, 67, 0.3);
 }
 
 /* ── Map view markers ───────────────────────────────────────────────────── */
@@ -551,6 +557,18 @@ h3,
     opacity: 0.5;
 }
 
+.fqf-map-act-row {
+    cursor: pointer;
+    border-radius: 0.2rem;
+    padding: 0 0.15rem;
+    margin: 0 -0.15rem;
+    transition: background-color 0.12s ease;
+}
+
+.fqf-map-act-row:hover {
+    background-color: rgba(26, 122, 74, 0.12);
+}
+
 .fqf-map-pin {
     width: 2px;
     height: 8px;
@@ -560,10 +578,10 @@ h3,
 
 /* ── Map time scrubber ──────────────────────────────────────────────────── */
 .fqf-time-scrubber {
-    background-color: rgba(255, 253, 247, 0.95);
-    border-bottom: 1px solid rgba(74, 26, 107, 0.12);
+    background: linear-gradient(180deg, rgba(26, 122, 74, 0.1) 0%, rgba(26, 122, 74, 0.05) 100%);
+    border-bottom: 1px solid rgba(26, 122, 74, 0.15);
 }
 
 .fqf-time-scrubber input[type='range'] {
-    accent-color: var(--mg-purple);
+    accent-color: var(--mg-green-deep);
 }

@@ -36,5 +36,11 @@ export const MAP_BOUNDS = {
 } as const;
 
 export const MAX_LOOKAHEAD_MINUTES = 60;
+export const SHOW_NEXT_THRESHOLD_MINUTES = 15;
 
 export const MINUTES_PER_HOUR = 60;
+
+export const SCRUBBER_STEP_MINUTES = 10;
+
+// Festival start: Thu Apr 16, 2026, 11:00 AM Central
+export const FESTIVAL_START_ISO = '2026-04-16T11:00:00-05:00';
