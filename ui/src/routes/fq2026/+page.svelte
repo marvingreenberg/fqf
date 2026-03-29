@@ -336,7 +336,7 @@
                         {detailAct.stage} &middot; {detailAct.start}&#8211;{detailAct.end}
                     </p>
 
-                    <p class="text-sm leading-relaxed whitespace-pre-line">
+                    <p class="text-sm leading-relaxed">
                         {detailAct.about || 'No bio available yet.'}
                     </p>
                 {/if}
