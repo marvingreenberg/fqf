@@ -133,7 +133,10 @@
                         <span class="text-sm font-medium" style="color: var(--mg-purple-deep);">
                             {entry.label}
                             {#if entry.id === appState.token}
-                                <span class="text-xs font-normal" style="color: rgba(74,26,107,0.5);">
+                                <span
+                                    class="text-xs font-normal"
+                                    style="color: rgba(74,26,107,0.5);"
+                                >
                                     (you)
                                 </span>
                             {/if}

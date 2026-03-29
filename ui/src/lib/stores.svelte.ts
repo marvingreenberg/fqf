@@ -69,11 +69,18 @@ class AppState {
             const loaded = await Promise.allSettled(
                 resp.shares.map(async (ref: ShareRef) => {
                     const shared = await loadSharedSchedule(ref.share_id);
-                    return { share_id: ref.share_id, name: ref.name || shared.name, picks: shared.picks, acts: shared.acts };
+                    return {
+                        share_id: ref.share_id,
+                        name: ref.name || shared.name,
+                        picks: shared.picks,
+                        acts: shared.acts
+                    };
                 })
             );
             this.sharedSchedules = loaded
-                .filter((r): r is PromiseFulfilledResult<SharedSchedule> => r.status === 'fulfilled')
+                .filter(
+                    (r): r is PromiseFulfilledResult<SharedSchedule> => r.status === 'fulfilled'
+                )
                 .map((r) => r.value);
         }
     }
@@ -126,7 +133,10 @@ class AppState {
         }
         if (this.token) {
             const { addShareToSchedule } = await import('$lib/api');
-            await addShareToSchedule(this.token, { share_id: schedule.share_id, name: schedule.name });
+            await addShareToSchedule(this.token, {
+                share_id: schedule.share_id,
+                name: schedule.name
+            });
         }
     }
 

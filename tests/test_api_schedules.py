@@ -372,9 +372,7 @@ class TestRemoveShare:
             patch(f"{DB_MODULE}.remove_share_from_schedule", new=AsyncMock(return_value=True)),
             patch(f"{DB_MODULE}.load_schedule", new=AsyncMock(return_value=loaded)),
         ):
-            resp = await client.delete(
-                f"{SCHEDULE_URL}/{FAKE_TOKEN}/remove-share/{SHARE_ID}"
-            )
+            resp = await client.delete(f"{SCHEDULE_URL}/{FAKE_TOKEN}/remove-share/{SHARE_ID}")
 
         assert resp.status_code == 200
         assert resp.json()["shares"] == []
@@ -382,7 +380,5 @@ class TestRemoveShare:
     @pytest.mark.asyncio
     async def test_returns_404_when_token_not_found(self, client: AsyncClient) -> None:
         with patch(f"{DB_MODULE}.remove_share_from_schedule", new=AsyncMock(return_value=False)):
-            resp = await client.delete(
-                f"{SCHEDULE_URL}/{FAKE_TOKEN}/remove-share/{SHARE_ID}"
-            )
+            resp = await client.delete(f"{SCHEDULE_URL}/{FAKE_TOKEN}/remove-share/{SHARE_ID}")
         assert resp.status_code == 404

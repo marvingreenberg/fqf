@@ -242,9 +242,7 @@ async def remove_share_from_schedule(token: str, share_id: str) -> bool:
         if token not in _memory_store:
             return False
         existing = _memory_store[token].get(SHARES_FIELD, [])
-        _memory_store[token][SHARES_FIELD] = [
-            s for s in existing if s[SHARE_ID_FIELD] != share_id
-        ]
+        _memory_store[token][SHARES_FIELD] = [s for s in existing if s[SHARE_ID_FIELD] != share_id]
         return True
     assert _db is not None
     doc_ref = _db.collection(SCHEDULES_COLLECTION).document(token)

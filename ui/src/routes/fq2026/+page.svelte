@@ -241,12 +241,17 @@
                             title={isPicked ? 'Remove from picks' : 'Add to picks'}
                             onclick={() => appState.togglePick(detailAct.slug)}
                         >
-                            <svg viewBox="0 0 16 16" width="20" height="20"
+                            <svg
+                                viewBox="0 0 16 16"
+                                width="20"
+                                height="20"
                                 fill={isPicked ? 'var(--mg-green-deep)' : 'none'}
                                 stroke={isPicked ? 'none' : 'rgba(74, 26, 107, 0.3)'}
                                 stroke-width="0.75"
                             >
-                                <path d="M8 0C8 0 6.5 3.5 6.5 5.5C6.5 7 7 8 8 9C9 8 9.5 7 9.5 5.5C9.5 3.5 8 0 8 0ZM4.5 6C2.5 6 0 7.5 0 7.5C0 7.5 2 9 4.5 9C5.5 9 6.5 8.5 7 8C6 7.5 5.5 7 4.5 6ZM11.5 6C10.5 7 10 7.5 9 8C9.5 8.5 10.5 9 11.5 9C14 9 16 7.5 16 7.5C16 7.5 13.5 6 11.5 6ZM8 10C7 10 5 10.5 5 12C5 14 8 16 8 16C8 16 11 14 11 12C11 10.5 9 10 8 10Z" />
+                                <path
+                                    d="M8 0C8 0 6.5 3.5 6.5 5.5C6.5 7 7 8 8 9C9 8 9.5 7 9.5 5.5C9.5 3.5 8 0 8 0ZM4.5 6C2.5 6 0 7.5 0 7.5C0 7.5 2 9 4.5 9C5.5 9 6.5 8.5 7 8C6 7.5 5.5 7 4.5 6ZM11.5 6C10.5 7 10 7.5 9 8C9.5 8.5 10.5 9 11.5 9C14 9 16 7.5 16 7.5C16 7.5 13.5 6 11.5 6ZM8 10C7 10 5 10.5 5 12C5 14 8 16 8 16C8 16 11 14 11 12C11 10.5 9 10 8 10Z"
+                                />
                             </svg>
                         </button>
 
@@ -261,11 +266,22 @@
                                     class="shrink-0 hover:scale-110 transition-transform"
                                     style="color: var(--mg-purple);"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="18"
+                                        height="18"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
                                         <circle cx="12" cy="12" r="10" />
                                         <path d="M2 12h20" />
-                                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                                        <path
+                                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+                                        />
                                     </svg>
                                 </a>
                             {/each}
@@ -282,8 +298,17 @@
                                 class="shrink-0 hover:scale-110 transition-transform"
                                 style="color: var(--mg-green-deep);"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="18"
+                                    height="18"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
                                     <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
                                     <circle cx="12" cy="10" r="3" />
                                 </svg>
@@ -304,7 +329,10 @@
                         </span>
                     </div>
 
-                    <p class="text-sm mb-3 flex items-center gap-1.5" style="color: rgba(74, 26, 107, 0.55);">
+                    <p
+                        class="text-sm mb-3 flex items-center gap-1.5"
+                        style="color: rgba(74, 26, 107, 0.55);"
+                    >
                         {detailAct.stage} &middot; {detailAct.start}&#8211;{detailAct.end}
                     </p>
 

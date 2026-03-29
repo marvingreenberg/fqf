@@ -9,8 +9,8 @@ from fqf.api.schemas import (
     MergeResponse,
     ScheduleResponse,
     ScheduleUpdate,
-    ShareRef,
     SharedScheduleResponse,
+    ShareRef,
     ShareResponse,
     TokenResponse,
 )

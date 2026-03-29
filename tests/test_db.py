@@ -239,9 +239,7 @@ class TestInMemoryLoadSchedule:
     @pytest.mark.asyncio
     async def test_returns_shares_when_present(self) -> None:
         share_entry = {SHARE_ID_FIELD: SHARE_ID, NAME_FIELD: "Friend"}
-        db_module._memory_store = {
-            FAKE_TOKEN: _mem_doc(list(SAMPLE_PICKS), shares=[share_entry])
-        }
+        db_module._memory_store = {FAKE_TOKEN: _mem_doc(list(SAMPLE_PICKS), shares=[share_entry])}
         result = await load_schedule(FAKE_TOKEN)
         assert result is not None
         picks, name, shares = result
@@ -448,7 +446,11 @@ class TestFirestoreLoadSchedule:
     @pytest.mark.asyncio
     async def test_returns_shares_when_present(self) -> None:
         share_entry = {SHARE_ID_FIELD: SHARE_ID, NAME_FIELD: "Friend"}
-        data = {PICKS_FIELD: list(SAMPLE_PICKS), NAME_FIELD: SAMPLE_NAME, SHARES_FIELD: [share_entry]}
+        data = {
+            PICKS_FIELD: list(SAMPLE_PICKS),
+            NAME_FIELD: SAMPLE_NAME,
+            SHARES_FIELD: [share_entry],
+        }
         doc = _make_firestore_doc(exists=True, data=data)
         fake_client = MagicMock()
         fake_client.collection().document().get.return_value = doc

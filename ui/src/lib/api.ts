@@ -72,7 +72,10 @@ export async function loadSharedSchedule(shareId: string): Promise<SharedSchedul
     return fetchJson<SharedScheduleResponse>(`${BASE}/schedule/by-share/${shareId}`);
 }
 
-export async function addShareToSchedule(token: string, shareRef: ShareRef): Promise<ScheduleResponse> {
+export async function addShareToSchedule(
+    token: string,
+    shareRef: ShareRef
+): Promise<ScheduleResponse> {
     return fetchJson<ScheduleResponse>(`${BASE}/schedule/${token}/add-share`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -80,7 +83,10 @@ export async function addShareToSchedule(token: string, shareRef: ShareRef): Pro
     });
 }
 
-export async function removeShareFromSchedule(token: string, shareId: string): Promise<ScheduleResponse> {
+export async function removeShareFromSchedule(
+    token: string,
+    shareId: string
+): Promise<ScheduleResponse> {
     return fetchJson<ScheduleResponse>(`${BASE}/schedule/${token}/remove-share/${shareId}`, {
         method: 'DELETE'
     });
