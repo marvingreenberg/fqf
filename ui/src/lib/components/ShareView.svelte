@@ -31,17 +31,14 @@
         return entries;
     });
 
-    // Checked state — all enabled by default
-    let checkedIds = $state<Set<string>>(new Set());
+    // Checked state — all enabled by default. Derived from entries so it
+    // never reads+writes the same state (which would cause an infinite loop).
+    let manuallyUnchecked = $state<Set<string>>(new Set());
 
-    $effect(() => {
-        // When entries change, ensure all new entries are checked
-        const next = new Set(checkedIds);
-        for (const e of allEntries) {
-            next.add(e.id);
-        }
-        checkedIds = next;
-    });
+    // All entries are checked unless manually unchecked
+    const checkedIds = $derived(
+        new Set(allEntries.map((e) => e.id).filter((id) => !manuallyUnchecked.has(id)))
+    );
 
     const activeEntries = $derived(allEntries.filter((e) => checkedIds.has(e.id)));
 
@@ -102,10 +99,10 @@
     }
 
     function toggleChecked(id: string): void {
-        const next = new Set(checkedIds);
+        const next = new Set(manuallyUnchecked);
         if (next.has(id)) next.delete(id);
         else next.add(id);
-        checkedIds = next;
+        manuallyUnchecked = next;
     }
 </script>
 
