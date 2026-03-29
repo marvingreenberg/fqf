@@ -14,9 +14,10 @@
         picks: Set<string>;
         onTogglePick: (slug: string) => void;
         onActDetail: (act: ActSummary) => void;
+        readOnly?: boolean;
     }
 
-    let { acts, picks, onTogglePick, onActDetail }: Props = $props();
+    let { acts, picks, onTogglePick, onActDetail, readOnly = false }: Props = $props();
 
     const GRID_START_MINUTES = GRID_START_HOUR * 60;
     const GRID_END_MINUTES = GRID_END_HOUR * 60;
@@ -117,6 +118,7 @@
                             conflictLevel={conflictLevel(act)}
                             onToggle={() => onTogglePick(act.slug)}
                             onDetail={() => onActDetail(act)}
+                            {readOnly}
                         />
                     {/each}
                 </div>
