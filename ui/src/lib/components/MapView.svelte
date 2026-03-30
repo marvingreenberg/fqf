@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { ActSummary } from '$lib/types';
+    import { appState, type MapMode } from '$lib/stores.svelte';
     import { FESTIVAL_DATES, DAY_LABELS } from '$lib/types';
     import {
         GRID_START_HOUR,
@@ -37,7 +38,7 @@
 
     const SCRUBBER_START = GRID_START_HOUR * MINUTES_PER_HOUR;
     const SCRUBBER_END = GRID_END_HOUR * MINUTES_PER_HOUR;
-    const DEFAULT_HOUR = 12;
+    const DEFAULT_HOUR = GRID_START_HOUR;
     const DEFAULT_TIME = DEFAULT_HOUR * MINUTES_PER_HOUR;
     const NOW_UPDATE_MS = 60_000;
     // Marker sizes in CSS px
@@ -48,9 +49,7 @@
     const ARROW_MIDPOINT = 0.5;
     const LABEL_OFFSET_PX = 6;
 
-    let mapMode = $state<MapMode>('scroll');
-    let manualMinutes = $state(DEFAULT_TIME);
-    let showPaths = $state(false);
+    // appState.mapMode, appState.mapManualMinutes, appState.mapShowPaths live in appState to survive tab switches
     let nowMinutes = $state(DEFAULT_TIME);
     let nowInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -65,7 +64,7 @@
     }
 
     $effect(() => {
-        if (mapMode === 'now') {
+        if (appState.mapMode === 'now') {
             nowMinutes = computeNowMinutes();
             nowInterval = setInterval(() => {
                 nowMinutes = computeNowMinutes();
@@ -79,25 +78,25 @@
         };
     });
 
-    const currentMinutes = $derived(mapMode === 'now' ? nowMinutes : manualMinutes);
+    const currentMinutes = $derived(appState.mapMode === 'now' ? nowMinutes : appState.mapManualMinutes);
     const timeLabel = $derived(formatTimeDisplay(currentMinutes));
 
     // Scroll / Now mode — existing stage-status markers
     const statuses = $derived(
-        mapMode !== 'my-schedule' ? allStageStatuses(acts, stageLocations, currentMinutes) : []
+        appState.mapMode !== 'my-schedule' ? allStageStatuses(acts, stageLocations, currentMinutes) : []
     );
 
     // My Schedule mode
     const orderedPicks = $derived(
-        mapMode === 'my-schedule'
+        appState.mapMode === 'my-schedule'
             ? pickedActsForDay(allActs, picks, selectedDate, stageLocations)
             : []
     );
     const scheduleMarkers = $derived(
-        mapMode === 'my-schedule' ? buildScheduleMarkers(orderedPicks, stageLocations) : []
+        appState.mapMode === 'my-schedule' ? buildScheduleMarkers(orderedPicks, stageLocations) : []
     );
     const pathArrows = $derived(
-        mapMode === 'my-schedule' && showPaths ? buildPathArrows(orderedPicks, stageLocations) : []
+        appState.mapMode === 'my-schedule' && appState.mapShowPaths ? buildPathArrows(orderedPicks, stageLocations) : []
     );
 
     function markerLabel(order: number, act: ActSummary): string {
@@ -145,8 +144,8 @@
                             type="radio"
                             name="map-mode"
                             value={mode.value}
-                            checked={mapMode === mode.value}
-                            onchange={() => (mapMode = mode.value as MapMode)}
+                            checked={appState.mapMode === mode.value}
+                            onchange={() => (appState.mapMode = mode.value as MapMode)}
                             class="accent-purple-700"
                         />
                         {mode.label}
@@ -156,7 +155,7 @@
         </div>
 
         <!-- Row 2: time scrubber (Scroll Time only) or Show Paths (My Schedule only) -->
-        {#if mapMode === 'scroll'}
+        {#if appState.mapMode === 'scroll'}
             <div class="flex items-center gap-3">
                 <span
                     class="text-sm font-semibold shrink-0"
@@ -169,12 +168,12 @@
                     min={SCRUBBER_START}
                     max={SCRUBBER_END}
                     step={SCRUBBER_STEP_MINUTES}
-                    bind:value={manualMinutes}
+                    bind:value={appState.mapManualMinutes}
                     class="flex-1"
                     aria-label="Festival time"
                 />
             </div>
-        {:else if mapMode === 'now'}
+        {:else if appState.mapMode === 'now'}
             <span class="text-xs italic" style="color: var(--mg-green-deep); opacity: 0.7;">
                 Live clock (updates every minute)
             </span>
@@ -183,7 +182,7 @@
                 class="flex items-center gap-1.5 text-xs cursor-pointer select-none"
                 style="color: var(--mg-purple-deep);"
             >
-                <input type="checkbox" bind:checked={showPaths} class="accent-purple-700" />
+                <input type="checkbox" bind:checked={appState.mapShowPaths} class="accent-purple-700" />
                 Show Paths
             </label>
         {/if}
@@ -199,7 +198,7 @@
                 draggable="false"
             />
 
-            {#if mapMode !== 'my-schedule'}
+            {#if appState.mapMode !== 'my-schedule'}
                 <!-- Scroll Time / Now: existing stage-status markers -->
                 {#each statuses as status (status.stage)}
                     {@const loc = stageLocations.get(status.stage)}
@@ -214,7 +213,7 @@
                 {/each}
             {:else}
                 <!-- My Schedule: path arrows (SVG overlay) -->
-                {#if showPaths && pathArrows.length > 0}
+                {#if appState.mapShowPaths && pathArrows.length > 0}
                     <svg
                         class="absolute inset-0 w-full h-full pointer-events-none"
                         style="overflow: visible;"

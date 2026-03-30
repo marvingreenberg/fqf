@@ -1,5 +1,11 @@
 import type { ActSummary, SharedSchedule, ViewMode, MobileSortMode, ShareRef } from '$lib/types';
 import { FESTIVAL_DATES, FINGERPRINT_COUNTER_KEY, IDENTITY_STORAGE_KEY } from '$lib/types';
+import { GRID_START_HOUR } from '$lib/constants';
+
+export type MapMode = 'scroll' | 'now' | 'my-schedule';
+
+const MINUTES_PER_HOUR = 60;
+const DEFAULT_MAP_MINUTES = GRID_START_HOUR * MINUTES_PER_HOUR;
 
 const SAVE_AFTER_CHANGES = 4;
 const SAVE_DEBOUNCE_MS = 5_000;
@@ -27,6 +33,11 @@ class AppState {
     // Query params set on page load when a ?share= link is opened
     pendingShareId = $state<string | null>(null);
     pendingShareName = $state<string | null>(null);
+
+    // Map view state (persists across tab switches, resets on page reload)
+    mapMode = $state<MapMode>('scroll');
+    mapManualMinutes = $state<number>(DEFAULT_MAP_MINUTES);
+    mapShowPaths = $state<boolean>(false);
 
     // Filter state
     hiddenGenres = $state<Set<string>>(new Set());
