@@ -9,6 +9,7 @@
         shortenStageName,
         distanceStyle
     } from '$lib/distance';
+    import ActRow from './ActRow.svelte';
 
     interface Props {
         allActs: ActSummary[];
@@ -114,51 +115,23 @@
             </div>
 
             {#each group.acts as act (act.slug)}
-                <!-- svelte-ignore a11y_no_static_element_interactions -->
-                <!-- svelte-ignore a11y_click_events_have_key_events -->
-                <div
-                    class="fqf-list-row flex items-center gap-3 px-3 py-2.5 border-l-4"
-                    style="border-left-color: {conflictColor(act)};"
-                    onclick={() => onActDetail(act)}
+                <ActRow
+                    {act}
+                    isPicked={true}
+                    conflictColor={conflictColor(act)}
+                    {readOnly}
+                    {onTogglePick}
+                    {onActDetail}
                 >
-                    {#if !readOnly}
-                        <button
-                            class="fqf-fleur shrink-0"
-                            style="width: 1.25rem; height: 1.25rem;"
-                            onclick={(e) => {
-                                e.stopPropagation();
-                                onTogglePick(act.slug);
-                            }}
-                            aria-label="Remove {act.name} from picks"
-                        >
-                            <!-- Always picked in this view — show filled gold fleur-de-lis -->
-                            <svg
-                                viewBox="0 0 16 16"
-                                width="18"
-                                height="18"
-                                fill="var(--mg-gold-rich)"
-                            >
-                                <path
-                                    d="M8 0C8 0 6.5 3.5 6.5 5.5C6.5 7 7 8 8 9C9 8 9.5 7 9.5 5.5C9.5 3.5 8 0 8 0ZM4.5 6C2.5 6 0 7.5 0 7.5C0 7.5 2 9 4.5 9C5.5 9 6.5 8.5 7 8C6 7.5 5.5 7 4.5 6ZM11.5 6C10.5 7 10 7.5 9 8C9.5 8.5 10.5 9 11.5 9C14 9 16 7.5 16 7.5C16 7.5 13.5 6 11.5 6ZM8 10C7 10 5 10.5 5 12C5 14 8 16 8 16C8 16 11 14 11 12C11 10.5 9 10 8 10Z"
-                                />
-                            </svg>
-                        </button>
-                    {/if}
-
-                    <div class="flex-1 min-w-0">
-                        <p class="text-sm font-semibold truncate">{act.name}</p>
-                        <p class="text-xs truncate" style="color: rgba(74, 26, 107, 0.5);">
-                            {act.start}&#8211;{act.end} &middot; {act.stage}
-                        </p>
+                    {#snippet extraMain()}
                         {#if distanceInfo.has(act.slug)}
                             {@const d = distanceInfo.get(act.slug)!}
                             <p class="text-[10px] mt-0.5" style={distanceStyle(d.distance)}>
                                 {formatDistance(d.distance)} from {shortenStageName(d.fromStage)}
                             </p>
                         {/if}
-                    </div>
-
-                    <div class="shrink-0 flex items-center gap-1.5">
+                    {/snippet}
+                    {#snippet extra()}
                         {#if hasConflict(act)}
                             {@const level = conflictLevel(act)}
                             {#if level !== 'none'}
@@ -170,11 +143,8 @@
                                 </span>
                             {/if}
                         {/if}
-                        <span class="text-xs italic" style="color: rgba(74, 26, 107, 0.45);">
-                            {act.genre}
-                        </span>
-                    </div>
-                </div>
+                    {/snippet}
+                </ActRow>
             {/each}
         {/each}
     {/if}
