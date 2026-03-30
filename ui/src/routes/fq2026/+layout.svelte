@@ -10,8 +10,11 @@
     // Suppress the gate during initial async auto-confirm to prevent flash
     let initializing = $state(true);
 
-    // Gate shows when: not confirmed AND not still initializing
-    const gateVisible = $derived(!appState.confirmed && !initializing);
+    // Detect view-only share route — no identity gate needed
+    const isViewOnlyRoute = $derived($page.url.pathname !== '/fq2026' && $page.url.pathname !== '/fq2026/');
+
+    // Gate shows when: not confirmed AND not initializing AND not on a view-only share route
+    const gateVisible = $derived(!appState.confirmed && !initializing && !isViewOnlyRoute);
 
     onMount(async () => {
         appState.loadFromStorage();
@@ -34,28 +37,32 @@
     });
 </script>
 
-<div class="min-h-screen flex flex-col">
-    <header class="fqf-header shrink-0 px-4 py-3 flex items-center justify-between">
-        <div class="flex flex-col">
-            <a href="/" style="text-decoration: none;">
-                <span class="fqf-header-title">FQF 2026</span>
-            </a>
-            <span class="fqf-header-subtitle">Schedule Builder</span>
-        </div>
-        <div class="flex items-center gap-3">
-            {#if appState.confirmed && appState.token}
-                <AvatarMenu />
-            {:else if appState.confirmed}
-                <!-- Guest viewing a shared schedule -->
-                <span class="text-xs" style="color: rgba(245,215,110,0.7);">Guest view</span>
-            {/if}
-        </div>
-    </header>
+{#if isViewOnlyRoute}
+    <!-- View-only share route — child layout handles its own header -->
+    {@render children()}
+{:else}
+    <div class="min-h-screen flex flex-col">
+        <header class="fqf-header shrink-0 px-4 py-3 flex items-center justify-between">
+            <div class="flex flex-col">
+                <a href="/" style="text-decoration: none;">
+                    <span class="fqf-header-title">FQF 2026</span>
+                </a>
+                <span class="fqf-header-subtitle">Schedule Builder</span>
+            </div>
+            <div class="flex items-center gap-3">
+                {#if appState.confirmed && appState.token}
+                    <AvatarMenu />
+                {:else if appState.confirmed}
+                    <span class="text-xs" style="color: rgba(245,215,110,0.7);">Guest view</span>
+                {/if}
+            </div>
+        </header>
 
-    <main class="flex-1 overflow-hidden flex flex-col">
-        {@render children()}
-    </main>
-</div>
+        <main class="flex-1 overflow-hidden flex flex-col">
+            {@render children()}
+        </main>
+    </div>
+{/if}
 
 {#if gateVisible}
     <IdentityGate
