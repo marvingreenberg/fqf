@@ -15,6 +15,7 @@ from fqf.db import (
     close_pool,
     create_schedule,
     create_share_id,
+    delete_schedule,
     init_pool,
     load_multiple_schedules,
     load_schedule,
@@ -858,3 +859,65 @@ class TestFirestoreRemoveShareFromSchedule:
 
         result = await remove_share_from_schedule("ghost-token", SHARE_ID)
         assert result is False
+
+
+# ── In-memory: delete_schedule ───────────────────────────────────────────────
+
+
+class TestInMemoryDeleteSchedule:
+    @pytest.mark.asyncio
+    async def test_returns_true_and_removes_schedule(self) -> None:
+        db_module._memory_store = {FAKE_TOKEN: _mem_doc(list(SAMPLE_PICKS))}
+        result = await delete_schedule(FAKE_TOKEN)
+        assert result is True
+        assert FAKE_TOKEN not in db_module._memory_store
+
+    @pytest.mark.asyncio
+    async def test_returns_false_for_missing_token(self) -> None:
+        db_module._memory_store = {}
+        result = await delete_schedule("ghost-token")
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_does_not_affect_other_schedules(self) -> None:
+        db_module._memory_store = {
+            FAKE_TOKEN: _mem_doc(list(SAMPLE_PICKS)),
+            ANOTHER_TOKEN: _mem_doc(list(ANOTHER_PICKS)),
+        }
+        await delete_schedule(FAKE_TOKEN)
+        assert ANOTHER_TOKEN in db_module._memory_store
+
+
+# ── Firestore: delete_schedule ───────────────────────────────────────────────
+
+
+class TestFirestoreDeleteSchedule:
+    @pytest.mark.asyncio
+    async def test_calls_delete_on_existing_doc(self) -> None:
+        fake_client = MagicMock()
+        db_module._db = fake_client
+
+        doc = _make_firestore_doc(exists=True)
+        doc_ref = MagicMock()
+        doc_ref.get.return_value = doc
+        fake_client.collection().document.return_value = doc_ref
+
+        result = await delete_schedule(FAKE_TOKEN)
+
+        assert result is True
+        doc_ref.delete.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_returns_false_for_missing_doc(self) -> None:
+        fake_client = MagicMock()
+        db_module._db = fake_client
+
+        doc = _make_firestore_doc(exists=False)
+        doc_ref = MagicMock()
+        doc_ref.get.return_value = doc
+        fake_client.collection().document.return_value = doc_ref
+
+        result = await delete_schedule("ghost-token")
+
+        assert result is False
+        doc_ref.delete.assert_not_called()

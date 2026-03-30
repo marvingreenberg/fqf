@@ -522,3 +522,26 @@ class TestRateLimitIntegration:
         assert resp.status_code == 429
         rl_module._create_windows.clear()
         rl_module._global_windows.clear()
+
+
+# ── DELETE /api/v1/schedule/{token} ──────────────────────────────────────────
+
+
+class TestDeleteSchedule:
+    @pytest.mark.asyncio
+    async def test_returns_204_on_success(self, client: AsyncClient) -> None:
+        with patch(f"{DB_MODULE}.delete_schedule", new=AsyncMock(return_value=True)):
+            resp = await client.delete(f"{SCHEDULE_URL}/{FAKE_TOKEN}")
+        assert resp.status_code == 204
+
+    @pytest.mark.asyncio
+    async def test_returns_404_when_token_not_found(self, client: AsyncClient) -> None:
+        with patch(f"{DB_MODULE}.delete_schedule", new=AsyncMock(return_value=False)):
+            resp = await client.delete(f"{SCHEDULE_URL}/{FAKE_TOKEN}")
+        assert resp.status_code == 404
+
+    @pytest.mark.asyncio
+    async def test_response_has_no_body_on_success(self, client: AsyncClient) -> None:
+        with patch(f"{DB_MODULE}.delete_schedule", new=AsyncMock(return_value=True)):
+            resp = await client.delete(f"{SCHEDULE_URL}/{FAKE_TOKEN}")
+        assert resp.content == b""

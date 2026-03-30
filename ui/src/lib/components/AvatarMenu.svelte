@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { createShare } from '$lib/api';
+    import { createShare, deleteSchedule } from '$lib/api';
     import { appState } from '$lib/stores.svelte';
 
     const FLEUR = '⚜️';
@@ -9,6 +9,15 @@
     let shareUrl = $state<string | null>(null);
     let shareLoading = $state(false);
     let shareCopied = $state(false);
+
+    // Logout modal: shown after logout to remind the user of their token
+    let logoutModalVisible = $state(false);
+    let logoutToken = $state('');
+
+    // Delete confirmation dialog state
+    let deleteConfirmVisible = $state(false);
+    let deleteLoading = $state(false);
+    let deleteError = $state('');
 
     const initials = $derived.by(() => {
         if (!appState.token) return '???';
@@ -46,10 +55,44 @@
         }, 2000);
     }
 
-    function handleClearIdentity(): void {
+    function handleLogout(): void {
         open = false;
         shareUrl = null;
+        // Capture token before clearing so we can show it in the reminder modal
+        logoutToken = appState.token ?? '';
         appState.clearIdentity();
+        logoutModalVisible = true;
+    }
+
+    function handleLogoutModalOk(): void {
+        logoutModalVisible = false;
+    }
+
+    function handleDeleteClick(): void {
+        open = false;
+        shareUrl = null;
+        deleteError = '';
+        deleteConfirmVisible = true;
+    }
+
+    async function handleDeleteConfirm(): Promise<void> {
+        if (!appState.token) return;
+        deleteLoading = true;
+        deleteError = '';
+        try {
+            await deleteSchedule(appState.token);
+            deleteConfirmVisible = false;
+            appState.clearIdentity();
+        } catch {
+            deleteError = 'Could not delete schedule. Please try again.';
+        } finally {
+            deleteLoading = false;
+        }
+    }
+
+    function handleDeleteCancel(): void {
+        deleteConfirmVisible = false;
+        deleteError = '';
     }
 
     function handleOverlayClick(): void {
@@ -137,10 +180,94 @@
                     </button>
                 {/if}
 
-                <button class="fqf-btn-ghost text-sm" onclick={handleClearIdentity}>
-                    Clear identity
+                <button class="fqf-btn-ghost text-sm" onclick={handleLogout}> Logout </button>
+                <button
+                    class="fqf-btn-ghost text-sm"
+                    style="color: #dc2626; border-color: rgba(220, 38, 38, 0.3);"
+                    onclick={handleDeleteClick}
+                >
+                    Delete schedule
                 </button>
             </div>
         </div>
     {/if}
 </div>
+
+<!-- Logout reminder modal -->
+{#if logoutModalVisible}
+    <div
+        class="fixed inset-0 z-50 flex items-center justify-center"
+        style="background: rgba(26, 10, 40, 0.75);"
+    >
+        <div
+            class="fqf-dialog-card w-full max-w-sm mx-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="logout-modal-title"
+        >
+            <div class="fqf-dialog-header text-center py-5 px-6">
+                <h2 id="logout-modal-title" class="text-lg">Logged out</h2>
+            </div>
+            <div class="fqf-dialog-body flex flex-col gap-4">
+                <p class="text-sm" style="color: var(--mg-purple-deep);">
+                    Your schedule is still stored as
+                </p>
+                <p
+                    class="text-base font-bold px-3 py-2 rounded-lg"
+                    style="font-family: 'Courier New', monospace; background: rgba(74,26,107,0.07); color: var(--mg-gold-dark); word-break: break-all;"
+                >
+                    {logoutToken}
+                </p>
+                <p class="text-sm" style="color: var(--mg-purple-deep);">
+                    You have to remember those secret words. You can load it on this or another
+                    device.
+                </p>
+                <button class="fqf-btn-gold w-full" onclick={handleLogoutModalOk}>OK</button>
+            </div>
+        </div>
+    </div>
+{/if}
+
+<!-- Delete confirmation dialog -->
+{#if deleteConfirmVisible}
+    <div
+        class="fixed inset-0 z-50 flex items-center justify-center"
+        style="background: rgba(26, 10, 40, 0.75);"
+    >
+        <div
+            class="fqf-dialog-card w-full max-w-sm mx-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-modal-title"
+        >
+            <div class="fqf-dialog-header text-center py-5 px-6">
+                <h2 id="delete-modal-title" class="text-lg">Delete schedule?</h2>
+            </div>
+            <div class="fqf-dialog-body flex flex-col gap-4">
+                <p class="text-sm" style="color: var(--mg-purple-deep);">
+                    This will permanently delete your saved fest schedule. Are you sure?
+                </p>
+                {#if deleteError}
+                    <p class="text-sm" style="color: #dc2626;">{deleteError}</p>
+                {/if}
+                <div class="flex gap-2">
+                    <button
+                        class="fqf-btn-ghost flex-1"
+                        onclick={handleDeleteCancel}
+                        disabled={deleteLoading}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        class="fqf-btn-ghost flex-1"
+                        style="color: #dc2626; border-color: rgba(220, 38, 38, 0.4); background: rgba(220, 38, 38, 0.07);"
+                        onclick={handleDeleteConfirm}
+                        disabled={deleteLoading}
+                    >
+                        {deleteLoading ? 'Deleting…' : 'Delete'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{/if}

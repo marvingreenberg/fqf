@@ -288,6 +288,22 @@ async def remove_share_from_schedule(token: str, share_id: str) -> bool:
     return True
 
 
+async def delete_schedule(token: str) -> bool:
+    """Delete a schedule entirely. Returns False if token not found."""
+    if _using_memory():
+        assert _memory_store is not None
+        if token not in _memory_store:
+            return False
+        del _memory_store[token]
+        return True
+    assert _db is not None
+    doc_ref = _db.collection(SCHEDULES_COLLECTION).document(token)
+    if not doc_ref.get().exists:
+        return False
+    doc_ref.delete()
+    return True
+
+
 async def load_multiple_schedules(tokens: list[str]) -> dict[str, list[str]]:
     """Load picks for multiple tokens at once."""
     if _using_memory():

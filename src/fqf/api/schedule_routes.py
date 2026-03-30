@@ -24,6 +24,7 @@ from fqf.db import (
     add_share_to_schedule,
     create_schedule,
     create_share_id,
+    delete_schedule,
     load_multiple_schedules,
     load_schedule,
     load_schedule_by_share,
@@ -169,6 +170,14 @@ async def save(token: str, body: ScheduleUpdate, _rl: _GlobalRateLimit) -> Sched
     return ScheduleResponse(
         token=token, name=name, picks=body.picks, acts=acts, shares=shares, share_id=own_share_id
     )
+
+
+@router.delete("/{token}", status_code=204)
+async def delete(token: str, _rl: _GlobalRateLimit) -> None:
+    """Delete a schedule and all its data."""
+    removed = await delete_schedule(token)
+    if not removed:
+        raise HTTPException(status_code=404, detail=NOT_FOUND_DETAIL)
 
 
 @router.post("/{token}/add-share", response_model=ScheduleResponse)

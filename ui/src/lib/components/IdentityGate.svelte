@@ -6,28 +6,24 @@
     import { FINGERPRINT_COUNTER_KEY } from '$lib/types';
 
     interface Props {
-        onconfirmed?: () => void;
         pendingShareId?: string | null;
         pendingShareName?: string | null;
     }
 
-    let { onconfirmed, pendingShareId = null, pendingShareName = null }: Props = $props();
+    let { pendingShareId = null, pendingShareName = null }: Props = $props();
 
     // null = not yet checked (pending), true/false = resolved after mount
     // Start as null only when there is a share to validate, otherwise false (no share)
     let shareValid = $state<boolean | null>(null);
     let shareValidName = $state<string>('');
 
-    let nameInput = $state(appState.name ?? '');
+    let nameInput = $state('');
     let tripleInput = $state('');
     let errorMsg = $state('');
     let shareError = $state('');
     let loading = $state(false);
 
-    // Detect returning user (has a stored triple pre-filled)
-    const isReturning = $derived(!!appState.token);
-
-    // Pre-fill triple if a token was found in localStorage
+    // Pre-fill triple if a stored token exists (e.g. after page load with stored identity)
     $effect(() => {
         if (appState.token) tripleInput = appState.token;
     });
@@ -47,16 +43,11 @@
         }
     });
 
-    function validateName(): boolean {
-        if (!nameInput.trim()) {
-            errorMsg = 'Please enter a name before continuing.';
-            return false;
-        }
-        return true;
-    }
-
     async function handleNewSchedule(): Promise<void> {
-        if (!validateName()) return;
+        if (!nameInput.trim()) {
+            errorMsg = 'Please enter a name before creating a schedule.';
+            return;
+        }
         loading = true;
         errorMsg = '';
         try {
@@ -72,7 +63,6 @@
             const nextCounter = counter + 1;
             localStorage.setItem(FINGERPRINT_COUNTER_KEY, String(nextCounter));
             await appState.confirm(resp.token, nameInput.trim(), nextCounter);
-            onconfirmed?.();
         } catch {
             errorMsg = 'Could not create schedule. Please try again.';
         } finally {
@@ -81,7 +71,6 @@
     }
 
     async function handleLoadSchedule(): Promise<void> {
-        if (!validateName()) return;
         const triple = tripleInput.trim();
         if (!triple) {
             errorMsg = 'Please enter your secret words.';
@@ -95,8 +84,8 @@
                 // Auto-fill the corrected triple so the user sees what was matched
                 tripleInput = result.token;
             }
-            await appState.confirm(result.token, nameInput.trim() || result.name);
-            onconfirmed?.();
+            // Name comes from the stored schedule — no input required for load
+            await appState.confirm(result.token, result.name);
         } catch {
             errorMsg = 'Schedule not found. Check your secret words.';
         } finally {
@@ -129,74 +118,72 @@
             </p>
         </div>
 
-        <div class="fqf-dialog-body flex flex-col gap-3">
-            <!-- Share-not-found banner (Cases 3 & 6) -->
+        <div class="fqf-dialog-body flex flex-col gap-4">
+            <!-- Share-not-found banner -->
             {#if shareValid === false && shareError}
                 <p class="text-sm font-medium" style="color: #c05000; font-style: italic;">
                     {shareError}
                 </p>
             {/if}
 
-            <!-- Name field — REQUIRED -->
-            <div>
-                <label
-                    for="identity-name"
-                    class="block text-xs font-semibold mb-1"
-                    style="color: var(--mg-purple-deep);"
-                >
-                    Your name (required)
-                </label>
-                <input
-                    id="identity-name"
-                    class="input w-full text-sm"
-                    type="text"
-                    placeholder="ANY name! Fred, BooBoo — just for sharing your schedule"
-                    bind:value={nameInput}
-                />
-            </div>
-
-            <!-- Load schedule section -->
-            <div>
-                <button
-                    class="fqf-btn-outline w-full"
-                    onclick={handleLoadSchedule}
-                    disabled={loading}
-                >
-                    {loading ? 'Loading…' : 'Load schedule'}
-                </button>
-                <p class="text-xs mt-1" style="color: rgba(74,26,107,0.6); font-style: italic;">
-                    {isReturning
-                        ? 'Load existing schedule, or enter new one'
-                        : 'Load existing schedule if you have one'}
+            <!-- Load existing schedule section -->
+            <div class="flex flex-col gap-2">
+                <p class="text-xs" style="color: rgba(74,26,107,0.65); font-style: italic;">
+                    If you have an existing schedule, you can load it
                 </p>
+                <button class="fqf-btn-gold w-full" onclick={handleLoadSchedule} disabled={loading}>
+                    {loading ? 'Loading…' : 'Load Schedule'}
+                </button>
                 <input
                     id="identity-triple"
-                    class="input w-full text-sm mt-1"
+                    class="input w-full text-sm"
                     type="text"
-                    placeholder="use your secret words"
+                    placeholder="enter your secret words"
                     style={tripleInput ? 'color: #1a1a1a;' : ''}
                     bind:value={tripleInput}
                     onkeydown={handleKeydown}
                 />
             </div>
 
+            <!-- Divider -->
+            <hr style="border-color: rgba(74,26,107,0.15);" />
+
+            <!-- New schedule section -->
+            <div class="flex flex-col gap-2">
+                <p class="text-xs" style="color: rgba(74,26,107,0.65); font-style: italic;">
+                    Create a new schedule. Name is just for sharing, a nickname is fine
+                </p>
+                {#if shareValid === true}
+                    <p class="text-xs" style="color: rgba(74,26,107,0.6); font-style: italic;">
+                        Create a schedule to allow comparing with {shareValidName}
+                    </p>
+                {/if}
+                <button class="fqf-btn-gold w-full" onclick={handleNewSchedule} disabled={loading}>
+                    {loading ? 'Creating…' : 'New Schedule'}
+                </button>
+                <div class="flex items-center gap-2">
+                    <label
+                        for="identity-name"
+                        class="text-sm font-semibold shrink-0"
+                        style="color: var(--mg-purple-deep);"
+                    >
+                        Name:
+                    </label>
+                    <input
+                        id="identity-name"
+                        class="input flex-1 text-sm"
+                        type="text"
+                        placeholder="Fred, BooBoo, …"
+                        bind:value={nameInput}
+                    />
+                </div>
+            </div>
+
             {#if errorMsg}
                 <p class="text-sm" style="color: #dc2626;">{errorMsg}</p>
             {/if}
 
-            <!-- New Schedule button -->
-            <div>
-                <button class="fqf-btn-gold" onclick={handleNewSchedule} disabled={loading}>
-                    {loading ? 'Creating…' : 'New Schedule'}
-                </button>
-                {#if shareValid === true}
-                    <p class="text-xs mt-1" style="color: rgba(74,26,107,0.6); font-style: italic;">
-                        Create a schedule to allow comparing with {shareValidName}
-                    </p>
-                {/if}
-            </div>
-
-            <!-- View-only share option (Cases 2 & 3) -->
+            <!-- View-only share option -->
             {#if pendingShareId && shareValid === true}
                 <button class="fqf-btn-ghost" onclick={handleViewShareOnly} disabled={loading}>
                     View {shareValidName}'s schedule?

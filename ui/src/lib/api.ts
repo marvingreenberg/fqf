@@ -121,6 +121,13 @@ export async function removeShareFromSchedule(
     });
 }
 
+export async function deleteSchedule(token: string): Promise<void> {
+    const resp = await fetch(`${BASE}/schedule/${token}`, { method: 'DELETE' });
+    if (!resp.ok) {
+        throw new Error(`API error: ${resp.status} ${resp.statusText}`);
+    }
+}
+
 export async function mergeSchedules(tokens: string[]): Promise<MergeResponse> {
     return fetchJson<MergeResponse>(`${BASE}/schedule/merge?tokens=${tokens.join(',')}`);
 }
