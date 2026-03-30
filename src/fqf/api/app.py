@@ -10,7 +10,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from fqf.api.act_routes import router as act_router
-from fqf.api.rate_limit import check_general_limit
+from fqf.api.rate_limit import global_rate_limit_dependency
 from fqf.api.schedule_routes import router as schedule_router
 from fqf.api.stage_routes import router as stage_router
 from fqf.db import close_pool, init_pool
@@ -40,7 +40,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    general_limit_dep = [Depends(check_general_limit)]
+    general_limit_dep = [Depends(global_rate_limit_dependency)]
     app.include_router(act_router, dependencies=general_limit_dep)
     app.include_router(schedule_router)
     app.include_router(stage_router, dependencies=general_limit_dep)

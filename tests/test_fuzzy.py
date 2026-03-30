@@ -2,7 +2,10 @@
 
 import pytest
 
-from fqf.tokens.fuzzy import correct_word, fuzzy_resolve_triple, normalize_triple
+from fqf.tokens.fuzzy import find_closest_word, fuzzy_resolve, normalize_triple
+from fqf.tokens.words import POOL_MUSIC, POOL_NOLA, POOL_PLACES
+
+_ALL_POOLS: list[list[str]] = [POOL_PLACES, POOL_MUSIC, POOL_NOLA]
 
 # ── normalize_triple ──────────────────────────────────────────────────────────
 
@@ -10,9 +13,6 @@ HYPHEN_TRIPLE = "foo-bar-baz"
 SPACE_TRIPLE = "Foo Bar Baz"
 MESSY_TRIPLE = "foo  bar--baz"
 EXPECTED_NORMALIZED = ["foo", "bar", "baz"]
-
-TOO_FEW_WORDS = "only-two"
-TOO_MANY_WORDS = "one-two-three-four"
 
 
 class TestNormalizeTriple:
@@ -25,92 +25,76 @@ class TestNormalizeTriple:
     def test_mixed_separators(self) -> None:
         assert normalize_triple(MESSY_TRIPLE) == EXPECTED_NORMALIZED
 
-    def test_too_few_words_raises(self) -> None:
-        with pytest.raises(ValueError):
-            normalize_triple(TOO_FEW_WORDS)
 
-    def test_too_many_words_raises(self) -> None:
-        with pytest.raises(ValueError):
-            normalize_triple(TOO_MANY_WORDS)
+# ── find_closest_word ────────────────────────────────────────────────────────
 
-
-# ── correct_word ──────────────────────────────────────────────────────────────
-
-# Exact words from the pools
 EXACT_PLACE = "treme"
 EXACT_MUSIC = "funky"
 EXACT_NOLA = "crawfish"
 
-# 1-char typo: "funky" → "funku"
 TYPO_ONE_CHAR = "funku"
 CORRECTED_ONE_CHAR = "funky"
 
-# 2-char diff: "funky" → "zznky"
 TYPO_TWO_CHAR = "zznky"
 
 
-class TestCorrectWord:
-    def test_exact_match_returns_no_correction(self) -> None:
-        word, corrected = correct_word(EXACT_PLACE)
+class TestFindClosestWord:
+    def test_exact_match_distance_zero(self) -> None:
+        word, dist = find_closest_word(EXACT_PLACE, _ALL_POOLS)
         assert word == EXACT_PLACE
-        assert corrected is False
+        assert dist == 0
 
     def test_exact_match_music_pool(self) -> None:
-        word, corrected = correct_word(EXACT_MUSIC)
+        word, dist = find_closest_word(EXACT_MUSIC, _ALL_POOLS)
         assert word == EXACT_MUSIC
-        assert corrected is False
+        assert dist == 0
 
     def test_exact_match_nola_pool(self) -> None:
-        word, corrected = correct_word(EXACT_NOLA)
+        word, dist = find_closest_word(EXACT_NOLA, _ALL_POOLS)
         assert word == EXACT_NOLA
-        assert corrected is False
+        assert dist == 0
 
-    def test_one_char_typo_is_corrected(self) -> None:
-        word, corrected = correct_word(TYPO_ONE_CHAR)
+    def test_one_char_typo_returns_distance_one(self) -> None:
+        word, dist = find_closest_word(TYPO_ONE_CHAR, _ALL_POOLS)
         assert word == CORRECTED_ONE_CHAR
-        assert corrected is True
+        assert dist == 1
 
-    def test_two_char_diff_raises(self) -> None:
-        with pytest.raises(ValueError):
-            correct_word(TYPO_TWO_CHAR)
+    def test_two_char_diff_returns_distance_two_plus(self) -> None:
+        _word, dist = find_closest_word(TYPO_TWO_CHAR, _ALL_POOLS)
+        assert dist >= 2
 
 
-# ── fuzzy_resolve_triple ──────────────────────────────────────────────────────
+# ── fuzzy_resolve ─────────────────────────────────────────────────────────────
 
-# All three are exact pool words: treme (POOL_PLACES), funky (POOL_MUSIC), crawfish (POOL_NOLA)
 EXACT_TRIPLE = "treme-funky-crawfish"
-SORTED_EXACT = "crawfish-funky-treme"
-
-# One typo: "funku" instead of "funky"
 TYPO_TRIPLE = "treme-funku-crawfish"
-
-# Order-invariant: same words in different order
 REVERSED_TRIPLE = "crawfish-funky-treme"
+UNRESOLVABLE_TRIPLE = "treme-zzzzz-crawfish"
 
 
-class TestFuzzyResolveTriple:
-    def test_exact_match_no_correction(self) -> None:
-        as_entered, sorted_tok, corrected = fuzzy_resolve_triple(EXACT_TRIPLE)
-        assert as_entered == EXACT_TRIPLE
-        assert sorted_tok == SORTED_EXACT
-        assert corrected is False
+class TestFuzzyResolve:
+    def test_exact_match_no_suggestion(self) -> None:
+        token, suggestion = fuzzy_resolve(EXACT_TRIPLE)
+        assert suggestion is None
+        # Token is sorted
+        words = token.split("-")
+        assert words == sorted(words)
 
-    def test_typo_is_corrected(self) -> None:
-        as_entered, sorted_tok, corrected = fuzzy_resolve_triple(TYPO_TRIPLE)
-        assert as_entered == EXACT_TRIPLE
-        assert sorted_tok == SORTED_EXACT
-        assert corrected is True
+    def test_typo_returns_suggestion(self) -> None:
+        token, suggestion = fuzzy_resolve(TYPO_TRIPLE)
+        assert suggestion is not None
+        assert "funku" in suggestion
+        assert "funky" in suggestion
 
-    def test_sorted_output_is_consistent_regardless_of_order(self) -> None:
-        _, sorted_forward, _ = fuzzy_resolve_triple(EXACT_TRIPLE)
-        _, sorted_reversed, _ = fuzzy_resolve_triple(REVERSED_TRIPLE)
-        assert sorted_forward == sorted_reversed
+    def test_sorted_output_consistent_regardless_of_order(self) -> None:
+        token_forward, _ = fuzzy_resolve(EXACT_TRIPLE)
+        token_reversed, _ = fuzzy_resolve(REVERSED_TRIPLE)
+        assert token_forward == token_reversed
 
     def test_wrong_word_count_raises(self) -> None:
         with pytest.raises(ValueError):
-            fuzzy_resolve_triple("treme-funky")
+            fuzzy_resolve("treme-funky")
 
     def test_unresolvable_word_raises(self) -> None:
-        # "zzzzz" is far from any pool word
         with pytest.raises(ValueError):
-            fuzzy_resolve_triple("treme-zzzzz-crawfish")
+            fuzzy_resolve(UNRESOLVABLE_TRIPLE)
