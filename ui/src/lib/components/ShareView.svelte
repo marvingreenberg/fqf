@@ -11,9 +11,11 @@
 
     interface Props {
         selfActs: ActSummary[];
+        onTogglePick: (slug: string) => void;
+        onActDetail: (act: ActSummary) => void;
     }
 
-    let { selfActs }: Props = $props();
+    let { selfActs, onTogglePick, onActDetail }: Props = $props();
 
     interface ScheduleEntry {
         id: string; // token for self, share_id for shared
@@ -186,10 +188,52 @@
 
                 {#each group.acts as act (act.slug)}
                     {@const pickers = pickersBySlug.get(act.slug) ?? []}
+                    {@const isSelfPicked = appState.picks.has(act.slug)}
+                    <!-- svelte-ignore a11y_no_static_element_interactions -->
+                    <!-- svelte-ignore a11y_click_events_have_key_events -->
                     <div
                         class="fqf-list-row flex items-center gap-3 px-3 py-2.5 border-l-4"
                         style="border-left-color: {conflictColor(act)};"
+                        onclick={() => onActDetail(act)}
                     >
+                        <button
+                            class="fqf-fleur shrink-0"
+                            style="width: 1.25rem; height: 1.25rem;"
+                            onclick={(e) => {
+                                e.stopPropagation();
+                                onTogglePick(act.slug);
+                            }}
+                            aria-label={isSelfPicked
+                                ? `Remove ${act.name} from picks`
+                                : `Add ${act.name} to picks`}
+                        >
+                            {#if isSelfPicked}
+                                <svg
+                                    viewBox="0 0 16 16"
+                                    width="18"
+                                    height="18"
+                                    fill="var(--mg-gold-rich)"
+                                >
+                                    <path
+                                        d="M8 0C8 0 6.5 3.5 6.5 5.5C6.5 7 7 8 8 9C9 8 9.5 7 9.5 5.5C9.5 3.5 8 0 8 0ZM4.5 6C2.5 6 0 7.5 0 7.5C0 7.5 2 9 4.5 9C5.5 9 6.5 8.5 7 8C6 7.5 5.5 7 4.5 6ZM11.5 6C10.5 7 10 7.5 9 8C9.5 8.5 10.5 9 11.5 9C14 9 16 7.5 16 7.5C16 7.5 13.5 6 11.5 6ZM8 10C7 10 5 10.5 5 12C5 14 8 16 8 16C8 16 11 14 11 12C11 10.5 9 10 8 10Z"
+                                    />
+                                </svg>
+                            {:else}
+                                <svg
+                                    viewBox="0 0 16 16"
+                                    width="18"
+                                    height="18"
+                                    fill="none"
+                                    stroke="rgba(74, 26, 107, 0.3)"
+                                    stroke-width="0.75"
+                                >
+                                    <path
+                                        d="M8 0C8 0 6.5 3.5 6.5 5.5C6.5 7 7 8 8 9C9 8 9.5 7 9.5 5.5C9.5 3.5 8 0 8 0ZM4.5 6C2.5 6 0 7.5 0 7.5C0 7.5 2 9 4.5 9C5.5 9 6.5 8.5 7 8C6 7.5 5.5 7 4.5 6ZM11.5 6C10.5 7 10 7.5 9 8C9.5 8.5 10.5 9 11.5 9C14 9 16 7.5 16 7.5C16 7.5 13.5 6 11.5 6ZM8 10C7 10 5 10.5 5 12C5 14 8 16 8 16C8 16 11 14 11 12C11 10.5 9 10 8 10Z"
+                                    />
+                                </svg>
+                            {/if}
+                        </button>
+
                         <div class="flex-1 min-w-0">
                             <p class="text-sm font-semibold truncate">{act.name}</p>
                             <p class="text-xs truncate" style="color: rgba(74, 26, 107, 0.5);">

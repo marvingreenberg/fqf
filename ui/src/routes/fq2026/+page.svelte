@@ -203,7 +203,11 @@
         {:else if appState.viewMode === 'map'}
             <MapView {acts} {stageLocations} onActDetail={openDetail} />
         {:else if appState.viewMode === 'share'}
-            <ShareView selfActs={allActs} />
+            <ShareView
+                selfActs={allActs}
+                onTogglePick={(slug) => appState.togglePick(slug)}
+                onActDetail={openDetail}
+            />
         {:else if loading}
             <div class="flex items-center justify-center h-full">
                 <p style="color: var(--mg-purple); opacity: 0.6;">Loading schedule…</p>
@@ -275,7 +279,7 @@
                                 viewBox="0 0 16 16"
                                 width="20"
                                 height="20"
-                                fill={isPicked ? 'var(--mg-green-deep)' : 'none'}
+                                fill={isPicked ? 'var(--mg-gold-rich)' : 'none'}
                                 stroke={isPicked ? 'none' : 'rgba(74, 26, 107, 0.3)'}
                                 stroke-width="0.75"
                             >
