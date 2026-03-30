@@ -116,12 +116,59 @@
         else next.add(id);
         manuallyUnchecked = next;
     }
+
+    // Refresh shared schedules
+    let refreshing = $state(false);
+    let refreshStatus = $state<string | null>(null);
+    const REFRESH_STATUS_DURATION_MS = 3000;
+
+    async function handleRefresh(): Promise<void> {
+        if (appState.sharedSchedules.length === 0) return;
+        refreshing = true;
+        refreshStatus = null;
+        try {
+            const { loadSharedSchedule } = await import('$lib/api');
+            let changed = false;
+            const updated = await Promise.all(
+                appState.sharedSchedules.map(async (s) => {
+                    const resp = await loadSharedSchedule(s.share_id);
+                    const picksChanged =
+                        JSON.stringify(resp.picks.sort()) !== JSON.stringify([...s.picks].sort());
+                    if (picksChanged) changed = true;
+                    return { ...s, picks: resp.picks, acts: resp.acts, name: resp.name || s.name };
+                })
+            );
+            appState.sharedSchedules = updated;
+            refreshStatus = changed ? 'Updated!' : 'No changes';
+        } catch {
+            refreshStatus = 'Refresh failed';
+        } finally {
+            refreshing = false;
+            setTimeout(() => { refreshStatus = null; }, REFRESH_STATUS_DURATION_MS);
+        }
+    }
 </script>
 
 <div class="flex flex-col overflow-y-auto h-full">
     <!-- Person toggles -->
     {#if allEntries.length > 0}
         <div class="shrink-0 px-3 py-2 border-b fqf-filter-panel flex flex-wrap items-center gap-3">
+            <!-- Refresh button -->
+            {#if appState.sharedSchedules.length > 0}
+                <button
+                    class="fqf-btn-outline text-xs py-1 px-2"
+                    onclick={handleRefresh}
+                    disabled={refreshing}
+                    title="Refresh shared schedules"
+                >
+                    {refreshing ? '⟳' : '↻'} Refresh
+                </button>
+                {#if refreshStatus}
+                    <span class="text-xs font-medium" style="color: {refreshStatus === 'Updated!' ? 'var(--mg-green-deep)' : 'rgba(74,26,107,0.5)'};">
+                        {refreshStatus}
+                    </span>
+                {/if}
+            {/if}
             {#each allEntries as entry (entry.id)}
                 <div class="flex items-center gap-1.5">
                     <label class="flex items-center gap-1.5 cursor-pointer select-none">
