@@ -59,8 +59,10 @@
         return slots.map((slot) => ({ header: slotLabel(slot), acts: bySlot.get(slot)! }));
     });
 
+    const UNPICKED_BORDER_COLOR = 'transparent';
+
     function conflictColor(act: ActSummary): string {
-        if (!picks.has(act.slug)) return CONFLICT_COLORS.none;
+        if (!picks.has(act.slug)) return UNPICKED_BORDER_COLOR;
         const level: ConflictLevel = getWorstConflict(act, acts, picks);
         return CONFLICT_COLORS[level];
     }
