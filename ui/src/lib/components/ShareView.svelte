@@ -5,15 +5,18 @@
     import { getWorstConflict } from '$lib/conflict';
     import { CONFLICT_COLORS } from '$lib/constants';
     import { appState } from '$lib/stores.svelte';
+    import ActRow from './ActRow.svelte';
 
     const BADGE_COUNT = 4;
     const SELF_LABEL = 'Self';
 
     interface Props {
         selfActs: ActSummary[];
+        onTogglePick: (slug: string) => void;
+        onActDetail: (act: ActSummary) => void;
     }
 
-    let { selfActs }: Props = $props();
+    let { selfActs, onTogglePick, onActDetail }: Props = $props();
 
     interface ScheduleEntry {
         id: string; // token for self, share_id for shared
@@ -186,18 +189,14 @@
 
                 {#each group.acts as act (act.slug)}
                     {@const pickers = pickersBySlug.get(act.slug) ?? []}
-                    <div
-                        class="fqf-list-row flex items-center gap-3 px-3 py-2.5 border-l-4"
-                        style="border-left-color: {conflictColor(act)};"
+                    <ActRow
+                        {act}
+                        isPicked={appState.picks.has(act.slug)}
+                        conflictColor={conflictColor(act)}
+                        {onTogglePick}
+                        {onActDetail}
                     >
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-semibold truncate">{act.name}</p>
-                            <p class="text-xs truncate" style="color: rgba(74, 26, 107, 0.5);">
-                                {act.stage} &middot; {act.start}–{act.end}
-                            </p>
-                        </div>
-
-                        <div class="shrink-0 flex items-center gap-1.5">
+                        {#snippet extra()}
                             <div class="flex gap-0.5">
                                 {#each pickers as id (id)}
                                     {@const entry = allEntries.find((e) => e.id === id)}
@@ -210,11 +209,8 @@
                                     </span>
                                 {/each}
                             </div>
-                            <span class="text-xs italic" style="color: rgba(74, 26, 107, 0.45);">
-                                {act.genre}
-                            </span>
-                        </div>
-                    </div>
+                        {/snippet}
+                    </ActRow>
                 {/each}
             {/each}
         </div>
