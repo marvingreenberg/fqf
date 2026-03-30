@@ -115,10 +115,11 @@
         const date = appState.selectedDate;
         const mode = appState.viewMode;
 
-        if ((mode === 'my-schedule' || mode === 'share') && !allActsLoaded) {
+        if ((mode === 'my-schedule' || mode === 'share' || mode === 'map') && !allActsLoaded) {
             loadAllActs();
-        } else if (
-            (mode === 'grid' || mode === 'mobile') &&
+        }
+        if (
+            (mode === 'grid' || mode === 'mobile' || mode === 'map') &&
             (date !== prevDate || mode !== prevViewMode)
         ) {
             prevDate = date;
@@ -201,7 +202,17 @@
                 onActDetail={openDetail}
             />
         {:else if appState.viewMode === 'map'}
-            <MapView {acts} {stageLocations} onActDetail={openDetail} />
+            <MapView
+                {acts}
+                {allActs}
+                picks={appState.picks}
+                selectedDate={appState.selectedDate}
+                {stageLocations}
+                onActDetail={openDetail}
+                onDayChange={(d) => {
+                    appState.selectedDate = d;
+                }}
+            />
         {:else if appState.viewMode === 'share'}
             <ShareView selfActs={allActs} />
         {:else if loading}

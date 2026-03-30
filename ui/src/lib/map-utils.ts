@@ -3,8 +3,14 @@
  * countdown color interpolation, and time formatting.
  */
 
-import type { ActSummary } from '$lib/types';
-import { MAP_BOUNDS, MAX_LOOKAHEAD_MINUTES, MINUTES_PER_HOUR } from '$lib/constants';
+import type { ActSummary, ConflictLevel } from '$lib/types';
+import {
+    MAP_BOUNDS,
+    MAX_LOOKAHEAD_MINUTES,
+    MINUTES_PER_HOUR,
+    CONFLICT_COLORS
+} from '$lib/constants';
+import { haversineMeters } from '$lib/distance';
 
 // Countdown color endpoints: gray (inactive) ↔ dark green (active)
 export const COUNTDOWN_GRAY = '#999999';
@@ -33,6 +39,16 @@ export function formatTimeDisplay(minutes: number): string {
     const period = h >= NOON_HOUR ? 'PM' : 'AM';
     const h12 = h > NOON_HOUR ? h - NOON_HOUR : h === 0 ? NOON_HOUR : h;
     return `${h12}:${m.toString().padStart(2, '0')} ${period}`;
+}
+
+/**
+ * Format an "HH:MM" 24-hour time string to 12-hour without AM/PM suffix.
+ * E.g. "14:30" → "2:30", "11:00" → "11:00".
+ */
+export function formatTime12(hhmm: string): string {
+    const [h, m] = hhmm.split(':').map(Number);
+    const h12 = h > NOON_HOUR ? h - NOON_HOUR : h === 0 ? NOON_HOUR : h;
+    return `${h12}:${m.toString().padStart(2, '0')}`;
 }
 
 // ── Coordinate conversion ───────────────────────────────────────────────
@@ -147,4 +163,120 @@ export function countdownColor(fraction: number): string {
         Math.round(g1 + (g2 - g1) * t),
         Math.round(b1 + (b2 - b1) * t)
     );
+}
+
+// ── My Schedule map mode ────────────────────────────────────────────────
+
+/** Minimum straight-line distance (meters) before drawing a path arrow. */
+export const MIN_PATH_DISTANCE_METERS = 61; // ≈ 200 feet
+
+export const SCHEDULE_MARKER_PURPLE = '#7c3aed';
+
+export interface ScheduleMarker {
+    act: ActSummary;
+    order: number; // 1-based chronological index
+    conflict: ConflictLevel;
+    pos: { x: number; y: number }; // CSS % position
+    isFirst: boolean;
+}
+
+export interface PathArrow {
+    from: { x: number; y: number };
+    to: { x: number; y: number };
+    distanceMeters: number;
+}
+
+/**
+ * Return picked acts for a specific date, sorted by start time then stage
+ * latitude (ascending) when start times are equal.
+ */
+export function pickedActsForDay(
+    allActs: ActSummary[],
+    picks: Set<string>,
+    date: string,
+    stageLocations: Map<string, { lat: number; lng: number }>
+): ActSummary[] {
+    return allActs
+        .filter((a) => picks.has(a.slug) && a.date === date)
+        .sort((a, b) => {
+            const timeDiff = parseTimeToMinutes(a.start) - parseTimeToMinutes(b.start);
+            if (timeDiff !== 0) return timeDiff;
+            const aLat = stageLocations.get(a.stage)?.lat ?? 0;
+            const bLat = stageLocations.get(b.stage)?.lat ?? 0;
+            return aLat - bLat;
+        });
+}
+
+/**
+ * Build the ordered marker list for My Schedule mode.
+ * Conflict level for each act is computed against all other picked acts on the same day.
+ */
+export function buildScheduleMarkers(
+    orderedActs: ActSummary[],
+    stageLocations: Map<string, { lat: number; lng: number }>
+): ScheduleMarker[] {
+    return orderedActs
+        .map((act, i) => {
+            const loc = stageLocations.get(act.stage);
+            if (!loc) return null;
+            const conflict = computeConflictForAct(act, orderedActs);
+            return {
+                act,
+                order: i + 1,
+                conflict,
+                pos: latLngToPercent(loc.lat, loc.lng),
+                isFirst: i === 0
+            };
+        })
+        .filter((m): m is ScheduleMarker => m !== null);
+}
+
+/** Compute worst conflict level for an act against the other acts in the list. */
+function computeConflictForAct(act: ActSummary, allPickedActs: ActSummary[]): ConflictLevel {
+    const s1 = parseTimeToMinutes(act.start);
+    const e1 = parseTimeToMinutes(act.end);
+    let worst: ConflictLevel = 'none';
+    for (const other of allPickedActs) {
+        if (other.slug === act.slug) continue;
+        const s2 = parseTimeToMinutes(other.start);
+        const e2 = parseTimeToMinutes(other.end);
+        const overlap = Math.max(0, Math.min(e1, e2) - Math.max(s1, s2));
+        if (overlap > 0) {
+            worst = 'red';
+            break;
+        }
+    }
+    return worst;
+}
+
+/**
+ * Build path arrows between consecutive acts in the schedule.
+ * Only draws an arrow when the straight-line distance exceeds MIN_PATH_DISTANCE_METERS.
+ */
+export function buildPathArrows(
+    orderedActs: ActSummary[],
+    stageLocations: Map<string, { lat: number; lng: number }>
+): PathArrow[] {
+    const arrows: PathArrow[] = [];
+    for (let i = 0; i < orderedActs.length - 1; i++) {
+        const fromAct = orderedActs[i];
+        const toAct = orderedActs[i + 1];
+        const fromLoc = stageLocations.get(fromAct.stage);
+        const toLoc = stageLocations.get(toAct.stage);
+        if (!fromLoc || !toLoc) continue;
+        const distMeters = haversineMeters(fromLoc.lat, fromLoc.lng, toLoc.lat, toLoc.lng);
+        if (distMeters <= MIN_PATH_DISTANCE_METERS) continue;
+        arrows.push({
+            from: latLngToPercent(fromLoc.lat, fromLoc.lng),
+            to: latLngToPercent(toLoc.lat, toLoc.lng),
+            distanceMeters: distMeters
+        });
+    }
+    return arrows;
+}
+
+/** Marker fill color based on conflict level. First act is always purple. */
+export function markerFillColor(isFirst: boolean, conflict: ConflictLevel): string {
+    if (isFirst) return SCHEDULE_MARKER_PURPLE;
+    return CONFLICT_COLORS[conflict];
 }
