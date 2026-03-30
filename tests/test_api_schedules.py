@@ -9,7 +9,6 @@ from fqf.api.app import create_app
 
 SCHEDULE_URL = "/api/v1/schedule"
 MERGE_URL = "/api/v1/schedule/merge"
-FUZZY_LOOKUP_URL = "/api/v1/schedule/fuzzy-lookup"
 
 FAKE_TOKEN = "tremé-jazz-laissez"
 OTHER_TOKEN = "bywater-funk-krewe"
@@ -48,7 +47,12 @@ async def client(app):  # type: ignore[no-untyped-def]
 # ── POST /api/v1/schedule ─────────────────────────────────────────────────────
 
 
-CREATE_BODY = {"counter": 0}
+CREATE_BODY = {"name": SAMPLE_NAME}
+CREATE_BODY_WITH_FINGERPRINT = {
+    "name": SAMPLE_NAME,
+    "fingerprint_hash": "abc123def456",
+    "counter": 0,
+}
 
 
 class TestCreateSchedule:
@@ -64,6 +68,21 @@ class TestCreateSchedule:
         with patch(f"{DB_MODULE}.create_schedule", new=AsyncMock(return_value=FAKE_TOKEN)):
             resp = await client.post(SCHEDULE_URL, json=CREATE_BODY)
         assert "token" in resp.json()
+
+    @pytest.mark.asyncio
+    async def test_name_required(self, client: AsyncClient) -> None:
+        resp = await client.post(SCHEDULE_URL)
+        assert resp.status_code == 422
+
+    @pytest.mark.asyncio
+    async def test_passes_fingerprint_and_counter_to_db(self, client: AsyncClient) -> None:
+        mock_create = AsyncMock(return_value=FAKE_TOKEN)
+        with patch(f"{DB_MODULE}.create_schedule", new=mock_create):
+            resp = await client.post(SCHEDULE_URL, json=CREATE_BODY_WITH_FINGERPRINT)
+        assert resp.status_code == 201
+        mock_create.assert_awaited_once_with(
+            name=SAMPLE_NAME, fingerprint_hash="abc123def456", counter=0
+        )
 
 
 # ── GET /api/v1/schedule/{token} ──────────────────────────────────────────────
@@ -390,77 +409,116 @@ class TestRemoveShare:
 
 # ── POST /api/v1/schedule/fuzzy-lookup ───────────────────────────────────────
 
-# Valid pool words for a resolvable triple
-FUZZY_EXACT_TRIPLE = "treme-funky-crawfish"
-FUZZY_SORTED_TOKEN = "crawfish-funky-treme"
-FUZZY_TYPO_TRIPLE = "treme-funku-crawfish"  # "funku" → "funky"
-FUZZY_OWNER_NAME = "Jazz Fan"
+FUZZY_URL = "/api/v1/schedule/fuzzy-lookup"
+FUZZY_MODULE = "fqf.api.schedule_routes"
 
-# A triple that's valid words but no schedule stored under that token
-FUZZY_VALID_BUT_MISSING = "treme-jazzy-beignet"
-FUZZY_SORTED_MISSING = "beignet-jazzy-treme"
-
-# A triple with a word that can't be matched
-FUZZY_BAD_WORD_TRIPLE = "treme-zzzzzzz-crawfish"
-
-
-FUZZY_MODULE = "fqf.tokens.fuzzy"
+KNOWN_TOKEN = "bayou-groovy-crawfish"
+LOADED_SCHEDULE = (["kermit-ruffins-the-barbecue-swingers"], SAMPLE_NAME, [], "")
 
 
 class TestFuzzyLookup:
     @pytest.mark.asyncio
-    async def test_exact_match_found(self, client: AsyncClient) -> None:
-        """Exact triple that resolves to an existing schedule."""
-        schedule_data = (SAMPLE_PICKS, FUZZY_OWNER_NAME, [], "")
-        with patch(f"{DB_MODULE}.load_schedule", new=AsyncMock(return_value=schedule_data)):
-            resp = await client.post(FUZZY_LOOKUP_URL, json={"raw_triple": FUZZY_EXACT_TRIPLE})
+    async def test_exact_match_found_returns_200(self, client: AsyncClient) -> None:
+        with (
+            patch(f"{FUZZY_MODULE}.fuzzy_resolve", return_value=(KNOWN_TOKEN, None)),
+            patch(f"{DB_MODULE}.load_schedule", new=AsyncMock(return_value=LOADED_SCHEDULE)),
+        ):
+            resp = await client.post(FUZZY_URL, json={"raw_triple": KNOWN_TOKEN})
 
         assert resp.status_code == 200
         data = resp.json()
-        assert data["found"] is True
-        assert data["corrected"] is False
-        assert data["name"] == FUZZY_OWNER_NAME
-        assert data["token"] in (FUZZY_EXACT_TRIPLE, FUZZY_SORTED_TOKEN)
+        assert data["token"] == KNOWN_TOKEN
+        assert data["suggestion"] is None
 
     @pytest.mark.asyncio
-    async def test_typo_corrected_and_found(self, client: AsyncClient) -> None:
-        """Triple with 1-char typo gets corrected and schedule is found."""
-        schedule_data = (SAMPLE_PICKS, FUZZY_OWNER_NAME, [], "")
-        # as_entered (corrected to treme-funky-crawfish) is found on first try
-        with patch(f"{DB_MODULE}.load_schedule", new=AsyncMock(return_value=schedule_data)):
-            resp = await client.post(FUZZY_LOOKUP_URL, json={"raw_triple": FUZZY_TYPO_TRIPLE})
+    async def test_corrected_match_returns_suggestion(self, client: AsyncClient) -> None:
+        suggestion = "Did you mean: 'bayoux' → 'bayou'"
+        with (
+            patch(f"{FUZZY_MODULE}.fuzzy_resolve", return_value=(KNOWN_TOKEN, suggestion)),
+            patch(f"{DB_MODULE}.load_schedule", new=AsyncMock(return_value=LOADED_SCHEDULE)),
+        ):
+            resp = await client.post(FUZZY_URL, json={"raw_triple": "bayoux-groovy-crawfish"})
 
         assert resp.status_code == 200
         data = resp.json()
-        assert data["found"] is True
-        assert data["corrected"] is True
-        assert data["name"] == FUZZY_OWNER_NAME
+        assert data["token"] == KNOWN_TOKEN
+        assert data["suggestion"] == suggestion
 
     @pytest.mark.asyncio
-    async def test_valid_words_but_schedule_not_found(self, client: AsyncClient) -> None:
-        """Valid pool words but no schedule stored under that token."""
-        with patch(f"{DB_MODULE}.load_schedule", new=AsyncMock(return_value=None)):
-            resp = await client.post(FUZZY_LOOKUP_URL, json={"raw_triple": FUZZY_VALID_BUT_MISSING})
+    async def test_returns_404_when_fuzzy_resolve_raises(self, client: AsyncClient) -> None:
+        with patch(f"{FUZZY_MODULE}.fuzzy_resolve", side_effect=ValueError("no match")):
+            resp = await client.post(FUZZY_URL, json={"raw_triple": "xyzzy-xyzzy-xyzzy"})
 
-        assert resp.status_code == 200
-        data = resp.json()
-        assert data["found"] is False
-        assert data["name"] == ""
-        assert data["token"] in (FUZZY_VALID_BUT_MISSING, FUZZY_SORTED_MISSING)
+        assert resp.status_code == 404
 
     @pytest.mark.asyncio
-    async def test_unresolvable_word_returns_400(self, client: AsyncClient) -> None:
-        """Word with edit distance > 1 from all pool words returns 400."""
-        resp = await client.post(FUZZY_LOOKUP_URL, json={"raw_triple": FUZZY_BAD_WORD_TRIPLE})
-        assert resp.status_code == 400
+    async def test_returns_404_when_resolved_token_not_in_db(self, client: AsyncClient) -> None:
+        with (
+            patch(f"{FUZZY_MODULE}.fuzzy_resolve", return_value=(KNOWN_TOKEN, None)),
+            patch(f"{DB_MODULE}.load_schedule", new=AsyncMock(return_value=None)),
+        ):
+            resp = await client.post(FUZZY_URL, json={"raw_triple": KNOWN_TOKEN})
+
+        assert resp.status_code == 404
 
     @pytest.mark.asyncio
-    async def test_response_shape(self, client: AsyncClient) -> None:
-        """Response always has all required fields."""
-        with patch(f"{DB_MODULE}.load_schedule", new=AsyncMock(return_value=None)):
-            resp = await client.post(FUZZY_LOOKUP_URL, json={"raw_triple": FUZZY_VALID_BUT_MISSING})
+    async def test_missing_body_returns_422(self, client: AsyncClient) -> None:
+        resp = await client.post(FUZZY_URL)
+        assert resp.status_code == 422
 
-        assert resp.status_code == 200
-        data = resp.json()
-        for field in ("token", "corrected", "suggestion", "name", "found"):
-            assert field in data
+
+# ── Rate limiting ─────────────────────────────────────────────────────────────
+
+RATE_LIMIT_MODULE = "fqf.api.rate_limit"
+# HTTPX ASGITransport presents this IP to FastAPI's request.client
+HTTPX_CLIENT_IP = "127.0.0.1"
+
+
+class TestRateLimitIntegration:
+    """Verify that rate-limit checks are wired into the schedule endpoints.
+
+    The rate limiter itself is tested in test_rate_limit.py. These tests confirm
+    that exceeding the limits produces 429 responses from the real app.
+    """
+
+    @pytest.mark.asyncio
+    async def test_create_returns_429_after_hourly_limit(self, client: AsyncClient) -> None:
+        import time
+        from collections import deque
+
+        import fqf.api.rate_limit as rl_module
+        from fqf.api.rate_limit import CREATES_PER_HOUR
+
+        rl_module._create_windows.clear()
+        rl_module._global_windows.clear()
+
+        now = time.time()
+        rl_module._create_windows[HTTPX_CLIENT_IP] = deque([now] * CREATES_PER_HOUR)
+
+        with patch(f"{DB_MODULE}.create_schedule", new=AsyncMock(return_value=FAKE_TOKEN)):
+            resp = await client.post(SCHEDULE_URL, json={"name": SAMPLE_NAME})
+
+        assert resp.status_code == 429
+        rl_module._create_windows.clear()
+        rl_module._global_windows.clear()
+
+    @pytest.mark.asyncio
+    async def test_get_schedule_returns_429_after_global_limit(self, client: AsyncClient) -> None:
+        import time
+        from collections import deque
+
+        import fqf.api.rate_limit as rl_module
+        from fqf.api.rate_limit import REQUESTS_PER_MINUTE
+
+        rl_module._create_windows.clear()
+        rl_module._global_windows.clear()
+
+        now = time.time()
+        rl_module._global_windows[HTTPX_CLIENT_IP] = deque([now] * REQUESTS_PER_MINUTE)
+
+        with patch(f"{DB_MODULE}.load_schedule", new=AsyncMock(return_value=([], "", [], ""))):
+            resp = await client.get(f"{SCHEDULE_URL}/{FAKE_TOKEN}")
+
+        assert resp.status_code == 429
+        rl_module._create_windows.clear()
+        rl_module._global_windows.clear()

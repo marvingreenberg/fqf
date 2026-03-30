@@ -1,6 +1,7 @@
 import type {
     ActListResponse,
     ActDetail,
+    FuzzyLookupResponse,
     ScheduleResponse,
     ScheduleUpdate,
     TokenResponse,
@@ -38,13 +39,41 @@ export async function getAct(slug: string): Promise<ActDetail> {
     return fetchJson<ActDetail>(`${BASE}/acts/${slug}`);
 }
 
-export async function createSchedule(name?: string): Promise<TokenResponse> {
-    const body = name ? JSON.stringify({ name }) : undefined;
+export async function createSchedule(
+    name: string,
+    fingerprintHash?: string,
+    counter?: number
+): Promise<TokenResponse> {
+    const body = JSON.stringify({
+        name,
+        ...(fingerprintHash !== undefined ? { fingerprint_hash: fingerprintHash } : {}),
+        ...(counter !== undefined ? { counter } : {})
+    });
     return fetchJson<TokenResponse>(`${BASE}/schedule`, {
         method: 'POST',
-        headers: body ? { 'Content-Type': 'application/json' } : undefined,
+        headers: { 'Content-Type': 'application/json' },
         body
     });
+}
+
+export async function fuzzyLookup(rawTriple: string): Promise<FuzzyLookupResponse> {
+    // Backend returns { token, suggestion } — we enrich to the full FuzzyLookupResponse shape
+    const raw = await fetchJson<{ token: string; suggestion: string | null }>(
+        `${BASE}/schedule/fuzzy-lookup`,
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ raw_triple: rawTriple })
+        }
+    );
+    const schedule = await fetchJson<ScheduleResponse>(`${BASE}/schedule/${raw.token}`);
+    return {
+        token: raw.token,
+        found: true,
+        corrected: raw.suggestion !== null,
+        suggestion: raw.suggestion ?? '',
+        name: schedule.name
+    };
 }
 
 export async function loadSchedule(token: string): Promise<ScheduleResponse> {

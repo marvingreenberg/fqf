@@ -1,62 +1,117 @@
 <script lang="ts">
-    import { createSchedule } from '$lib/api';
+    import { onMount } from 'svelte';
+    import { createSchedule, fuzzyLookup, loadSharedSchedule } from '$lib/api';
+    import { getFingerprint } from '$lib/fingerprint';
     import { appState } from '$lib/stores.svelte';
-
-    type GateMode = 'choose' | 'enter-token' | 'creating';
+    import { FINGERPRINT_COUNTER_KEY } from '$lib/types';
 
     interface Props {
         onconfirmed?: () => void;
+        pendingShareId?: string | null;
+        pendingShareName?: string | null;
     }
 
-    let { onconfirmed }: Props = $props();
+    let { onconfirmed, pendingShareId = null, pendingShareName = null }: Props = $props();
 
-    let mode = $state<GateMode>('choose');
-    let tokenInput = $state('');
-    let nameInput = $state('');
+    // null = not yet checked (pending), true/false = resolved after mount
+    // Start as null only when there is a share to validate, otherwise false (no share)
+    let shareValid = $state<boolean | null>(null);
+    let shareValidName = $state<string>('');
+
+    let nameInput = $state(appState.name ?? '');
+    let tripleInput = $state('');
     let errorMsg = $state('');
+    let shareError = $state('');
     let loading = $state(false);
 
-    // Pre-fill if a token was found in localStorage
+    // Detect returning user (has a stored triple pre-filled)
+    const isReturning = $derived(!!appState.token);
+
+    // Pre-fill triple if a token was found in localStorage
     $effect(() => {
-        if (appState.token) {
-            tokenInput = appState.token;
-            mode = 'enter-token';
+        if (appState.token) tripleInput = appState.token;
+    });
+
+    onMount(async () => {
+        if (!pendingShareId) {
+            shareValid = false;
+            return;
+        }
+        try {
+            const resp = await loadSharedSchedule(pendingShareId);
+            shareValidName = pendingShareName ?? resp.name;
+            shareValid = true;
+        } catch {
+            shareValid = false;
+            shareError = '(!) Share not found';
         }
     });
 
-    async function handleConfirmToken(): Promise<void> {
-        const trimmed = tokenInput.trim().toLowerCase();
-        if (!trimmed) {
-            errorMsg = 'Please enter your fest schedule identity.';
+    function validateName(): boolean {
+        if (!nameInput.trim()) {
+            errorMsg = 'Please enter a name before continuing.';
+            return false;
+        }
+        return true;
+    }
+
+    async function handleNewSchedule(): Promise<void> {
+        if (!validateName()) return;
+        loading = true;
+        errorMsg = '';
+        try {
+            const fingerprintHash = await getFingerprint();
+            const rawCounter = localStorage.getItem(FINGERPRINT_COUNTER_KEY);
+            const counter = rawCounter !== null ? parseInt(rawCounter, 10) || 0 : 0;
+
+            const resp =
+                fingerprintHash !== null
+                    ? await createSchedule(nameInput.trim(), fingerprintHash, counter)
+                    : await createSchedule(nameInput.trim());
+
+            const nextCounter = counter + 1;
+            localStorage.setItem(FINGERPRINT_COUNTER_KEY, String(nextCounter));
+            await appState.confirm(resp.token, nameInput.trim(), nextCounter);
+            onconfirmed?.();
+        } catch {
+            errorMsg = 'Could not create schedule. Please try again.';
+        } finally {
+            loading = false;
+        }
+    }
+
+    async function handleLoadSchedule(): Promise<void> {
+        if (!validateName()) return;
+        const triple = tripleInput.trim();
+        if (!triple) {
+            errorMsg = 'Please enter your secret words.';
             return;
         }
         loading = true;
         errorMsg = '';
         try {
-            await appState.confirm(trimmed, nameInput.trim() || undefined);
+            const result = await fuzzyLookup(triple);
+            if (result.corrected) {
+                // Auto-fill the corrected triple so the user sees what was matched
+                tripleInput = result.token;
+            }
+            await appState.confirm(result.token, nameInput.trim() || result.name);
             onconfirmed?.();
         } catch {
-            errorMsg = 'Could not find that identity. Check your secret words and try again.';
+            errorMsg = 'Schedule not found. Check your secret words.';
         } finally {
             loading = false;
         }
     }
 
-    async function handleCreateNew(): Promise<void> {
-        loading = true;
-        errorMsg = '';
-        try {
-            const resp = await createSchedule(nameInput.trim() || undefined);
-            tokenInput = resp.token;
-            await appState.confirm(resp.token, nameInput.trim() || undefined);
-            onconfirmed?.();
-        } finally {
-            loading = false;
-        }
+    function handleViewShareOnly(): void {
+        if (!pendingShareId) return;
+        // Navigate to view-only route (Task 28)
+        window.location.href = `/fq2026/${pendingShareId}`;
     }
 
     function handleKeydown(e: KeyboardEvent): void {
-        if (e.key === 'Enter') handleConfirmToken();
+        if (e.key === 'Enter') handleLoadSchedule();
     }
 </script>
 
@@ -75,108 +130,83 @@
         </div>
 
         <div class="fqf-dialog-body flex flex-col gap-3">
-            <!-- Optional name field always visible -->
+            <!-- Share-not-found banner (Cases 3 & 6) -->
+            {#if shareValid === false && shareError}
+                <p class="text-sm font-medium" style="color: #c05000; font-style: italic;">
+                    {shareError}
+                </p>
+            {/if}
+
+            <!-- Name field — REQUIRED -->
             <div>
                 <label
                     for="identity-name"
                     class="block text-xs font-semibold mb-1"
                     style="color: var(--mg-purple-deep);"
                 >
-                    Display name for sharing (optional)
+                    Your name (required)
                 </label>
                 <input
                     id="identity-name"
                     class="input w-full text-sm"
                     type="text"
-                    placeholder="e.g. JazzFan, MG, …"
+                    placeholder="ANY name! Fred, BooBoo — just for sharing your schedule"
                     bind:value={nameInput}
                 />
             </div>
 
-            {#if mode === 'choose'}
-                <button class="fqf-btn-gold" onclick={handleCreateNew} disabled={loading}>
-                    {loading ? 'Creating…' : 'Create new identity'}
-                </button>
+            <!-- Load schedule section -->
+            <div>
                 <button
-                    class="fqf-btn-outline"
-                    onclick={() => {
-                        mode = 'enter-token';
-                    }}
+                    class="fqf-btn-outline w-full"
+                    onclick={handleLoadSchedule}
                     disabled={loading}
                 >
-                    I have a fest schedule identity
+                    {loading ? 'Loading…' : 'Load schedule'}
                 </button>
-            {:else if mode === 'enter-token'}
-                <div>
-                    <label
-                        for="identity-token"
-                        class="block text-xs font-semibold mb-1"
-                        style="color: var(--mg-purple-deep);"
-                    >
-                        Your secret words
-                    </label>
-                    <input
-                        id="identity-token"
-                        class="input w-full text-sm mb-1"
-                        type="text"
-                        placeholder="Your three-word identity…"
-                        bind:value={tokenInput}
-                        onkeydown={handleKeydown}
-                    />
-                </div>
+                <p class="text-xs mt-1" style="color: rgba(74,26,107,0.6); font-style: italic;">
+                    {isReturning
+                        ? 'Load existing schedule, or enter new one'
+                        : 'Load existing schedule if you have one'}
+                </p>
+                <input
+                    id="identity-triple"
+                    class="input w-full text-sm mt-1"
+                    type="text"
+                    placeholder="use your secret words"
+                    style={tripleInput ? 'color: #1a1a1a;' : ''}
+                    bind:value={tripleInput}
+                    onkeydown={handleKeydown}
+                />
+            </div>
 
-                {#if errorMsg}
-                    <p class="text-sm" style="color: #dc2626;">{errorMsg}</p>
-                {/if}
-
-                <button class="fqf-btn-primary" onclick={handleConfirmToken} disabled={loading}>
-                    {loading ? 'Loading…' : 'Confirm identity'}
-                </button>
-
-                <button
-                    class="fqf-btn-ghost"
-                    onclick={() => {
-                        mode = 'choose';
-                        errorMsg = '';
-                        tokenInput = '';
-                    }}
-                    disabled={loading}
-                >
-                    {errorMsg ? 'Start over' : 'Back'}
-                </button>
+            {#if errorMsg}
+                <p class="text-sm" style="color: #dc2626;">{errorMsg}</p>
             {/if}
 
-            {#if appState.pendingShareId}
-                <div
-                    class="mt-1 pt-3 border-t text-center"
-                    style="border-color: rgba(74, 26, 107, 0.15);"
-                >
-                    <p class="text-xs mb-2" style="color: rgba(74, 26, 107, 0.6);">
-                        A shared schedule is waiting for you.
+            <!-- New Schedule button -->
+            <div>
+                <button class="fqf-btn-gold" onclick={handleNewSchedule} disabled={loading}>
+                    {loading ? 'Creating…' : 'New Schedule'}
+                </button>
+                {#if shareValid === true}
+                    <p class="text-xs mt-1" style="color: rgba(74,26,107,0.6); font-style: italic;">
+                        Create a schedule to allow comparing with {shareValidName}
                     </p>
-                    <button
-                        class="fqf-btn-ghost text-sm"
-                        onclick={async () => {
-                            if (!appState.pendingShareId) return;
-                            const { loadSharedSchedule } = await import('$lib/api');
-                            const resp = await loadSharedSchedule(appState.pendingShareId);
-                            await appState.addSharedSchedule({
-                                share_id: appState.pendingShareId,
-                                name: appState.pendingShareName ?? resp.name,
-                                picks: resp.picks,
-                                acts: resp.acts
-                            });
-                            appState.pendingShareId = null;
-                            appState.pendingShareName = null;
-                            // Confirm as guest — no token required
-                            appState.confirmed = true;
-                            appState.viewMode = 'share';
-                            onconfirmed?.();
-                        }}
+                {/if}
+            </div>
+
+            <!-- View-only share option (Cases 2 & 3) -->
+            {#if pendingShareId && shareValid === true}
+                <button class="fqf-btn-ghost" onclick={handleViewShareOnly} disabled={loading}>
+                    View {shareValidName}'s schedule?
+                    <span
+                        class="block text-xs"
+                        style="color: rgba(74,26,107,0.5); font-style: italic;"
                     >
-                        View shared schedule only (no login)
-                    </button>
-                </div>
+                        view only, no changes can be made
+                    </span>
+                </button>
             {/if}
         </div>
     </div>

@@ -1,119 +1,71 @@
-"""In-memory rate limiting for the FQF API."""
+"""Simple in-memory sliding-window rate limiter for FastAPI endpoints."""
 
-import os
 import time
-from collections import defaultdict
-from dataclasses import dataclass, field
+from collections import defaultdict, deque
 
 from fastapi import HTTPException, Request
 
-# Maximum schedule creates per IP per hour
-CREATE_MAX_PER_HOUR = 10
-# Maximum schedules per fingerprint (reject when counter >= this)
-CREATE_MAX_PER_FINGERPRINT = 5
-# Maximum load/fuzzy-lookup requests per IP per minute
-LOAD_MAX_PER_MINUTE = 30
-# General rate limit for all endpoints
-GENERAL_MAX_PER_MINUTE = 60
+# Per-IP limits
+CREATES_PER_HOUR = 10
+REQUESTS_PER_MINUTE = 60
 
-_RATE_LIMIT_DISABLED_ENV = "DISABLE_RATE_LIMIT"
-_TOO_MANY_REQUESTS_STATUS = 429
-_RATE_LIMIT_DETAIL = "Too many requests"
-_FINGERPRINT_LIMIT_DETAIL = "Schedule limit reached for this browser"
+# Window durations in seconds
+HOUR_WINDOW = 3600
+MINUTE_WINDOW = 60
 
-_SECONDS_PER_MINUTE = 60
-_SECONDS_PER_HOUR = 3600
+HTTP_TOO_MANY_REQUESTS = 429
+RATE_LIMIT_DETAIL_CREATE = "Too many schedule creations. Try again later."
+RATE_LIMIT_DETAIL_GLOBAL = "Too many requests. Try again later."
 
-
-def _rate_limiting_enabled() -> bool:
-    return os.environ.get(_RATE_LIMIT_DISABLED_ENV, "").lower() not in ("1", "true", "yes")
+# Sliding-window deques: ip -> deque of timestamps (float, seconds since epoch)
+_create_windows: dict[str, deque[float]] = defaultdict(deque)
+_global_windows: dict[str, deque[float]] = defaultdict(deque)
 
 
-@dataclass
-class _WindowCounter:
-    """Sliding-window request counter for one key."""
-
-    timestamps: list[float] = field(default_factory=list)
-
-    def count_in_window(self, window_seconds: int, now: float) -> int:
-        cutoff = now - window_seconds
-        self.timestamps = [t for t in self.timestamps if t > cutoff]
-        return len(self.timestamps)
-
-    def record(self, now: float) -> None:
-        self.timestamps.append(now)
+def _evict_old(dq: deque[float], window: int, now: float) -> None:
+    """Remove timestamps older than `window` seconds from the left of the deque."""
+    cutoff = now - window
+    while dq and dq[0] < cutoff:
+        dq.popleft()
 
 
-class RateLimiter:
-    """Thread-safe (asyncio-safe for single-process uvicorn) in-memory rate limiter.
-
-    Tracks sliding-window request counts per key. Safe for concurrent async usage
-    because CPython's GIL protects the dict operations; no explicit lock needed
-    for single-process deployments.
-    """
-
-    def __init__(self) -> None:
-        self._counters: dict[str, _WindowCounter] = defaultdict(_WindowCounter)
-
-    def check(self, key: str, max_requests: int, window_seconds: int) -> None:
-        """Raise HTTPException(429) if the key has exceeded max_requests in window_seconds.
-
-        Records the current request if it is within the limit.
-        """
-        if not _rate_limiting_enabled():
-            return
-        now = time.monotonic()
-        counter = self._counters[key]
-        count = counter.count_in_window(window_seconds, now)
-        if count >= max_requests:
-            raise HTTPException(status_code=_TOO_MANY_REQUESTS_STATUS, detail=_RATE_LIMIT_DETAIL)
-        counter.record(now)
-
-    def reset(self, key: str) -> None:
-        """Remove all recorded timestamps for a key (useful in tests)."""
-        self._counters.pop(key, None)
+def check_create_rate(ip: str) -> None:
+    """Raise 429 if this IP has exceeded the create-schedule rate limit."""
+    now = time.time()
+    dq = _create_windows[ip]
+    _evict_old(dq, HOUR_WINDOW, now)
+    if len(dq) >= CREATES_PER_HOUR:
+        raise HTTPException(status_code=HTTP_TOO_MANY_REQUESTS, detail=RATE_LIMIT_DETAIL_CREATE)
+    dq.append(now)
 
 
-# Module-level singleton — shared across all requests in one process
-_limiter = RateLimiter()
+def check_global_rate(ip: str) -> None:
+    """Raise 429 if this IP has exceeded the global per-minute rate limit."""
+    now = time.time()
+    dq = _global_windows[ip]
+    _evict_old(dq, MINUTE_WINDOW, now)
+    if len(dq) >= REQUESTS_PER_MINUTE:
+        raise HTTPException(status_code=HTTP_TOO_MANY_REQUESTS, detail=RATE_LIMIT_DETAIL_GLOBAL)
+    dq.append(now)
 
 
 def _client_ip(request: Request) -> str:
-    """Extract the best-available client IP from the request."""
-    forwarded_for = request.headers.get("X-Forwarded-For")
+    """Extract the client IP from the request, respecting X-Forwarded-For."""
+    forwarded_for = request.headers.get("x-forwarded-for")
     if forwarded_for:
-        # X-Forwarded-For may be a comma-separated list; leftmost is the originating client
         return forwarded_for.split(",")[0].strip()
     if request.client:
         return request.client.host
     return "unknown"
 
 
-async def check_create_ip_limit(request: Request) -> None:
-    """Dependency: enforce CREATE_MAX_PER_HOUR creates per IP."""
-    key = f"create:ip:{_client_ip(request)}"
-    _limiter.check(key, CREATE_MAX_PER_HOUR, _SECONDS_PER_HOUR)
+async def global_rate_limit_dependency(request: Request) -> None:
+    """FastAPI dependency: apply the global per-minute rate limit."""
+    check_global_rate(_client_ip(request))
 
 
-async def check_load_limit(request: Request) -> None:
-    """Dependency: enforce LOAD_MAX_PER_MINUTE load/fuzzy-lookup requests per IP."""
-    key = f"load:ip:{_client_ip(request)}"
-    _limiter.check(key, LOAD_MAX_PER_MINUTE, _SECONDS_PER_MINUTE)
-
-
-async def check_general_limit(request: Request) -> None:
-    """Dependency: enforce GENERAL_MAX_PER_MINUTE requests per IP for all endpoints."""
-    key = f"general:ip:{_client_ip(request)}"
-    _limiter.check(key, GENERAL_MAX_PER_MINUTE, _SECONDS_PER_MINUTE)
-
-
-def check_fingerprint_limit(counter: int) -> None:
-    """Raise HTTPException(429) if a client-supplied counter has reached the per-fingerprint cap.
-
-    The counter is provided by the client and represents how many schedules this browser
-    fingerprint has already created. Reject before generating when counter >= CREATE_MAX_PER_FINGERPRINT.
-    """
-    if not _rate_limiting_enabled():
-        return
-    if counter >= CREATE_MAX_PER_FINGERPRINT:
-        raise HTTPException(status_code=_TOO_MANY_REQUESTS_STATUS, detail=_FINGERPRINT_LIMIT_DETAIL)
+async def create_rate_limit_dependency(request: Request) -> None:
+    """FastAPI dependency: apply both global and create-specific rate limits."""
+    ip = _client_ip(request)
+    check_global_rate(ip)
+    check_create_rate(ip)

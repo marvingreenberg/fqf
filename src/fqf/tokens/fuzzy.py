@@ -1,68 +1,83 @@
-"""Fuzzy matching for NOLA-themed triple tokens."""
+"""Fuzzy resolution of raw word-triple input to canonical tokens."""
 
 import re
 
-from fqf.tokens.words import POOL_MUSIC, POOL_NOLA, POOL_PLACES, levenshtein_distance
+from fqf.tokens.words import POOL_MUSIC, POOL_NOLA, POOL_PLACES
 
-_ALL_WORDS: list[str] = POOL_PLACES + POOL_MUSIC + POOL_NOLA
+_ALL_POOLS: list[list[str]] = [POOL_PLACES, POOL_MUSIC, POOL_NOLA]
 
-EXPECTED_WORD_COUNT = 3
+# Maximum Levenshtein distance allowed for a fuzzy correction
 MAX_CORRECTION_DISTANCE = 1
 
 _SPLIT_PATTERN = re.compile(r"[^a-zA-Z]+")
 
 
+def _levenshtein(a: str, b: str) -> int:
+    """Compute Levenshtein edit distance between two strings."""
+    if a == b:
+        return 0
+    if not a:
+        return len(b)
+    if not b:
+        return len(a)
+    prev = list(range(len(b) + 1))
+    for i, ca in enumerate(a, 1):
+        curr = [i] + [0] * len(b)
+        for j, cb in enumerate(b, 1):
+            curr[j] = min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + (ca != cb))
+        prev = curr
+    return prev[len(b)]
+
+
 def normalize_triple(raw: str) -> list[str]:
-    """Split and lowercase a raw triple string into exactly 3 words.
+    """Split on hyphens/spaces/non-alpha, lowercase, return list of words."""
+    return [w.lower() for w in _SPLIT_PATTERN.split(raw) if w]
 
-    Splits on hyphens, spaces, or any non-alpha character.
-    Raises ValueError if the result is not exactly 3 non-empty words.
+
+def find_closest_word(word: str, pools: list[list[str]]) -> tuple[str, int]:
+    """Find the closest word across all pools.
+
+    Returns (word, distance) where distance is the minimum Levenshtein distance found.
+    Exact matches always return distance 0.
     """
-    words = [w for w in _SPLIT_PATTERN.split(raw.lower()) if w]
-    if len(words) != EXPECTED_WORD_COUNT:
-        raise ValueError(f"Expected {EXPECTED_WORD_COUNT} words, got {len(words)}: {raw!r}")
-    return words
+    best_word = word
+    best_dist = len(word) + 1  # worse than any real distance
+    for pool in pools:
+        for candidate in pool:
+            dist = _levenshtein(word, candidate)
+            if dist < best_dist:
+                best_dist = dist
+                best_word = candidate
+    return best_word, best_dist
 
 
-def correct_word(word: str) -> tuple[str, bool]:
-    """Match a word to the closest pool word, correcting at most 1 edit.
+def fuzzy_resolve(raw: str) -> tuple[str, str | None]:
+    """Resolve a raw triple input to a canonical token.
 
-    Returns (word, False) if exact match exists.
-    Returns (closest_word, True) if closest match has distance <= 1.
-    Raises ValueError if closest match has distance > 1.
-    """
-    if word in _ALL_WORDS:
-        return word, False
-
-    closest_word = min(_ALL_WORDS, key=lambda w: levenshtein_distance(word, w))
-    distance = levenshtein_distance(word, closest_word)
-    if distance <= MAX_CORRECTION_DISTANCE:
-        return closest_word, True
-    raise ValueError(
-        f"Cannot match word {word!r}: closest is {closest_word!r} (distance {distance})"
-    )
-
-
-def fuzzy_resolve_triple(raw: str) -> tuple[str, str, bool]:
-    """Resolve a raw triple string to canonical tokens.
-
-    Returns (as_entered_token, sorted_token, was_corrected) where:
-    - as_entered_token: corrected words joined with hyphens in input order
-    - sorted_token: same words sorted alphabetically and joined with hyphens
-    - was_corrected: True if any word required fuzzy correction
-
-    Raises ValueError if the input doesn't have exactly 3 words or a word
-    cannot be matched within 1 edit distance.
+    Returns (resolved_token, suggestion_or_none).
+    - If all words match exactly: (token, None)
+    - If all words correct within MAX_CORRECTION_DISTANCE: (corrected_token, "Did you mean: ...")
+    - If any word is too far from any pool word: raises ValueError
     """
     words = normalize_triple(raw)
-    corrected_words = []
-    any_corrected = False
-    for word in words:
-        resolved, was_corrected = correct_word(word)
-        corrected_words.append(resolved)
-        if was_corrected:
-            any_corrected = True
+    if len(words) != 3:
+        raise ValueError(f"Expected 3 words, got {len(words)}: {raw!r}")
 
-    as_entered_token = "-".join(corrected_words)
-    sorted_token = "-".join(sorted(corrected_words))
-    return as_entered_token, sorted_token, any_corrected
+    corrected: list[str] = []
+    corrections_made: list[str] = []
+
+    for word in words:
+        closest, dist = find_closest_word(word, _ALL_POOLS)
+        if dist > MAX_CORRECTION_DISTANCE:
+            raise ValueError(
+                f"No pool word close enough to {word!r} (nearest: {closest!r}, dist={dist})"
+            )
+        corrected.append(closest)
+        if dist > 0:
+            corrections_made.append(f"{word!r} → {closest!r}")
+
+    token = "-".join(sorted(corrected))
+    if corrections_made:
+        suggestion = "Did you mean: " + ", ".join(corrections_made)
+        return token, suggestion
+    return token, None
