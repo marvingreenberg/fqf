@@ -47,11 +47,11 @@ class TestGenerateToken:
         assert len(tokens) == GENERATION_COUNT  # no collisions expected at this scale
 
     def test_words_from_pools(self) -> None:
+        # Tokens are sorted alphabetically, so parts don't align with fixed pool positions.
         token = generate_token()
         parts = token.split("-")
-        assert parts[0] in POOL_PLACES
-        assert parts[1] in POOL_MUSIC
-        assert parts[2] in POOL_NOLA
+        all_words = set(POOL_PLACES) | set(POOL_MUSIC) | set(POOL_NOLA)
+        assert all(p in all_words for p in parts)
 
 
 class TestValidateTokenFormat:

@@ -1,10 +1,16 @@
 """Schedule persistence API endpoints."""
 
-from fastapi import APIRouter, HTTPException, Query, Request
+from typing import Annotated
 
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+
+from fqf.api.rate_limit import create_rate_limit_dependency, global_rate_limit_dependency
 from fqf.api.schemas import (
     ActSummary,
     AddShareRequest,
+    CreateScheduleRequest,
+    FuzzyLookupRequest,
+    FuzzyLookupResponse,
     MergeEntry,
     MergeResponse,
     ScheduleResponse,
@@ -25,14 +31,19 @@ from fqf.db import (
     save_picks,
 )
 from fqf.schedule import get_by_slug
+from fqf.tokens.fuzzy import fuzzy_resolve
 
 router = APIRouter(prefix="/api/v1/schedule", tags=["schedule"])
 
 NOT_FOUND_DETAIL = "Schedule not found"
 TOO_MANY_TOKENS_DETAIL = "Too many tokens"
+FUZZY_NO_MATCH_DETAIL = "No matching token found"
 MAX_MERGE_TOKENS = 5
 
 SHARE_PATH_PREFIX = "/s"
+
+_GlobalRateLimit = Annotated[None, Depends(global_rate_limit_dependency)]
+_CreateRateLimit = Annotated[None, Depends(create_rate_limit_dependency)]
 
 
 def _slug_to_summary(slug: str) -> ActSummary | None:
@@ -50,10 +61,13 @@ def _slug_to_summary(slug: str) -> ActSummary | None:
     )
 
 
-# IMPORTANT: /merge and /by-share/... must be defined before /{token} to avoid
-# those literal path segments being captured as a token parameter.
+# IMPORTANT: /merge, /fuzzy-lookup, and /by-share/... must be defined before /{token}
+# to avoid those literal path segments being captured as a token parameter.
 @router.get("/merge", response_model=MergeResponse)
-async def merge(tokens: str = Query(..., description="Comma-separated tokens")) -> MergeResponse:
+async def merge(
+    _rl: _GlobalRateLimit,
+    tokens: str = Query(..., description="Comma-separated tokens"),
+) -> MergeResponse:
     """Merge multiple schedules for comparison."""
     token_list = [t.strip() for t in tokens.split(",") if t.strip()]
     if len(token_list) > MAX_MERGE_TOKENS:
@@ -68,8 +82,31 @@ async def merge(tokens: str = Query(..., description="Comma-separated tokens")) 
     return MergeResponse(schedules=entries, acts=acts)
 
 
+@router.post("/fuzzy-lookup", response_model=FuzzyLookupResponse)
+async def fuzzy_lookup(
+    body: FuzzyLookupRequest,
+    _rl: _GlobalRateLimit,
+) -> FuzzyLookupResponse:
+    """Resolve a fuzzy word triple to a canonical token.
+
+    Tries exact match first, then 1-character corrections. Returns 404 if no
+    pool word is close enough.
+    """
+    try:
+        resolved_token, suggestion = fuzzy_resolve(body.raw_triple)
+    except ValueError:
+        raise HTTPException(status_code=404, detail=FUZZY_NO_MATCH_DETAIL)
+
+    result = await load_schedule(resolved_token)
+    if result is None:
+        # Try sorted order — fuzzy_resolve already sorts, but raw input might be sorted differently
+        raise HTTPException(status_code=404, detail=FUZZY_NO_MATCH_DETAIL)
+
+    return FuzzyLookupResponse(token=resolved_token, suggestion=suggestion)
+
+
 @router.get("/by-share/{share_id}", response_model=SharedScheduleResponse)
-async def load_by_share(share_id: str) -> SharedScheduleResponse:
+async def load_by_share(share_id: str, _rl: _GlobalRateLimit) -> SharedScheduleResponse:
     """Load a read-only schedule view by its share_id."""
     result = await load_schedule_by_share(share_id)
     if result is None:
@@ -80,14 +117,18 @@ async def load_by_share(share_id: str) -> SharedScheduleResponse:
 
 
 @router.post("", response_model=TokenResponse, status_code=201)
-async def create() -> TokenResponse:
+async def create(body: CreateScheduleRequest, _rl: _CreateRateLimit) -> TokenResponse:
     """Generate a new schedule with a NOLA-themed token."""
-    token = await create_schedule()
+    token = await create_schedule(
+        name=body.name,
+        fingerprint_hash=body.fingerprint_hash,
+        counter=body.counter,
+    )
     return TokenResponse(token=token)
 
 
 @router.post("/{token}/share", response_model=ShareResponse)
-async def share(token: str, request: Request) -> ShareResponse:
+async def share(token: str, request: Request, _rl: _GlobalRateLimit) -> ShareResponse:
     """Generate (or retrieve) a share_id for a schedule."""
     try:
         share_id = await create_share_id(token)
@@ -99,7 +140,7 @@ async def share(token: str, request: Request) -> ShareResponse:
 
 
 @router.get("/{token}", response_model=ScheduleResponse)
-async def load(token: str) -> ScheduleResponse:
+async def load(token: str, _rl: _GlobalRateLimit) -> ScheduleResponse:
     """Load a schedule by its token."""
     result = await load_schedule(token)
     if result is None:
@@ -113,7 +154,7 @@ async def load(token: str) -> ScheduleResponse:
 
 
 @router.put("/{token}", response_model=ScheduleResponse)
-async def save(token: str, body: ScheduleUpdate) -> ScheduleResponse:
+async def save(token: str, body: ScheduleUpdate, _rl: _GlobalRateLimit) -> ScheduleResponse:
     """Save picks (and optionally name) for an existing schedule."""
     success = await save_picks(token, body.picks, body.name)
     if not success:
@@ -131,7 +172,7 @@ async def save(token: str, body: ScheduleUpdate) -> ScheduleResponse:
 
 
 @router.post("/{token}/add-share", response_model=ScheduleResponse)
-async def add_share(token: str, body: AddShareRequest) -> ScheduleResponse:
+async def add_share(token: str, body: AddShareRequest, _rl: _GlobalRateLimit) -> ScheduleResponse:
     """Add a share reference to the user's schedule."""
     success = await add_share_to_schedule(token, body.share_id, body.name)
     if not success:
@@ -148,7 +189,7 @@ async def add_share(token: str, body: AddShareRequest) -> ScheduleResponse:
 
 
 @router.delete("/{token}/remove-share/{share_id}", response_model=ScheduleResponse)
-async def remove_share(token: str, share_id: str) -> ScheduleResponse:
+async def remove_share(token: str, share_id: str, _rl: _GlobalRateLimit) -> ScheduleResponse:
     """Remove a share reference from the user's schedule."""
     success = await remove_share_from_schedule(token, share_id)
     if not success:
