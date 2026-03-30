@@ -2,7 +2,7 @@ import type { ActSummary, SharedSchedule, ViewMode, MobileSortMode, ShareRef } f
 import { FESTIVAL_DATES, FINGERPRINT_COUNTER_KEY, IDENTITY_STORAGE_KEY } from '$lib/types';
 
 const SAVE_AFTER_CHANGES = 4;
-const SAVE_DEBOUNCE_MS = 10_000;
+const SAVE_DEBOUNCE_MS = 5_000;
 
 interface StoredIdentity {
     token: string;
@@ -155,6 +155,13 @@ class AppState {
         }
         if (this._saveTimeout) clearTimeout(this._saveTimeout);
         this._saveTimeout = setTimeout(() => this._flushSave(), SAVE_DEBOUNCE_MS);
+    }
+
+    setViewMode(mode: ViewMode): void {
+        if (this._unsavedChanges > 0) {
+            this._flushSave();
+        }
+        this.viewMode = mode;
     }
 
     async addSharedSchedule(schedule: SharedSchedule): Promise<void> {

@@ -90,7 +90,7 @@
     async function loadPendingShare(shareId: string, shareName: string | null): Promise<void> {
         // Skip if this is our own share link
         if (appState.ownShareId && shareId === appState.ownShareId) {
-            appState.viewMode = 'my-schedule';
+            appState.setViewMode('my-schedule');
             return;
         }
         try {
@@ -101,7 +101,7 @@
                 picks: resp.picks,
                 acts: resp.acts
             });
-            appState.viewMode = 'share';
+            appState.setViewMode('share');
         } catch {
             // Share not found — silently ignore
         }
@@ -179,7 +179,7 @@
                     class="fqf-view-pill {appState.viewMode === tab.value
                         ? 'fqf-view-pill-active'
                         : 'fqf-view-pill-inactive'}"
-                    onclick={() => (appState.viewMode = tab.value)}
+                    onclick={() => appState.setViewMode(tab.value)}
                 >
                     {tab.label()}
                 </button>
