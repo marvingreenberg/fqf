@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { page } from '$app/stores';
+    import { goto } from '$app/navigation';
     import { appState } from '$lib/stores.svelte';
     import AvatarMenu from '$lib/components/AvatarMenu.svelte';
     import IdentityGate from '$lib/components/IdentityGate.svelte';
@@ -11,7 +12,9 @@
     let initializing = $state(true);
 
     // Detect view-only share route — no identity gate needed
-    const isViewOnlyRoute = $derived($page.url.pathname !== '/fq2026' && $page.url.pathname !== '/fq2026/');
+    const isViewOnlyRoute = $derived(
+        $page.url.pathname !== '/fq2026' && $page.url.pathname !== '/fq2026/'
+    );
 
     // Gate shows when: not confirmed AND not initializing AND not on a view-only share route
     const gateVisible = $derived(!appState.confirmed && !initializing && !isViewOnlyRoute);
@@ -34,6 +37,12 @@
             }
         }
         initializing = false;
+
+        // If a share link was opened and the user is still not confirmed, redirect to
+        // the view-only route so ShareLoginPane can handle the context-specific login flow.
+        if (appState.pendingShareId && !appState.confirmed) {
+            goto(`/fq2026/${appState.pendingShareId}`);
+        }
     });
 </script>
 

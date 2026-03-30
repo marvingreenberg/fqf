@@ -139,7 +139,9 @@
                     class="input w-full text-sm"
                     type="text"
                     placeholder="enter your secret words"
-                    style="{tripleInput ? 'color: #1a1a1a;' : 'color: rgba(74,26,107,0.4); font-style: italic; font-size: 0.8rem;'}"
+                    style={tripleInput
+                        ? 'color: #1a1a1a;'
+                        : 'color: rgba(74,26,107,0.4); font-style: italic; font-size: 0.8rem;'}
                     bind:value={tripleInput}
                     onkeydown={handleKeydown}
                 />
@@ -174,7 +176,9 @@
                         class="input flex-1 text-sm"
                         type="text"
                         placeholder="Fred, BooBoo, …"
-                        style={nameInput ? '' : 'color: rgba(74,26,107,0.4); font-style: italic; font-size: 0.8rem;'}
+                        style={nameInput
+                            ? ''
+                            : 'color: rgba(74,26,107,0.4); font-style: italic; font-size: 0.8rem;'}
                         bind:value={nameInput}
                     />
                 </div>

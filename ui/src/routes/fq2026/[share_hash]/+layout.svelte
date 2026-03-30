@@ -16,11 +16,11 @@
         </div>
         <div class="flex items-center gap-3">
             <button
-                class="text-xs underline"
-                style="color: rgba(245,215,110,0.8);"
+                class="text-sm font-bold underline"
+                style="color: rgba(245,215,110,0.9);"
                 onclick={() => goto(MAIN_ROUTE)}
             >
-                ← Back to my schedule
+                ← Back to Start
             </button>
         </div>
     </header>

@@ -144,7 +144,9 @@
             refreshStatus = 'Refresh failed';
         } finally {
             refreshing = false;
-            setTimeout(() => { refreshStatus = null; }, REFRESH_STATUS_DURATION_MS);
+            setTimeout(() => {
+                refreshStatus = null;
+            }, REFRESH_STATUS_DURATION_MS);
         }
     }
 </script>
@@ -164,7 +166,12 @@
                     {refreshing ? '⟳' : '↻'} Refresh
                 </button>
                 {#if refreshStatus}
-                    <span class="text-xs font-medium" style="color: {refreshStatus === 'Updated!' ? 'var(--mg-green-deep)' : 'rgba(74,26,107,0.5)'};">
+                    <span
+                        class="text-xs font-medium"
+                        style="color: {refreshStatus === 'Updated!'
+                            ? 'var(--mg-green-deep)'
+                            : 'rgba(74,26,107,0.5)'};"
+                    >
                         {refreshStatus}
                     </span>
                 {/if}

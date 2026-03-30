@@ -9,6 +9,7 @@
     import MobileSchedule from '$lib/components/MobileSchedule.svelte';
     import MySchedule from '$lib/components/MySchedule.svelte';
     import MapView from '$lib/components/MapView.svelte';
+    import ShareLoginPane from '$lib/components/ShareLoginPane.svelte';
 
     const MOBILE_BREAKPOINT = 768;
     const CACHE_TTL_MS = 10 * 60 * 1000;
@@ -33,6 +34,8 @@
     let sharedLoading = $state(true);
     let sharedError = $state<string | null>(null);
     let ownerName = $state('');
+    // Show the login/context pane until the user dismisses it
+    let showLoginPane = $state(true);
     let picks = $state<Set<string>>(new Set());
     let detailAct = $state<ActDetail | null>(null);
     let detailLoading = $state(false);
@@ -153,6 +156,18 @@
         <a href="/fq2026" class="text-sm underline" style="color: var(--mg-purple);">
             Go to my schedule
         </a>
+    </div>
+{:else if showLoginPane}
+    <!-- Context-specific login pane — shown until the user dismisses via "See" -->
+    <div
+        class="fixed inset-0 z-50 flex items-center justify-center"
+        style="background: rgba(26, 10, 40, 0.88);"
+    >
+        <ShareLoginPane
+            shareName={ownerName}
+            shareHash={$page.params.share_hash}
+            ondismiss={() => (showLoginPane = false)}
+        />
     </div>
 {:else}
     <div class="flex flex-col h-full overflow-hidden">
