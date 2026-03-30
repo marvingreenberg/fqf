@@ -139,7 +139,7 @@
                     class="input w-full text-sm"
                     type="text"
                     placeholder="enter your secret words"
-                    style={tripleInput ? 'color: #1a1a1a;' : ''}
+                    style="{tripleInput ? 'color: #1a1a1a;' : 'color: rgba(74,26,107,0.4); font-style: italic; font-size: 0.8rem;'}"
                     bind:value={tripleInput}
                     onkeydown={handleKeydown}
                 />
@@ -151,7 +151,7 @@
             <!-- New schedule section -->
             <div class="flex flex-col gap-2">
                 <p class="text-xs" style="color: rgba(74,26,107,0.65); font-style: italic;">
-                    Create a new schedule. Name is just for sharing, a nickname is fine
+                    Create a schedule. Name for sharing, a nickname is fine
                 </p>
                 {#if shareValid === true}
                     <p class="text-xs" style="color: rgba(74,26,107,0.6); font-style: italic;">
@@ -174,6 +174,7 @@
                         class="input flex-1 text-sm"
                         type="text"
                         placeholder="Fred, BooBoo, …"
+                        style={nameInput ? '' : 'color: rgba(74,26,107,0.4); font-style: italic; font-size: 0.8rem;'}
                         bind:value={nameInput}
                     />
                 </div>

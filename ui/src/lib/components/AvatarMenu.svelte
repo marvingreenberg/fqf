@@ -219,8 +219,8 @@
                     {logoutToken}
                 </p>
                 <p class="text-sm" style="color: var(--mg-purple-deep);">
-                    You have to remember those secret words. You can load it on this or another
-                    device.
+                    🤔 You have to remember those secret words! You can load your schedule on this
+                    or another device.
                 </p>
                 <button class="fqf-btn-gold w-full" onclick={handleLogoutModalOk}>OK</button>
             </div>
