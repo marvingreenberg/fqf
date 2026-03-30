@@ -58,14 +58,15 @@
     function handleLogout(): void {
         open = false;
         shareUrl = null;
-        // Capture token before clearing so we can show it in the reminder modal
+        // Capture token BEFORE clearing — show reminder modal first
         logoutToken = appState.token ?? '';
-        appState.clearIdentity();
         logoutModalVisible = true;
     }
 
     function handleLogoutModalOk(): void {
         logoutModalVisible = false;
+        // NOW clear identity — gate will appear after modal closes
+        appState.clearIdentity();
     }
 
     function handleDeleteClick(): void {

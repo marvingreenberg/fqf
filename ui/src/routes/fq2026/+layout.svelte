@@ -7,9 +7,11 @@
 
     let { children } = $props();
 
-    // Gate is visible whenever the user is not confirmed — reacts automatically
-    // when clearIdentity() sets confirmed = false (e.g. logout from avatar menu).
-    const gateVisible = $derived(!appState.confirmed);
+    // Suppress the gate during initial async auto-confirm to prevent flash
+    let initializing = $state(true);
+
+    // Gate shows when: not confirmed AND not still initializing
+    const gateVisible = $derived(!appState.confirmed && !initializing);
 
     onMount(async () => {
         appState.loadFromStorage();
@@ -25,10 +27,10 @@
             try {
                 await appState.confirm(appState.token);
             } catch {
-                // Token no longer valid — clear stale identity so gate shows clean
                 appState.clearIdentity();
             }
         }
+        initializing = false;
     });
 </script>
 
