@@ -7,7 +7,11 @@
         GRID_END_HOUR,
         MINUTES_PER_HOUR,
         SCRUBBER_STEP_MINUTES,
-        FESTIVAL_START_ISO
+        FESTIVAL_START_ISO,
+        MAP_ZOOM_MIN,
+        MAP_ZOOM_MAX,
+        MAP_ZOOM_DEFAULT,
+        MAP_ZOOM_STEP
     } from '$lib/constants';
     import {
         latLngToPercent,
@@ -186,17 +190,51 @@
                 Show Paths
             </label>
         {/if}
+
+        <!-- Zoom slider -->
+        <div class="flex items-center gap-2 ml-auto">
+            <span class="text-xs" style="color: var(--mg-purple-deep);">🔍</span>
+            <input
+                type="range"
+                min={MAP_ZOOM_MIN}
+                max={MAP_ZOOM_MAX}
+                step={MAP_ZOOM_STEP}
+                bind:value={appState.mapZoom}
+                class="w-20"
+                aria-label="Map zoom"
+            />
+            <span class="text-xs font-mono" style="color: var(--mg-purple-deep);">
+                {appState.mapZoom}x
+            </span>
+        </div>
     </div>
 
     <!-- Map container -->
     <div class="flex-1 overflow-auto">
-        <div class="relative mx-auto" style="max-width: 900px; min-width: 700px;">
+        <div
+            class="relative mx-auto origin-top-left"
+            style="width: {900 * appState.mapZoom}px; min-width: 700px;"
+        >
             <img
-                src="/fqf-map.png"
+                src="/fqf-map-hires.jpg"
                 alt="French Quarter Festival area map"
                 class="w-full h-auto block"
                 draggable="false"
             />
+
+            <!-- Stage icons: musical note markers for active stages -->
+            {#each [...stageLocations.entries()] as [stageName, loc] (stageName)}
+                {#if acts.some((a) => a.stage === stageName)}
+                    {@const pos = latLngToPercent(loc.lat, loc.lng)}
+                    <div
+                        class="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                        style="left: {pos.x}%; top: {pos.y}%;"
+                        title={stageName}
+                    >
+                        <span style="font-size: 1rem; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));">🎵</span>
+                    </div>
+                {/if}
+            {/each}
 
             {#if appState.mapMode !== 'my-schedule'}
                 <!-- Scroll Time / Now: existing stage-status markers -->

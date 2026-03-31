@@ -1,6 +1,6 @@
 import type { ActSummary, SharedSchedule, ViewMode, MobileSortMode, ShareRef } from '$lib/types';
 import { FESTIVAL_DATES, FINGERPRINT_COUNTER_KEY, IDENTITY_STORAGE_KEY } from '$lib/types';
-import { GRID_START_HOUR } from '$lib/constants';
+import { GRID_START_HOUR, MAP_ZOOM_DEFAULT } from '$lib/constants';
 
 export type MapMode = 'scroll' | 'now' | 'my-schedule';
 
@@ -38,6 +38,7 @@ class AppState {
     mapMode = $state<MapMode>('scroll');
     mapManualMinutes = $state<number>(DEFAULT_MAP_MINUTES);
     mapShowPaths = $state<boolean>(false);
+    mapZoom = $state<number>(MAP_ZOOM_DEFAULT);
 
     // Filter state
     hiddenGenres = $state<Set<string>>(new Set());

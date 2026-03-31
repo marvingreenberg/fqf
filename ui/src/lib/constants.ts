@@ -26,14 +26,20 @@ export const DISTANCE_COLORS = {
     far: '#991b1b'
 } as const;
 
-// Map view — bounds must match the static image in ui/static/fqf-map.png
-// Computed for center 29.95626,-90.06250 zoom 16, 900x750px
+// Map view — bounds must match the static image in ui/static/fqf-map-hires.jpg
+// Computed for center 29.95626,-90.06250 zoom 16, 2000x1327px browser window
 export const MAP_BOUNDS = {
-    north: 29.9635,
-    south: 29.949,
-    east: -90.053,
-    west: -90.072
+    north: 29.96860,
+    south: 29.94392,
+    east: -90.04104,
+    west: -90.08396
 } as const;
+
+// Map zoom levels (CSS transform scale values)
+export const MAP_ZOOM_MIN = 1;
+export const MAP_ZOOM_MAX = 2;
+export const MAP_ZOOM_DEFAULT = 1;
+export const MAP_ZOOM_STEP = 0.5;
 
 export const MAX_LOOKAHEAD_MINUTES = 60;
 export const SHOW_NEXT_THRESHOLD_MINUTES = 15;
