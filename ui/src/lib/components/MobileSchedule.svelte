@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { ActSummary, ConflictLevel, MobileSortMode } from '$lib/types';
-    import { CONFLICT_COLORS } from '$lib/constants';
-    import { getWorstConflict } from '$lib/conflict';
+    import { CONFLICT_COLORS, MINUTES_PER_HOUR } from '$lib/constants';
+    import { getWorstConflict, timeToMinutes } from '$lib/conflict';
     import ActRow from './ActRow.svelte';
 
     interface Props {
@@ -16,12 +16,6 @@
     let { acts, picks, sortMode, onTogglePick, onActDetail, readOnly = false }: Props = $props();
 
     const SLOT_INTERVAL_MINUTES = 30;
-    const MINUTES_PER_HOUR = 60;
-
-    function timeToMinutes(time: string): number {
-        const [h, m] = time.split(':').map(Number);
-        return h * MINUTES_PER_HOUR + m;
-    }
 
     function slotLabel(slotMinutes: number): string {
         const h = Math.floor(slotMinutes / MINUTES_PER_HOUR);

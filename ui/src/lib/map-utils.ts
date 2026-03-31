@@ -4,7 +4,7 @@
  */
 
 import type { ActSummary, ConflictLevel } from '$lib/types';
-import { getWorstConflict } from '$lib/conflict';
+import { getWorstConflict, timeToMinutes } from '$lib/conflict';
 import {
     MAP_BOUNDS,
     MAX_LOOKAHEAD_MINUTES,
@@ -27,11 +27,8 @@ const PERCENT = 100;
 
 // ── Time parsing ────────────────────────────────────────────────────────
 
-/** Parse "HH:MM" to minutes since midnight. */
-export function parseTimeToMinutes(hhmm: string): number {
-    const [h, m] = hhmm.split(':').map(Number);
-    return h * MINUTES_PER_HOUR + m;
-}
+/** Parse "HH:MM" to minutes since midnight. Re-exported from conflict.ts for backward compat. */
+export { timeToMinutes as parseTimeToMinutes };
 
 /** Format minutes since midnight as "H:MM AM/PM". */
 export function formatTimeDisplay(minutes: number): string {
@@ -81,15 +78,15 @@ export function stageStatusAt(
     timeMinutes: number
 ): StageStatus {
     const sorted = [...stageActs].sort(
-        (a, b) => parseTimeToMinutes(a.start) - parseTimeToMinutes(b.start)
+        (a, b) => timeToMinutes(a.start) - timeToMinutes(b.start)
     );
 
     let current: ActSummary | null = null;
     let next: ActSummary | null = null;
 
     for (const act of sorted) {
-        const start = parseTimeToMinutes(act.start);
-        const end = parseTimeToMinutes(act.end);
+        const start = timeToMinutes(act.start);
+        const end = timeToMinutes(act.end);
         if (start <= timeMinutes && timeMinutes < end) {
             current = act;
         } else if (start > timeMinutes && !next) {
@@ -97,13 +94,13 @@ export function stageStatusAt(
         }
     }
 
-    const currentEnd = current ? parseTimeToMinutes(current.end) : 0;
-    const currentStart = current ? parseTimeToMinutes(current.start) : 0;
+    const currentEnd = current ? timeToMinutes(current.end) : 0;
+    const currentStart = current ? timeToMinutes(current.start) : 0;
     const currentMinutesRemaining = current ? currentEnd - timeMinutes : 0;
     const currentDuration = current ? Math.max(1, currentEnd - currentStart) : 1;
     const currentFractionRemaining = current ? currentMinutesRemaining / currentDuration : 0;
 
-    const nextMinutesUntil = next ? parseTimeToMinutes(next.start) - timeMinutes : 0;
+    const nextMinutesUntil = next ? timeToMinutes(next.start) - timeMinutes : 0;
     const nextFractionApproaching = next
         ? Math.max(0, 1 - nextMinutesUntil / MAX_LOOKAHEAD_MINUTES)
         : 0;
@@ -201,7 +198,7 @@ export function pickedActsForDay(
     return allActs
         .filter((a) => picks.has(a.slug) && a.date === date)
         .sort((a, b) => {
-            const timeDiff = parseTimeToMinutes(a.start) - parseTimeToMinutes(b.start);
+            const timeDiff = timeToMinutes(a.start) - timeToMinutes(b.start);
             if (timeDiff !== 0) return timeDiff;
             const aLat = stageLocations.get(a.stage)?.lat ?? 0;
             const bLat = stageLocations.get(b.stage)?.lat ?? 0;
