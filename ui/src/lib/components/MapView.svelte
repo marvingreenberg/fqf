@@ -266,8 +266,8 @@
                     <!-- svelte-ignore a11y_click_events_have_key_events -->
                     <!-- svelte-ignore a11y_no_static_element_interactions -->
                     <div
-                        class="absolute -translate-x-1/2 -translate-y-full cursor-pointer"
-                        style="left: {marker.pos.x}%; top: {marker.pos.y}%;"
+                        class="absolute cursor-pointer"
+                        style="left: calc({marker.pos.x}% + 0.375rem); top: calc({marker.pos.y}% + 0.375rem);"
                         onclick={(e) => {
                             e.stopPropagation();
                             onActDetail?.(marker.act);
