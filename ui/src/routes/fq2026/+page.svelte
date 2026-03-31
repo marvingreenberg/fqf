@@ -10,7 +10,7 @@
     import ShareView from '$lib/components/ShareView.svelte';
     import MapView from '$lib/components/MapView.svelte';
     import FilterPanel from '$lib/components/FilterPanel.svelte';
-    import { FLEUR_PATH } from '$lib/constants';
+    import ActDetailModal from '$lib/components/ActDetailModal.svelte';
 
     const MOBILE_BREAKPOINT = 768;
     const CACHE_TTL_MS = 10 * 60 * 1000;
@@ -243,148 +243,14 @@
     </div>
 </div>
 
-<!-- Act detail modal -->
 {#if detailAct || detailLoading}
-    <div
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-        onclick={closeDetail}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Act detail"
-        onkeydown={(e) => e.key === 'Escape' && closeDetail()}
-        tabindex="-1"
-    >
-        <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-        <!-- svelte-ignore a11y_click_events_have_key_events -->
-        <div
-            class="fqf-modal-card max-w-lg w-full mx-4 relative"
-            onclick={(e) => e.stopPropagation()}
-            role="document"
-        >
-            <!-- Purple accent strip -->
-            <div class="fqf-modal-header-strip"></div>
-
-            <div class="p-6">
-                <button
-                    class="absolute top-5 right-4 text-xl leading-none"
-                    style="color: rgba(74, 26, 107, 0.5);"
-                    onclick={closeDetail}
-                    aria-label="Close"
-                >
-                    ✕
-                </button>
-
-                {#if detailLoading}
-                    <p style="color: var(--mg-purple); opacity: 0.6;">Loading…</p>
-                {:else if detailAct}
-                    {@const isPicked = appState.isPicked(detailAct.slug)}
-                    <!-- Header row: fleur + web links + name + genre -->
-                    <div class="flex items-center gap-2 mb-3">
-                        <!-- Fleur-de-lis pick button -->
-                        <button
-                            class="fqf-fleur shrink-0"
-                            style="width: 1.5rem; height: 1.5rem;"
-                            title={isPicked ? 'Remove from picks' : 'Add to picks'}
-                            onclick={() => appState.togglePick(detailAct.slug)}
-                        >
-                            <svg
-                                viewBox="0 0 16 16"
-                                width="20"
-                                height="20"
-                                fill={isPicked ? 'var(--mg-gold-rich)' : 'none'}
-                                stroke={isPicked ? 'none' : 'rgba(74, 26, 107, 0.3)'}
-                                stroke-width="0.75"
-                            >
-                                <path d={FLEUR_PATH} />
-                            </svg>
-                        </button>
-
-                        <!-- Web links -->
-                        {#if detailAct.websites.length > 0}
-                            {#each detailAct.websites as url}
-                                <a
-                                    href={url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    title={new URL(url).hostname.replace('www.', '')}
-                                    class="shrink-0 hover:scale-110 transition-transform"
-                                    style="color: var(--mg-purple);"
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="18"
-                                        height="18"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                    >
-                                        <circle cx="12" cy="12" r="10" />
-                                        <path d="M2 12h20" />
-                                        <path
-                                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
-                                        />
-                                    </svg>
-                                </a>
-                            {/each}
-                        {/if}
-
-                        <!-- Map link -->
-                        {#if stageLocations.has(detailAct.stage)}
-                            {@const loc = stageLocations.get(detailAct.stage)}
-                            <a
-                                href="https://www.google.com/maps/dir/?api=1&destination={loc?.lat},{loc?.lng}"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                title="Directions to {detailAct.stage}"
-                                class="shrink-0 hover:scale-110 transition-transform"
-                                style="color: var(--mg-green-deep);"
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="18"
-                                    height="18"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                >
-                                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-                                    <circle cx="12" cy="10" r="3" />
-                                </svg>
-                            </a>
-                        {/if}
-
-                        <!-- Band name -->
-                        <h2
-                            class="flex-1 min-w-0 text-xl font-bold leading-snug"
-                            style="font-family: 'Playfair Display', Georgia, serif; color: var(--mg-purple-deep);"
-                        >
-                            {detailAct.name}
-                        </h2>
-
-                        <!-- Genre badge -->
-                        <span class="fqf-genre-badge shrink-0">
-                            {detailAct.genre}
-                        </span>
-                    </div>
-
-                    <p
-                        class="text-sm mb-3 flex items-center gap-1.5"
-                        style="color: rgba(74, 26, 107, 0.55);"
-                    >
-                        {detailAct.stage} &middot; {detailAct.start}&#8211;{detailAct.end}
-                    </p>
-
-                    <p class="text-sm leading-relaxed">
-                        {detailAct.about || 'No bio available yet.'}
-                    </p>
-                {/if}
-            </div>
-        </div>
-    </div>
+    <ActDetailModal
+        act={detailAct}
+        loading={detailLoading}
+        {stageLocations}
+        isPicked={detailAct ? appState.isPicked(detailAct.slug) : false}
+        readOnly={false}
+        onTogglePick={() => detailAct && appState.togglePick(detailAct.slug)}
+        onClose={closeDetail}
+    />
 {/if}
