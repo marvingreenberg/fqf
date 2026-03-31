@@ -4,25 +4,14 @@ from datetime import date
 
 from fastapi import APIRouter, HTTPException, Query
 
-from fqf.api.schemas import ActDetail, ActListResponse, ActSummary
+from fqf.api.helpers import to_summary
+from fqf.api.schemas import ActDetail, ActListResponse
 from fqf.models import Act
 from fqf.schedule import SCHEDULE, get_by_slug, on, search
 
 router = APIRouter(prefix="/api/v1/acts", tags=["acts"])
 
 NOT_FOUND_DETAIL = "Act not found"
-
-
-def _to_summary(act: Act) -> ActSummary:
-    return ActSummary(
-        slug=act.slug,
-        name=act.name,
-        stage=act.stage,
-        date=act.date,
-        start=act.start,
-        end=act.end,
-        genre=act.genre,
-    )
 
 
 def _to_detail(act: Act) -> ActDetail:
@@ -58,7 +47,7 @@ async def list_acts(
     else:
         all_acts = sorted(SCHEDULE, key=lambda a: (a.date, a.start))
         results = _filter_by_stage(all_acts, stage) if stage else all_acts
-    summaries = [_to_summary(a) for a in results]
+    summaries = [to_summary(a) for a in results]
     return ActListResponse(acts=summaries, count=len(summaries))
 
 

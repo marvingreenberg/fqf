@@ -1,10 +1,8 @@
 import type { ActSummary, SharedSchedule, ViewMode, MobileSortMode, ShareRef } from '$lib/types';
 import { FESTIVAL_DATES, FINGERPRINT_COUNTER_KEY, IDENTITY_STORAGE_KEY } from '$lib/types';
-import { GRID_START_HOUR } from '$lib/constants';
+import { GRID_START_HOUR, MINUTES_PER_HOUR } from '$lib/constants';
 
 export type MapMode = 'scroll' | 'now' | 'my-schedule';
-
-const MINUTES_PER_HOUR = 60;
 const DEFAULT_MAP_MINUTES = GRID_START_HOUR * MINUTES_PER_HOUR;
 
 const SAVE_AFTER_CHANGES = 4;

@@ -4,6 +4,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
+from fqf.api.helpers import to_summary
 from fqf.api.rate_limit import create_rate_limit_dependency, global_rate_limit_dependency
 from fqf.api.schemas import (
     ActSummary,
@@ -49,16 +50,22 @@ _CreateRateLimit = Annotated[None, Depends(create_rate_limit_dependency)]
 
 def _slug_to_summary(slug: str) -> ActSummary | None:
     act = get_by_slug(slug)
-    if act is None:
-        return None
-    return ActSummary(
-        slug=act.slug,
-        name=act.name,
-        stage=act.stage,
-        date=act.date,
-        start=act.start,
-        end=act.end,
-        genre=act.genre,
+    return None if act is None else to_summary(act)
+
+
+async def _build_schedule_response(token: str) -> ScheduleResponse:
+    """Load a schedule by token and assemble the full ScheduleResponse.
+
+    Raises HTTPException 404 if the token does not exist.
+    """
+    result = await load_schedule(token)
+    if result is None:
+        raise HTTPException(status_code=404, detail=NOT_FOUND_DETAIL)
+    picks, name, raw_shares, own_share_id = result
+    acts = [s for slug in picks if (s := _slug_to_summary(slug)) is not None]
+    shares = [ShareRef(share_id=s["share_id"], name=s["name"]) for s in raw_shares]
+    return ScheduleResponse(
+        token=token, name=name, picks=picks, acts=acts, shares=shares, share_id=own_share_id
     )
 
 
@@ -143,15 +150,7 @@ async def share(token: str, request: Request, _rl: _GlobalRateLimit) -> ShareRes
 @router.get("/{token}", response_model=ScheduleResponse)
 async def load(token: str, _rl: _GlobalRateLimit) -> ScheduleResponse:
     """Load a schedule by its token."""
-    result = await load_schedule(token)
-    if result is None:
-        raise HTTPException(status_code=404, detail=NOT_FOUND_DETAIL)
-    picks, name, raw_shares, own_share_id = result
-    acts = [s for slug in picks if (s := _slug_to_summary(slug)) is not None]
-    shares = [ShareRef(share_id=s["share_id"], name=s["name"]) for s in raw_shares]
-    return ScheduleResponse(
-        token=token, name=name, picks=picks, acts=acts, shares=shares, share_id=own_share_id
-    )
+    return await _build_schedule_response(token)
 
 
 @router.put("/{token}", response_model=ScheduleResponse)
@@ -160,16 +159,7 @@ async def save(token: str, body: ScheduleUpdate, _rl: _GlobalRateLimit) -> Sched
     success = await save_picks(token, body.picks, body.name)
     if not success:
         raise HTTPException(status_code=404, detail=NOT_FOUND_DETAIL)
-    # Re-fetch to reflect any update and include shares
-    result = await load_schedule(token)
-    name = result[1] if result is not None else (body.name or "")
-    raw_shares = result[2] if result is not None else []
-    own_share_id = result[3] if result is not None else ""
-    acts = [s for slug in body.picks if (s := _slug_to_summary(slug)) is not None]
-    shares = [ShareRef(share_id=s["share_id"], name=s["name"]) for s in raw_shares]
-    return ScheduleResponse(
-        token=token, name=name, picks=body.picks, acts=acts, shares=shares, share_id=own_share_id
-    )
+    return await _build_schedule_response(token)
 
 
 @router.delete("/{token}", status_code=204)
@@ -186,15 +176,7 @@ async def add_share(token: str, body: AddShareRequest, _rl: _GlobalRateLimit) ->
     success = await add_share_to_schedule(token, body.share_id, body.name)
     if not success:
         raise HTTPException(status_code=404, detail=NOT_FOUND_DETAIL)
-    result = await load_schedule(token)
-    if result is None:
-        raise HTTPException(status_code=404, detail=NOT_FOUND_DETAIL)
-    picks, name, raw_shares, own_share_id = result
-    acts = [s for slug in picks if (s := _slug_to_summary(slug)) is not None]
-    shares = [ShareRef(share_id=s["share_id"], name=s["name"]) for s in raw_shares]
-    return ScheduleResponse(
-        token=token, name=name, picks=picks, acts=acts, shares=shares, share_id=own_share_id
-    )
+    return await _build_schedule_response(token)
 
 
 @router.delete("/{token}/remove-share/{share_id}", response_model=ScheduleResponse)
@@ -203,12 +185,4 @@ async def remove_share(token: str, share_id: str, _rl: _GlobalRateLimit) -> Sche
     success = await remove_share_from_schedule(token, share_id)
     if not success:
         raise HTTPException(status_code=404, detail=NOT_FOUND_DETAIL)
-    result = await load_schedule(token)
-    if result is None:
-        raise HTTPException(status_code=404, detail=NOT_FOUND_DETAIL)
-    picks, name, raw_shares, own_share_id = result
-    acts = [s for slug in picks if (s := _slug_to_summary(slug)) is not None]
-    shares = [ShareRef(share_id=s["share_id"], name=s["name"]) for s in raw_shares]
-    return ScheduleResponse(
-        token=token, name=name, picks=picks, acts=acts, shares=shares, share_id=own_share_id
-    )
+    return await _build_schedule_response(token)
