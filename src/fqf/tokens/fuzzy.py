@@ -2,7 +2,7 @@
 
 import re
 
-from fqf.tokens.words import POOL_MUSIC, POOL_NOLA, POOL_PLACES
+from fqf.tokens.words import POOL_MUSIC, POOL_NOLA, POOL_PLACES, levenshtein_distance
 
 _ALL_POOLS: list[list[str]] = [POOL_PLACES, POOL_MUSIC, POOL_NOLA]
 
@@ -10,23 +10,6 @@ _ALL_POOLS: list[list[str]] = [POOL_PLACES, POOL_MUSIC, POOL_NOLA]
 MAX_CORRECTION_DISTANCE = 1
 
 _SPLIT_PATTERN = re.compile(r"[^a-zA-Z]+")
-
-
-def _levenshtein(a: str, b: str) -> int:
-    """Compute Levenshtein edit distance between two strings."""
-    if a == b:
-        return 0
-    if not a:
-        return len(b)
-    if not b:
-        return len(a)
-    prev = list(range(len(b) + 1))
-    for i, ca in enumerate(a, 1):
-        curr = [i] + [0] * len(b)
-        for j, cb in enumerate(b, 1):
-            curr[j] = min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + (ca != cb))
-        prev = curr
-    return prev[len(b)]
 
 
 def normalize_triple(raw: str) -> list[str]:
@@ -44,7 +27,7 @@ def find_closest_word(word: str, pools: list[list[str]]) -> tuple[str, int]:
     best_dist = len(word) + 1  # worse than any real distance
     for pool in pools:
         for candidate in pool:
-            dist = _levenshtein(word, candidate)
+            dist = levenshtein_distance(word, candidate)
             if dist < best_dist:
                 best_dist = dist
                 best_word = candidate

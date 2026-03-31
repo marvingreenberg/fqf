@@ -14,7 +14,7 @@ from fqf.tokens.words import (
     POOL_MUSIC,
     POOL_NOLA,
     POOL_PLACES,
-    _levenshtein,
+    levenshtein_distance,
     validate_pools,
     validate_word_pools,
 )
@@ -168,25 +168,25 @@ class TestFingerprintHashSeparator:
 
 class TestLevenshteinDistance:
     def test_identical_strings_distance_zero(self) -> None:
-        assert _levenshtein("crawfish", "crawfish") == 0
+        assert levenshtein_distance("crawfish", "crawfish") == 0
 
     def test_empty_vs_word(self) -> None:
-        assert _levenshtein("", "abc") == 3
+        assert levenshtein_distance("", "abc") == 3
 
     def test_word_vs_empty(self) -> None:
-        assert _levenshtein("abc", "") == 3
+        assert levenshtein_distance("abc", "") == 3
 
     def test_one_char_diff(self) -> None:
-        assert _levenshtein("treme", "tremo") == 1
+        assert levenshtein_distance("treme", "tremo") == 1
 
     def test_one_char_insertion(self) -> None:
-        assert _levenshtein("funky", "funky1") == 1
+        assert levenshtein_distance("funky", "funky1") == 1
 
     def test_two_char_diff(self) -> None:
-        assert _levenshtein("jazz", "fizz") == 2
+        assert levenshtein_distance("jazz", "fizz") == 2
 
     def test_completely_different_words(self) -> None:
-        assert _levenshtein("jazz", "zydecc") > 1
+        assert levenshtein_distance("jazz", "zydecc") > 1
 
 
 class TestValidateWordPools:

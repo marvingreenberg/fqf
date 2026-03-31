@@ -8,7 +8,7 @@ Example: "treme-funky-crawfish", "marigny-brassy-beignet"
 from itertools import combinations
 
 
-def _levenshtein(a: str, b: str) -> int:
+def levenshtein_distance(a: str, b: str) -> int:
     """Compute Levenshtein edit distance between two strings."""
     if a == b:
         return 0
@@ -344,9 +344,9 @@ def validate_word_pools() -> list[tuple[str, str, int]]:
     """
     all_words = POOL_PLACES + POOL_MUSIC + POOL_NOLA
     return [
-        (w1, w2, _levenshtein(w1, w2))
+        (w1, w2, d)
         for w1, w2 in combinations(all_words, 2)
-        if _levenshtein(w1, w2) <= _MAX_SAFE_LEVENSHTEIN_DISTANCE
+        if (d := levenshtein_distance(w1, w2)) <= _MAX_SAFE_LEVENSHTEIN_DISTANCE
     ]
 
 
