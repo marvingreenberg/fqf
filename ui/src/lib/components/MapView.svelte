@@ -78,12 +78,16 @@
         };
     });
 
-    const currentMinutes = $derived(appState.mapMode === 'now' ? nowMinutes : appState.mapManualMinutes);
+    const currentMinutes = $derived(
+        appState.mapMode === 'now' ? nowMinutes : appState.mapManualMinutes
+    );
     const timeLabel = $derived(formatTimeDisplay(currentMinutes));
 
     // Scroll / Now mode — existing stage-status markers
     const statuses = $derived(
-        appState.mapMode !== 'my-schedule' ? allStageStatuses(acts, stageLocations, currentMinutes) : []
+        appState.mapMode !== 'my-schedule'
+            ? allStageStatuses(acts, stageLocations, currentMinutes)
+            : []
     );
 
     // My Schedule mode
@@ -96,7 +100,9 @@
         appState.mapMode === 'my-schedule' ? buildScheduleMarkers(orderedPicks, stageLocations) : []
     );
     const pathArrows = $derived(
-        appState.mapMode === 'my-schedule' && appState.mapShowPaths ? buildPathArrows(orderedPicks, stageLocations) : []
+        appState.mapMode === 'my-schedule' && appState.mapShowPaths
+            ? buildPathArrows(orderedPicks, stageLocations)
+            : []
     );
 
     function markerLabel(order: number, act: ActSummary): string {
@@ -182,7 +188,11 @@
                 class="flex items-center gap-1.5 text-xs cursor-pointer select-none"
                 style="color: var(--mg-purple-deep);"
             >
-                <input type="checkbox" bind:checked={appState.mapShowPaths} class="accent-purple-700" />
+                <input
+                    type="checkbox"
+                    bind:checked={appState.mapShowPaths}
+                    class="accent-purple-700"
+                />
                 Show Paths
             </label>
         {/if}
@@ -267,7 +277,9 @@
                     <!-- svelte-ignore a11y_no_static_element_interactions -->
                     <div
                         class="absolute cursor-pointer"
-                        style="left: calc({marker.pos.x}% + 0.3rem + {marker.stageOffset * 0.3}rem); top: calc({marker.pos.y}% + 0.3rem + {marker.stageOffset * 1.875}rem);"
+                        style="left: calc({marker.pos.x}% + 0.3rem + {marker.stageOffset *
+                            0.3}rem); top: calc({marker.pos.y}% + 0.3rem + {marker.stageOffset *
+                            1.875}rem);"
                         onclick={(e) => {
                             e.stopPropagation();
                             onActDetail?.(marker.act);

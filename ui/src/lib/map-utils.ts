@@ -77,9 +77,7 @@ export function stageStatusAt(
     stage: string,
     timeMinutes: number
 ): StageStatus {
-    const sorted = [...stageActs].sort(
-        (a, b) => timeToMinutes(a.start) - timeToMinutes(b.start)
-    );
+    const sorted = [...stageActs].sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
 
     let current: ActSummary | null = null;
     let next: ActSummary | null = null;
