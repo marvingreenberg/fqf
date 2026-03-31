@@ -179,6 +179,7 @@ export interface ScheduleMarker {
     conflict: ConflictLevel;
     pos: { x: number; y: number }; // CSS % position
     isFirst: boolean;
+    stageOffset: number; // 0-based index among markers at the same stage
 }
 
 export interface PathArrow {
@@ -216,17 +217,21 @@ export function buildScheduleMarkers(
     orderedActs: ActSummary[],
     stageLocations: Map<string, { lat: number; lng: number }>
 ): ScheduleMarker[] {
+    const stageCounts = new Map<string, number>();
     return orderedActs
         .map((act, i) => {
             const loc = stageLocations.get(act.stage);
             if (!loc) return null;
             const conflict = computeConflictForAct(act, orderedActs);
+            const offset = stageCounts.get(act.stage) ?? 0;
+            stageCounts.set(act.stage, offset + 1);
             return {
                 act,
                 order: i + 1,
                 conflict,
                 pos: latLngToPercent(loc.lat, loc.lng),
-                isFirst: i === 0
+                isFirst: i === 0,
+                stageOffset: offset
             };
         })
         .filter((m): m is ScheduleMarker => m !== null);
