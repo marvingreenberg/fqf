@@ -1,9 +1,8 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import { createSchedule, fuzzyLookup, loadSharedSchedule } from '$lib/api';
-    import { getFingerprint } from '$lib/fingerprint';
+    import { fuzzyLookup, loadSharedSchedule } from '$lib/api';
     import { appState } from '$lib/stores.svelte';
-    import { FINGERPRINT_COUNTER_KEY } from '$lib/types';
+    import { createNewSchedule } from '$lib/auth-utils';
 
     interface Props {
         pendingShareId?: string | null;
@@ -51,18 +50,7 @@
         loading = true;
         errorMsg = '';
         try {
-            const fingerprintHash = await getFingerprint();
-            const rawCounter = localStorage.getItem(FINGERPRINT_COUNTER_KEY);
-            const counter = rawCounter !== null ? parseInt(rawCounter, 10) || 0 : 0;
-
-            const resp =
-                fingerprintHash !== null
-                    ? await createSchedule(nameInput.trim(), fingerprintHash, counter)
-                    : await createSchedule(nameInput.trim());
-
-            const nextCounter = counter + 1;
-            localStorage.setItem(FINGERPRINT_COUNTER_KEY, String(nextCounter));
-            await appState.confirm(resp.token, nameInput.trim(), nextCounter);
+            await createNewSchedule(nameInput.trim());
         } catch {
             errorMsg = 'Could not create schedule. Please try again.';
         } finally {

@@ -1,9 +1,8 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
-    import { createSchedule, fuzzyLookup, loadSharedSchedule } from '$lib/api';
-    import { getFingerprint } from '$lib/fingerprint';
+    import { fuzzyLookup, loadSharedSchedule } from '$lib/api';
     import { appState } from '$lib/stores.svelte';
-    import { FINGERPRINT_COUNTER_KEY } from '$lib/types';
+    import { createNewSchedule } from '$lib/auth-utils';
 
     interface Props {
         shareName: string;
@@ -60,18 +59,7 @@
         loading = true;
         errorMsg = '';
         try {
-            const fingerprintHash = await getFingerprint();
-            const rawCounter = localStorage.getItem(FINGERPRINT_COUNTER_KEY);
-            const counter = rawCounter !== null ? parseInt(rawCounter, 10) || 0 : 0;
-
-            const resp =
-                fingerprintHash !== null
-                    ? await createSchedule(name, fingerprintHash, counter)
-                    : await createSchedule(name);
-
-            const nextCounter = counter + 1;
-            localStorage.setItem(FINGERPRINT_COUNTER_KEY, String(nextCounter));
-            await appState.confirm(resp.token, name, nextCounter);
+            await createNewSchedule(name);
             await loadAndAttachShare();
             appState.setViewMode('share');
             goto(MAIN_SCHEDULE_ROUTE);
