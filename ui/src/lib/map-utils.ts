@@ -4,6 +4,7 @@
  */
 
 import type { ActSummary, ConflictLevel } from '$lib/types';
+import { getWorstConflict } from '$lib/conflict';
 import {
     MAP_BOUNDS,
     MAX_LOOKAHEAD_MINUTES,
@@ -231,22 +232,10 @@ export function buildScheduleMarkers(
         .filter((m): m is ScheduleMarker => m !== null);
 }
 
-/** Compute worst conflict level for an act against the other acts in the list. */
+/** Compute worst conflict level — delegates to the shared conflict module. */
 function computeConflictForAct(act: ActSummary, allPickedActs: ActSummary[]): ConflictLevel {
-    const s1 = parseTimeToMinutes(act.start);
-    const e1 = parseTimeToMinutes(act.end);
-    let worst: ConflictLevel = 'none';
-    for (const other of allPickedActs) {
-        if (other.slug === act.slug) continue;
-        const s2 = parseTimeToMinutes(other.start);
-        const e2 = parseTimeToMinutes(other.end);
-        const overlap = Math.max(0, Math.min(e1, e2) - Math.max(s1, s2));
-        if (overlap > 0) {
-            worst = 'red';
-            break;
-        }
-    }
-    return worst;
+    const pickedSlugs = new Set(allPickedActs.map((a) => a.slug));
+    return getWorstConflict(act, allPickedActs, pickedSlugs);
 }
 
 /**
