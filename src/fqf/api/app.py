@@ -16,7 +16,7 @@ from fqf.api.stage_routes import router as stage_router
 from fqf.db import close_pool, init_pool
 
 API_TITLE = "FQF 2026 Schedule Builder"
-CORS_ALLOW_ORIGINS = ["http://localhost:5173", "http://localhost:8000"]
+CORS_ALLOW_ORIGINS = ["http://localhost:5173", "http://localhost:8000", "https://festschedule.org"]
 API_PATH_PREFIX = "/api/"
 
 

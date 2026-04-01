@@ -18,7 +18,7 @@
     type SharedViewMode = Exclude<ViewMode, 'share'>;
 
     const VIEW_TABS: { value: SharedViewMode; label: () => string }[] = [
-        { value: 'grid', label: () => 'All Acts' },
+        { value: 'all-acts', label: () => 'All Acts' },
         { value: 'map', label: () => 'Map' },
         { value: 'my-schedule', label: () => `Their Schedule (${picks.size})` }
     ];
@@ -43,7 +43,7 @@
     let innerWidth = $state(MOBILE_BREAKPOINT + 1);
     let stageLocations = $state(new Map<string, { lat: number; lng: number }>());
     let selectedDate = $state<string>(FESTIVAL_DATES[0]);
-    let viewMode = $state<SharedViewMode>('grid');
+    let viewMode = $state<SharedViewMode>('all-acts');
     let mobileSortMode = $state<MobileSortMode>('by-time');
 
     const isMobile = $derived(innerWidth < MOBILE_BREAKPOINT);
@@ -96,7 +96,7 @@
 
     // Reload acts when day or relevant view mode changes
     let prevDate = $state('');
-    let prevViewMode = $state<SharedViewMode>('grid');
+    let prevViewMode = $state<SharedViewMode>('all-acts');
 
     $effect(() => {
         const date = selectedDate;
@@ -104,10 +104,7 @@
 
         if (mode === 'my-schedule' && !allActsLoaded) {
             loadAllActs();
-        } else if (
-            (mode === 'grid' || mode === 'mobile') &&
-            (date !== prevDate || mode !== prevViewMode)
-        ) {
+        } else if (mode === 'all-acts' && (date !== prevDate || mode !== prevViewMode)) {
             prevDate = date;
             prevViewMode = mode;
             loadActs(date);

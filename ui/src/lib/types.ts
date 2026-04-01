@@ -92,7 +92,7 @@ export interface SharedSchedule {
 
 export type ConflictLevel = 'none' | 'yellow' | 'red';
 
-export type ViewMode = 'grid' | 'mobile' | 'my-schedule' | 'share' | 'map';
+export type ViewMode = 'all-acts' | 'my-schedule' | 'share' | 'map';
 
 export type MobileSortMode = 'by-time' | 'by-stage';
 

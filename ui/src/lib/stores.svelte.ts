@@ -24,7 +24,7 @@ interface StoredIdentity {
 
 class AppState {
     selectedDate = $state<string>(FESTIVAL_DATES[0]);
-    viewMode = $state<ViewMode>('grid');
+    viewMode = $state<ViewMode>('all-acts');
     mobileSortMode = $state<MobileSortMode>('by-time');
     token = $state<string | null>(null);
     name = $state<string>('');

@@ -36,7 +36,7 @@
     ];
 
     const VIEW_TABS: { value: ViewMode; label: () => string }[] = [
-        { value: 'grid', label: () => 'All Acts' },
+        { value: 'all-acts', label: () => 'All Acts' },
         { value: 'map', label: () => 'Map' },
         { value: 'my-schedule', label: () => `My Schedule (${appState.picks.size})` },
         { value: 'share', label: () => `Share (${appState.sharedSchedules.length})` }
@@ -110,7 +110,7 @@
 
     // Reload acts when day or relevant view mode changes
     let prevDate = $state('');
-    let prevViewMode = $state<ViewMode>('grid');
+    let prevViewMode = $state<ViewMode>('all-acts');
 
     $effect(() => {
         const date = appState.selectedDate;
@@ -120,7 +120,7 @@
             loadAllActs();
         }
         if (
-            (mode === 'grid' || mode === 'mobile' || mode === 'map') &&
+            (mode === 'all-acts' || mode === 'map') &&
             (date !== prevDate || mode !== prevViewMode)
         ) {
             prevDate = date;
@@ -158,7 +158,7 @@
             <h1 class="text-base font-semibold" style="color: var(--mg-gold-bright);">
                 FQF 2026 Schedule Builder
             </h1>
-            {#if isMobile && appState.viewMode === 'grid'}
+            {#if isMobile && appState.viewMode === 'all-acts'}
                 <div class="flex gap-1">
                     {#each SORT_MODES as mode (mode.value)}
                         <button
