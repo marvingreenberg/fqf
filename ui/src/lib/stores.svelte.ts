@@ -1,5 +1,13 @@
 import type { ActSummary, SharedSchedule, ViewMode, MobileSortMode, ShareRef } from '$lib/types';
-import { FESTIVAL_DATES, FINGERPRINT_COUNTER_KEY, IDENTITY_STORAGE_KEY } from '$lib/types';
+import {
+    FESTIVAL_DATES,
+    FINGERPRINT_COUNTER_KEY,
+    IDENTITY_STORAGE_KEY,
+    PICKS_STORAGE_KEY,
+    ACTS_STORAGE_PREFIX,
+    STAGES_STORAGE_KEY,
+    ACTS_CACHE_TTL_MS
+} from '$lib/types';
 import { GRID_START_HOUR, MINUTES_PER_HOUR } from '$lib/constants';
 import {
     MAYBE_PREFIX,
@@ -15,6 +23,7 @@ const DEFAULT_MAP_MINUTES = GRID_START_HOUR * MINUTES_PER_HOUR;
 
 const SAVE_AFTER_CHANGES = 4;
 const SAVE_DEBOUNCE_MS = 5_000;
+const SAVED_FLASH_MS = 2_000;
 
 interface StoredIdentity {
     token: string;
@@ -50,8 +59,14 @@ class AppState {
     hiddenStages = $state<Set<string>>(new Set());
     showAll = $state<boolean>(false);
 
+    // Network / save status
+    isOnline = $state<boolean>(true);
+    saveError = $state<boolean>(false);
+    savedFlash = $state<boolean>(false);
+
     private _saveTimeout: ReturnType<typeof setTimeout> | null = null;
     private _unsavedChanges = 0;
+    private _savedFlashTimeout: ReturnType<typeof setTimeout> | null = null;
 
     get picksArray(): string[] {
         return [...this.picks];
@@ -85,6 +100,65 @@ class AppState {
             const parsed = parseInt(rawCounter, 10);
             if (!isNaN(parsed)) this.counter = parsed;
         }
+        // Hydrate picks from local cache (will be overwritten by API on confirm)
+        const rawPicks = localStorage.getItem(PICKS_STORAGE_KEY);
+        if (rawPicks) {
+            try {
+                const pickArr = JSON.parse(rawPicks) as string[];
+                if (Array.isArray(pickArr)) this.picks = new Set(pickArr);
+            } catch {
+                // Corrupt — ignore
+            }
+        }
+    }
+
+    /** Read cached acts for a date from localStorage, or null if absent/stale. */
+    loadCachedActs(date: string): ActSummary[] | null {
+        if (typeof localStorage === 'undefined') return null;
+        const raw = localStorage.getItem(`${ACTS_STORAGE_PREFIX}${date}`);
+        if (!raw) return null;
+        try {
+            const entry = JSON.parse(raw) as { acts: ActSummary[]; cachedAt: number };
+            if (Date.now() - entry.cachedAt > ACTS_CACHE_TTL_MS) return null;
+            return entry.acts;
+        } catch {
+            return null;
+        }
+    }
+
+    /** Write acts for a date to localStorage. */
+    cacheActs(date: string, acts: ActSummary[]): void {
+        if (typeof localStorage === 'undefined') return;
+        try {
+            localStorage.setItem(
+                `${ACTS_STORAGE_PREFIX}${date}`,
+                JSON.stringify({ acts, cachedAt: Date.now() })
+            );
+        } catch {
+            // localStorage quota exceeded — ignore gracefully
+        }
+    }
+
+    /** Read cached stage locations from localStorage, or null if absent. */
+    loadCachedStages(): { lat: number; lng: number; name: string }[] | null {
+        if (typeof localStorage === 'undefined') return null;
+        const raw = localStorage.getItem(STAGES_STORAGE_KEY);
+        if (!raw) return null;
+        try {
+            return JSON.parse(raw) as { lat: number; lng: number; name: string }[];
+        } catch {
+            return null;
+        }
+    }
+
+    /** Write stage locations to localStorage. */
+    cacheStages(stages: { lat: number; lng: number; name: string }[]): void {
+        if (typeof localStorage === 'undefined') return;
+        try {
+            localStorage.setItem(STAGES_STORAGE_KEY, JSON.stringify(stages));
+        } catch {
+            // Ignore quota errors
+        }
     }
 
     saveToStorage(): void {
@@ -101,11 +175,23 @@ class AppState {
 
     async confirm(token: string, name?: string, counter?: number): Promise<void> {
         const { loadSchedule, loadSharedSchedule } = await import('$lib/api');
-        const resp = await loadSchedule(token);
+        let resp: Awaited<ReturnType<typeof loadSchedule>>;
+        try {
+            resp = await loadSchedule(token);
+        } catch {
+            // API unreachable — confirm from locally cached picks so the app is
+            // still usable offline. Identity fields stay as loaded from storage.
+            this.confirmed = true;
+            if (counter !== undefined) this.counter = counter;
+            // picks already hydrated by loadFromStorage() — nothing more to do
+            return;
+        }
         this.token = resp.token;
         this.name = name ?? resp.name ?? '';
         this.ownShareId = resp.share_id ?? '';
         this.picks = new Set(resp.picks);
+        // Keep localStorage in sync with the authoritative server copy
+        this._cachePicksLocally();
         this.confirmed = true;
         if (counter !== undefined) this.counter = counter;
         this.saveToStorage();
@@ -169,13 +255,51 @@ class AppState {
         this.picks = new Set();
     }
 
+    /** Write picks to localStorage so they survive a page reload without network. */
+    private _cachePicksLocally(): void {
+        if (typeof localStorage === 'undefined') return;
+        localStorage.setItem(PICKS_STORAGE_KEY, JSON.stringify(this.picksArray));
+    }
+
+    private _showSavedFlash(): void {
+        this.savedFlash = true;
+        if (this._savedFlashTimeout) clearTimeout(this._savedFlashTimeout);
+        this._savedFlashTimeout = setTimeout(() => {
+            this.savedFlash = false;
+        }, SAVED_FLASH_MS);
+    }
+
     private async _flushSave(): Promise<void> {
         if (this._saveTimeout) clearTimeout(this._saveTimeout);
         this._saveTimeout = null;
-        this._unsavedChanges = 0;
-        if (this.token) {
+
+        // Always write to localStorage immediately — even if the API call fails,
+        // the local copy is up to date.
+        this._cachePicksLocally();
+
+        if (!this.token) return;
+
+        try {
             const { savePicks } = await import('$lib/api');
             await savePicks(this.token, this.picksArray, this.name || undefined);
+            this._unsavedChanges = 0;
+            const hadError = this.saveError;
+            this.saveError = false;
+            if (hadError) this._showSavedFlash();
+        } catch {
+            // Network or server failure — keep _unsavedChanges so a retry fires
+            // when the network watcher calls flushSaveIfPending().
+            this.saveError = true;
+        }
+    }
+
+    /**
+     * Called by the network watcher when connectivity is restored.
+     * Retries a pending/failed save if one is outstanding.
+     */
+    flushSaveIfPending(): void {
+        if (this._unsavedChanges > 0 || this.saveError) {
+            this._flushSave();
         }
     }
 

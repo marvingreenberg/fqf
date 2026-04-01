@@ -115,10 +115,7 @@
             </span>
         </div>
 
-        <p
-            class="text-sm mb-3 flex items-center gap-1.5"
-            style="color: rgba(74, 26, 107, 0.55);"
-        >
+        <p class="text-sm mb-3 flex items-center gap-1.5" style="color: rgba(74, 26, 107, 0.55);">
             {act.stage} &middot; {formatTime12(act.start)}&#8211;{formatTime12(act.end)}
         </p>
 

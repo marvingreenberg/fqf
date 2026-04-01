@@ -65,10 +65,7 @@
             >
                 {#snippet newSectionExtra()}
                     {#if shareValid === true}
-                        <p
-                            class="text-xs"
-                            style="color: rgba(74,26,107,0.6); font-style: italic;"
-                        >
+                        <p class="text-xs" style="color: rgba(74,26,107,0.6); font-style: italic;">
                             Create a schedule to allow comparing with {shareValidName}
                         </p>
                     {/if}
@@ -76,10 +73,7 @@
 
                 {#snippet footer()}
                     {#if pendingShareId && shareValid === true}
-                        <button
-                            class="fqf-btn-ghost"
-                            onclick={handleViewShareOnly}
-                        >
+                        <button class="fqf-btn-ghost" onclick={handleViewShareOnly}>
                             View {shareValidName}'s schedule?
                             <span
                                 class="block text-xs"

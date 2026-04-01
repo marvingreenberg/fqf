@@ -125,17 +125,44 @@
     }
 
     async function loadActs(date: string): Promise<void> {
+        // 1. In-memory cache (hot path within a session)
         if (isCacheFresh(date)) {
             acts = actsCache.get(date)!.acts;
             onDayActsLoaded?.(acts);
             return;
         }
+
+        // 2. localStorage cache — serve immediately while API request runs in background
+        const { appState } = await import('$lib/stores.svelte');
+        const lsCached = appState.loadCachedActs(date);
+        if (lsCached) {
+            acts = lsCached;
+            actsCache.set(date, { acts: lsCached, fetchedAt: Date.now() });
+            onDayActsLoaded?.(acts);
+            // Still fetch in background to refresh cache (no loading spinner since we have data)
+            listActs({ date })
+                .then((resp) => {
+                    acts = resp.acts;
+                    actsCache.set(date, { acts: resp.acts, fetchedAt: Date.now() });
+                    appState.cacheActs(date, resp.acts);
+                    onDayActsLoaded?.(acts);
+                })
+                .catch(() => {
+                    /* offline — cached data is fine */
+                });
+            return;
+        }
+
+        // 3. Cold load from API
         loading = true;
         try {
             const resp = await listActs({ date });
             acts = resp.acts;
             actsCache.set(date, { acts: resp.acts, fetchedAt: Date.now() });
+            appState.cacheActs(date, resp.acts);
             onDayActsLoaded?.(acts);
+        } catch {
+            // API unavailable and no cached data — acts stays empty
         } finally {
             loading = false;
         }
@@ -143,11 +170,39 @@
 
     async function loadAllActs(): Promise<void> {
         if (allActsLoaded && isCacheFresh('all')) return;
-        const resp = await listActs();
-        allActs = resp.acts;
-        actsCache.set('all', { acts: resp.acts, fetchedAt: Date.now() });
-        allActsLoaded = true;
-        onAllActsLoaded?.(allActs);
+
+        // Check localStorage for a cached all-acts list
+        const { appState } = await import('$lib/stores.svelte');
+        const lsCached = appState.loadCachedActs('all');
+        if (lsCached) {
+            allActs = lsCached;
+            actsCache.set('all', { acts: lsCached, fetchedAt: Date.now() });
+            allActsLoaded = true;
+            onAllActsLoaded?.(allActs);
+            // Background refresh
+            listActs()
+                .then((resp) => {
+                    allActs = resp.acts;
+                    actsCache.set('all', { acts: resp.acts, fetchedAt: Date.now() });
+                    appState.cacheActs('all', resp.acts);
+                    onAllActsLoaded?.(allActs);
+                })
+                .catch(() => {
+                    /* offline — cached data is fine */
+                });
+            return;
+        }
+
+        try {
+            const resp = await listActs();
+            allActs = resp.acts;
+            actsCache.set('all', { acts: resp.acts, fetchedAt: Date.now() });
+            appState.cacheActs('all', resp.acts);
+            allActsLoaded = true;
+            onAllActsLoaded?.(allActs);
+        } catch {
+            // API unavailable and no cached data — allActs stays empty
+        }
     }
 
     async function openDetail(act: ActSummary): Promise<void> {
@@ -189,8 +244,22 @@
     onMount(async () => {
         loadActs(selectedDate);
         prevDate = selectedDate;
-        const resp = await listStages();
-        stageLocations = new Map(resp.stages.map((s) => [s.name, { lat: s.lat, lng: s.lng }]));
+
+        // Cache-first stage load: serve cached data immediately, refresh in background.
+        const { appState } = await import('$lib/stores.svelte');
+        const cachedStages = appState.loadCachedStages();
+        if (cachedStages) {
+            stageLocations = new Map(cachedStages.map((s) => [s.name, { lat: s.lat, lng: s.lng }]));
+        }
+        try {
+            const resp = await listStages();
+            stageLocations = new Map(resp.stages.map((s) => [s.name, { lat: s.lat, lng: s.lng }]));
+            appState.cacheStages(
+                resp.stages.map((s) => ({ name: s.name, lat: s.lat, lng: s.lng }))
+            );
+        } catch {
+            // API unavailable — cached data (if any) is already in stageLocations
+        }
     });
 </script>
 

@@ -107,3 +107,8 @@ export const DAY_LABELS: Record<string, string> = {
 
 export const IDENTITY_STORAGE_KEY = 'fqf_identity';
 export const FINGERPRINT_COUNTER_KEY = 'fqf_fingerprint_counter';
+export const PICKS_STORAGE_KEY = 'fqf_picks';
+export const ACTS_STORAGE_PREFIX = 'fqf_acts_';
+export const STAGES_STORAGE_KEY = 'fqf_stage_locations';
+// 24-hour TTL for act/stage caches (data is static for the festival run)
+export const ACTS_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
