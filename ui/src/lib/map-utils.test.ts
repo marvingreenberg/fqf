@@ -333,6 +333,14 @@ describe('pickedActsForDay', () => {
         expect(result).toHaveLength(0);
     });
 
+    it('includes maybe acts (prefixed with ?) for the target date', () => {
+        const picks = new Set(['thu-a', '?thu-b']);
+        const result = pickedActsForDay(acts, picks, THU, locations);
+        const slugs = result.map((a) => a.slug);
+        expect(slugs).toContain('thu-a');
+        expect(slugs).toContain('thu-b');
+    });
+
     it('sorts by start time then stage latitude when times match', () => {
         const tieActs: ActSummary[] = [
             {
@@ -388,20 +396,21 @@ describe('buildScheduleMarkers', () => {
             genre: 'Blues'
         }
     ];
+    const pickedSet = new Set(['act-1', 'act-2']);
 
     it('assigns order 1 to first act', () => {
-        const markers = buildScheduleMarkers(orderedActs, locations);
+        const markers = buildScheduleMarkers(orderedActs, locations, pickedSet);
         expect(markers[0].order).toBe(1);
         expect(markers[0].isFirst).toBe(true);
     });
 
     it('assigns sequential order numbers', () => {
-        const markers = buildScheduleMarkers(orderedActs, locations);
+        const markers = buildScheduleMarkers(orderedActs, locations, pickedSet);
         expect(markers.map((m) => m.order)).toEqual([1, 2]);
     });
 
     it('marks only first act as isFirst', () => {
-        const markers = buildScheduleMarkers(orderedActs, locations);
+        const markers = buildScheduleMarkers(orderedActs, locations, pickedSet);
         expect(markers[0].isFirst).toBe(true);
         expect(markers[1].isFirst).toBe(false);
     });
@@ -411,7 +420,7 @@ describe('buildScheduleMarkers', () => {
             { ...orderedActs[0], stage: 'Unknown Stage' },
             orderedActs[1]
         ];
-        const markers = buildScheduleMarkers(actsWithUnknownStage, locations);
+        const markers = buildScheduleMarkers(actsWithUnknownStage, locations, pickedSet);
         expect(markers).toHaveLength(1);
         expect(markers[0].act.slug).toBe('act-2');
     });
@@ -437,15 +446,103 @@ describe('buildScheduleMarkers', () => {
                 genre: 'Blues'
             }
         ];
-        const markers = buildScheduleMarkers(conflictingActs, locations);
+        const conflictingPicks = new Set(['c1', 'c2']);
+        const markers = buildScheduleMarkers(conflictingActs, locations, conflictingPicks);
         expect(markers[0].conflict).toBe('red');
         expect(markers[1].conflict).toBe('red');
     });
 
     it('has no conflict for non-overlapping acts', () => {
-        const markers = buildScheduleMarkers(orderedActs, locations);
+        const markers = buildScheduleMarkers(orderedActs, locations, pickedSet);
         expect(markers[0].conflict).toBe('none');
         expect(markers[1].conflict).toBe('none');
+    });
+
+    it('marks picked acts as isMaybe=false', () => {
+        const markers = buildScheduleMarkers(orderedActs, locations, pickedSet);
+        expect(markers[0].isMaybe).toBe(false);
+        expect(markers[1].isMaybe).toBe(false);
+    });
+});
+
+describe('buildScheduleMarkers — maybe counter logic', () => {
+    const locations = new Map([
+        ['Stage A', { lat: 29.955, lng: -90.063 }],
+        ['Stage B', { lat: 29.96, lng: -90.058 }],
+        ['Stage C', { lat: 29.952, lng: -90.066 }]
+    ]);
+
+    const THU = '2026-04-16';
+
+    // Helpers to build minimal ActSummary objects
+    const act = (slug: string, stage: string, start: string, end: string): ActSummary => ({
+        slug,
+        name: slug,
+        stage,
+        date: THU,
+        start,
+        end,
+        genre: 'Jazz (Traditional)'
+    });
+
+    it('maybe act overlapping a picked act borrows its counter', () => {
+        // A picked 11–12, B maybe 11:30–12:30, C picked 13–14
+        // Expected orders: A→1, B→1 (borrows A's counter), C→2
+        const acts = [
+            act('a', 'Stage A', '11:00', '12:00'),
+            act('b', 'Stage B', '11:30', '12:30'),
+            act('c', 'Stage C', '13:00', '14:00')
+        ];
+        const picks = new Set(['a', '?b', 'c']);
+        const markers = buildScheduleMarkers(acts, locations, picks);
+        expect(markers).toHaveLength(3);
+        const [mA, mB, mC] = markers;
+        expect(mA.order).toBe(1);
+        expect(mA.isMaybe).toBe(false);
+        expect(mB.order).toBe(1);
+        expect(mB.isMaybe).toBe(true);
+        expect(mC.order).toBe(2);
+        expect(mC.isMaybe).toBe(false);
+    });
+
+    it('maybe act with no overlap gets prev+1 without advancing picked counter', () => {
+        // A picked 11–12, B maybe 14–15, C picked 16–17
+        // Expected orders: A→1, B→2 (prev_picked+1=2), C→2 (counter stays at 1, so next picked is 2)
+        const acts = [
+            act('a', 'Stage A', '11:00', '12:00'),
+            act('b', 'Stage B', '14:00', '15:00'),
+            act('c', 'Stage C', '16:00', '17:00')
+        ];
+        const picks = new Set(['a', '?b', 'c']);
+        const markers = buildScheduleMarkers(acts, locations, picks);
+        expect(markers).toHaveLength(3);
+        const [mA, mB, mC] = markers;
+        expect(mA.order).toBe(1);
+        expect(mB.order).toBe(2);
+        expect(mB.isMaybe).toBe(true);
+        expect(mC.order).toBe(2);
+        expect(mC.isMaybe).toBe(false);
+    });
+
+    it('maybe acts have conflict level none regardless of overlaps', () => {
+        // B is maybe and overlaps with A (picked), but conflict for B should be none
+        const acts = [act('a', 'Stage A', '11:00', '13:00'), act('b', 'Stage B', '11:30', '12:30')];
+        const picks = new Set(['a', '?b']);
+        const markers = buildScheduleMarkers(acts, locations, picks);
+        const mB = markers.find((m) => m.act.slug === 'b')!;
+        expect(mB.isMaybe).toBe(true);
+        expect(mB.conflict).toBe('none');
+    });
+
+    it('maybe act does not set isFirst even if it is the first in the list', () => {
+        // B is maybe and comes first chronologically, A is picked
+        const acts = [act('b', 'Stage B', '11:00', '12:00'), act('a', 'Stage A', '13:00', '14:00')];
+        const picks = new Set(['a', '?b']);
+        const markers = buildScheduleMarkers(acts, locations, picks);
+        const mB = markers.find((m) => m.act.slug === 'b')!;
+        const mA = markers.find((m) => m.act.slug === 'a')!;
+        expect(mB.isFirst).toBe(false);
+        expect(mA.isFirst).toBe(true);
     });
 });
 
@@ -453,7 +550,8 @@ describe('buildPathArrows', () => {
     // Stage A ≈ 29.955,-90.063 and Stage B ≈ 29.96,-90.058 are ~750m apart
     const locations = new Map([
         ['Stage A', { lat: 29.955, lng: -90.063 }],
-        ['Stage B', { lat: 29.96, lng: -90.058 }]
+        ['Stage B', { lat: 29.96, lng: -90.058 }],
+        ['Stage C', { lat: 29.952, lng: -90.066 }]
     ]);
 
     const farActs: ActSummary[] = [
@@ -482,30 +580,74 @@ describe('buildPathArrows', () => {
         { ...farActs[1], slug: 'x2', stage: 'Stage A' }
     ];
 
+    const allPickedFar = new Set(['a', 'b']);
+    const allPickedSame = new Set(['x1', 'x2']);
+
     it('draws an arrow between stages that are far apart', () => {
-        const arrows = buildPathArrows(farActs, locations);
+        const arrows = buildPathArrows(farActs, locations, allPickedFar);
         expect(arrows).toHaveLength(1);
     });
 
     it('skips arrow when acts are at the same stage (distance = 0)', () => {
-        const arrows = buildPathArrows(sameStageActs, locations);
+        const arrows = buildPathArrows(sameStageActs, locations, allPickedSame);
         expect(arrows).toHaveLength(0);
     });
 
     it('records the distance in meters', () => {
-        const arrows = buildPathArrows(farActs, locations);
+        const arrows = buildPathArrows(farActs, locations, allPickedFar);
         expect(arrows[0].distanceMeters).toBeGreaterThan(MIN_PATH_DISTANCE_METERS);
     });
 
     it('returns empty array for a single act', () => {
-        const arrows = buildPathArrows([farActs[0]], locations);
+        const arrows = buildPathArrows([farActs[0]], locations, new Set(['a']));
         expect(arrows).toHaveLength(0);
     });
 
     it('skips acts with missing location', () => {
         const actsWithUnknown: ActSummary[] = [{ ...farActs[0], stage: 'Unknown' }, farActs[1]];
-        const arrows = buildPathArrows(actsWithUnknown, locations);
+        const arrows = buildPathArrows(actsWithUnknown, locations, new Set(['a', 'b']));
         expect(arrows).toHaveLength(0);
+    });
+
+    it('skips maybe acts and draws arrow directly between the surrounding picked acts', () => {
+        // A picked (Stage A), B maybe (Stage B), C picked (Stage C)
+        // Arrow should go A→C, skipping B
+        const actsWithMaybe: ActSummary[] = [
+            {
+                slug: 'a',
+                name: 'A',
+                stage: 'Stage A',
+                date: '2026-04-16',
+                start: '11:00',
+                end: '12:00',
+                genre: 'Jazz (Traditional)'
+            },
+            {
+                slug: 'b',
+                name: 'B',
+                stage: 'Stage B',
+                date: '2026-04-16',
+                start: '13:00',
+                end: '14:00',
+                genre: 'Blues'
+            },
+            {
+                slug: 'c',
+                name: 'C',
+                stage: 'Stage C',
+                date: '2026-04-16',
+                start: '15:00',
+                end: '16:00',
+                genre: 'Funk'
+            }
+        ];
+        const picks = new Set(['a', '?b', 'c']);
+        const arrows = buildPathArrows(actsWithMaybe, locations, picks);
+        // Only one arrow: A→C (Stage A to Stage C), not through B
+        expect(arrows).toHaveLength(1);
+        // Verify it connects Stage A to Stage C (not Stage B)
+        const stageAPos = { x: expect.any(Number), y: expect.any(Number) };
+        expect(arrows[0].from).toMatchObject(stageAPos);
     });
 });
 

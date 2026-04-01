@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { Snippet } from 'svelte';
-    import { FLEUR_PATH } from '$lib/constants';
+    import { FLEUR_PATH, QUESTION_PATH } from '$lib/constants';
 
     const FLEUR_SIZE = 14;
     const FLEUR_VIEWBOX = '0 0 16 16';
@@ -12,6 +12,7 @@
         fleurFill: string;
         borderStyle?: string;
         isPicked?: boolean;
+        isMaybe?: boolean;
         title?: string;
         prefix?: Snippet;
         postfix?: Snippet;
@@ -23,12 +24,14 @@
         fleurFill,
         borderStyle = '',
         isPicked = false,
+        isMaybe = false,
         title = '',
         prefix,
         postfix,
         onclick
     }: Props = $props();
 
+    const iconPath = $derived(isMaybe ? QUESTION_PATH : FLEUR_PATH);
     const cardStyle = $derived(borderStyle + ' ' + (isPicked ? PICKED_BG : UNPICKED_BG));
 </script>
 
@@ -43,7 +46,7 @@
             viewBox={FLEUR_VIEWBOX}
             aria-hidden="true"
         >
-            <path d={FLEUR_PATH} fill={fleurFill} />
+            <path d={iconPath} fill={fleurFill} />
         </svg>
         {#if prefix}{@render prefix()}{/if}
         <span

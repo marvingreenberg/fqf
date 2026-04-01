@@ -20,6 +20,7 @@
         SCHEDULE_MARKER_PURPLE,
         formatTime12
     } from '$lib/map-utils';
+    import { isMaybe as _isMaybe } from '$lib/picks';
     import StageMarker from '$lib/components/StageMarker.svelte';
     import MapActLabel from '$lib/components/MapActLabel.svelte';
 
@@ -122,11 +123,13 @@
             : []
     );
     const scheduleMarkers = $derived(
-        appState.mapMode === 'my-schedule' ? buildScheduleMarkers(orderedPicks, stageLocations) : []
+        appState.mapMode === 'my-schedule'
+            ? buildScheduleMarkers(orderedPicks, stageLocations, picks)
+            : []
     );
     const pathArrows = $derived(
         appState.mapMode === 'my-schedule' && appState.mapShowPaths
-            ? buildPathArrows(orderedPicks, stageLocations)
+            ? buildPathArrows(orderedPicks, stageLocations, picks)
             : []
     );
 
@@ -315,6 +318,7 @@
                         : '1.5px solid rgba(74, 26, 107, 0.35)'}
                     {@const conflictColor = CONFLICT_COLORS[marker.conflict]}
                     {@const borderStyle = `border-left: ${SCHED_BORDER_LEFT_PX}px solid ${conflictColor}; border-bottom: ${SCHED_BORDER_BOTTOM_PX}px solid ${conflictColor};`}
+                    {@const actIsMaybe = _isMaybe(marker.act.slug, picks)}
                     <div
                         class="absolute"
                         style="left: calc({marker.pos
@@ -327,7 +331,8 @@
                             name={marker.act.name}
                             fleurFill={CONFLICT_COLORS.none}
                             {borderStyle}
-                            isPicked={true}
+                            isPicked={!actIsMaybe}
+                            isMaybe={actIsMaybe}
                             title={markerLabel(marker.order, marker.act)}
                             onclick={(e) => {
                                 e.stopPropagation();

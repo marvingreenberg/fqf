@@ -12,6 +12,7 @@ import {
     CONFLICT_COLORS
 } from '$lib/constants';
 import { haversineMeters } from '$lib/distance';
+import { isPicked as _isPicked, isMaybe as _isMaybe, isSelected } from '$lib/picks';
 
 // Countdown color endpoints: gray (inactive) ↔ dark green (active)
 export const COUNTDOWN_GRAY = '#999999';
@@ -175,6 +176,7 @@ export interface ScheduleMarker {
     pos: { x: number; y: number }; // CSS % position
     isFirst: boolean;
     stageOffset: number; // 0-based index among markers at the same stage
+    isMaybe: boolean;
 }
 
 export interface PathArrow {
@@ -194,7 +196,7 @@ export function pickedActsForDay(
     stageLocations: Map<string, { lat: number; lng: number }>
 ): ActSummary[] {
     return allActs
-        .filter((a) => picks.has(a.slug) && a.date === date)
+        .filter((a) => isSelected(a.slug, picks) && a.date === date)
         .sort((a, b) => {
             const timeDiff = timeToMinutes(a.start) - timeToMinutes(b.start);
             if (timeDiff !== 0) return timeDiff;
@@ -206,50 +208,107 @@ export function pickedActsForDay(
 
 /**
  * Build the ordered marker list for My Schedule mode.
- * Conflict level for each act is computed against all other picked acts on the same day.
+ * Picked acts get sequential counters; maybe acts borrow a counter without advancing it.
+ * Conflict level is computed only for picked acts; maybe acts always have conflict 'none'.
  */
 export function buildScheduleMarkers(
     orderedActs: ActSummary[],
-    stageLocations: Map<string, { lat: number; lng: number }>
+    stageLocations: Map<string, { lat: number; lng: number }>,
+    picks: Set<string>
 ): ScheduleMarker[] {
     const stageCounts = new Map<string, number>();
+    let pickedCounter = 0;
+    let firstPickedSeen = false;
+
     return orderedActs
-        .map((act, i) => {
+        .map((act) => {
             const loc = stageLocations.get(act.stage);
             if (!loc) return null;
-            const conflict = computeConflictForAct(act, orderedActs);
+
+            const actIsMaybe = _isMaybe(act.slug, picks);
+            const conflict: ConflictLevel = actIsMaybe
+                ? 'none'
+                : computeConflictForAct(act, orderedActs, picks);
+
             const offset = stageCounts.get(act.stage) ?? 0;
             stageCounts.set(act.stage, offset + 1);
+
+            let order: number;
+            let isFirst = false;
+            if (actIsMaybe) {
+                const borrowedCounter = findOverlappingPickedCounter(act, orderedActs, picks);
+                order = borrowedCounter !== null ? borrowedCounter : pickedCounter + 1;
+            } else {
+                pickedCounter++;
+                order = pickedCounter;
+                if (!firstPickedSeen) {
+                    isFirst = true;
+                    firstPickedSeen = true;
+                }
+            }
+
             return {
                 act,
-                order: i + 1,
+                order,
                 conflict,
                 pos: latLngToPercent(loc.lat, loc.lng),
-                isFirst: i === 0,
-                stageOffset: offset
+                isFirst,
+                stageOffset: offset,
+                isMaybe: actIsMaybe
             };
         })
         .filter((m): m is ScheduleMarker => m !== null);
 }
 
 /** Compute worst conflict level — delegates to the shared conflict module. */
-function computeConflictForAct(act: ActSummary, allPickedActs: ActSummary[]): ConflictLevel {
-    const pickedSlugs = new Set(allPickedActs.map((a) => a.slug));
-    return getWorstConflict(act, allPickedActs, pickedSlugs);
+function computeConflictForAct(
+    act: ActSummary,
+    allPickedActs: ActSummary[],
+    picks: Set<string>
+): ConflictLevel {
+    return getWorstConflict(act, allPickedActs, picks);
 }
 
 /**
- * Build path arrows between consecutive acts in the schedule.
+ * Find the sequential counter of a picked act that overlaps with the given maybe act.
+ * Iterates picked acts in order (same order as they'd receive counters) and returns
+ * the counter of the first overlapping one, or null if none overlap.
+ */
+function findOverlappingPickedCounter(
+    act: ActSummary,
+    allActs: ActSummary[],
+    picks: Set<string>
+): number | null {
+    const s1 = timeToMinutes(act.start);
+    const e1 = timeToMinutes(act.end);
+    let counter = 0;
+    for (const other of allActs) {
+        if (!_isPicked(other.slug, picks) || other.date !== act.date) continue;
+        counter++;
+        const s2 = timeToMinutes(other.start);
+        const e2 = timeToMinutes(other.end);
+        if (Math.max(0, Math.min(e1, e2) - Math.max(s1, s2)) > 0) {
+            return counter;
+        }
+    }
+    return null;
+}
+
+/**
+ * Build path arrows between consecutive PICKED acts in the schedule.
+ * Maybe acts are skipped — no arrows lead to or from them.
  * Only draws an arrow when the straight-line distance exceeds MIN_PATH_DISTANCE_METERS.
  */
 export function buildPathArrows(
     orderedActs: ActSummary[],
-    stageLocations: Map<string, { lat: number; lng: number }>
+    stageLocations: Map<string, { lat: number; lng: number }>,
+    picks: Set<string>
 ): PathArrow[] {
+    const pickedOnly = orderedActs.filter((a) => _isPicked(a.slug, picks));
     const arrows: PathArrow[] = [];
-    for (let i = 0; i < orderedActs.length - 1; i++) {
-        const fromAct = orderedActs[i];
-        const toAct = orderedActs[i + 1];
+    for (let i = 0; i < pickedOnly.length - 1; i++) {
+        const fromAct = pickedOnly[i];
+        const toAct = pickedOnly[i + 1];
         const fromLoc = stageLocations.get(fromAct.stage);
         const toLoc = stageLocations.get(toAct.stage);
         if (!fromLoc || !toLoc) continue;

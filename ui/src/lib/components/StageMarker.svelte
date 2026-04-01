@@ -3,6 +3,7 @@
     import type { StageStatus } from '$lib/map-utils';
     import { SHOW_NEXT_THRESHOLD_MINUTES, CONFLICT_COLORS } from '$lib/constants';
     import { getWorstConflict } from '$lib/conflict';
+    import { isMaybe as _isMaybe } from '$lib/picks';
     import MapActLabel from '$lib/components/MapActLabel.svelte';
 
     const PICKED_BORDER_LEFT_PX = 3;
@@ -27,12 +28,16 @@
 
     const isPicked = $derived(displayAct ? picks.has(displayAct.slug) : false);
 
+    const isMaybeAct = $derived(displayAct ? _isMaybe(displayAct.slug, picks) : false);
+
     const conflict = $derived.by((): ConflictLevel => {
         if (!displayAct || !isPicked) return 'none';
         return getWorstConflict(displayAct, allActs, picks);
     });
 
-    const fleurFill = $derived(isPicked ? CONFLICT_COLORS.none : UNSELECTED_FLEUR_FILL);
+    const fleurFill = $derived(
+        isPicked || isMaybeAct ? CONFLICT_COLORS.none : UNSELECTED_FLEUR_FILL
+    );
 
     const timeText = $derived.by(() => {
         if (showNext && status.next) return `${status.nextMinutesUntil}m`;
@@ -52,7 +57,8 @@
         name={displayAct.name}
         {fleurFill}
         {borderStyle}
-        {isPicked}
+        isPicked={isPicked || isMaybeAct}
+        isMaybe={isMaybeAct}
         onclick={(e) => {
             e.stopPropagation();
             onActDetail?.(displayAct);
