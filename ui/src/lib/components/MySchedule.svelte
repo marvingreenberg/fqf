@@ -3,6 +3,7 @@
     import { DAY_LABELS } from '$lib/types';
     import { getWorstConflict, getConflictBetweenActs } from '$lib/conflict';
     import { CONFLICT_COLORS } from '$lib/constants';
+    import { isPicked as _isPicked, isSelected } from '$lib/picks';
     import {
         walkingDistanceMeters,
         formatDistance,
@@ -35,7 +36,7 @@
 
     const pickedActs = $derived(
         allActs
-            .filter((act) => picks.has(act.slug))
+            .filter((act) => isSelected(act.slug, picks))
             .sort((a, b) => a.date.localeCompare(b.date) || a.start.localeCompare(b.start))
     );
 
@@ -57,14 +58,16 @@
         const info = new Map<string, DistanceEntry>();
         if (stageLocations.size === 0) return info;
         for (const group of groupedByDay) {
+            // Only picked (not maybe) acts participate in the distance chain.
+            const pickedOnly = group.acts.filter((a) => _isPicked(a.slug, picks));
             let anchor: ActSummary | null = null;
-            for (let i = 0; i < group.acts.length; i++) {
+            for (let i = 0; i < pickedOnly.length; i++) {
                 if (i === 0) {
-                    anchor = group.acts[0];
+                    anchor = pickedOnly[0];
                     continue;
                 }
-                const prev = group.acts[i - 1];
-                const curr = group.acts[i];
+                const prev = pickedOnly[i - 1];
+                const curr = pickedOnly[i];
                 const conflict = getConflictBetweenActs(prev, curr);
                 const refAct = conflict === 'red' ? anchor : prev;
                 if (!refAct || refAct.stage === curr.stage) {
@@ -83,7 +86,10 @@
         return info;
     });
 
+    const NO_CONFLICT: ConflictLevel = 'none';
+
     function conflictLevel(act: ActSummary): ConflictLevel {
+        if (!_isPicked(act.slug, picks)) return NO_CONFLICT;
         return getWorstConflict(act, allActs, picks);
     }
 
@@ -92,7 +98,7 @@
     }
 
     function hasConflict(act: ActSummary): boolean {
-        return conflictLevel(act) !== 'none';
+        return conflictLevel(act) !== NO_CONFLICT;
     }
 
     const CONFLICT_BADGE_COLORS: Record<Exclude<ConflictLevel, 'none'>, string> = {
@@ -121,7 +127,7 @@
             {#each group.acts as act (act.slug)}
                 <ActRow
                     {act}
-                    isPicked={true}
+                    isPicked={_isPicked(act.slug, picks)}
                     isMaybe={maybes.has(act.slug)}
                     conflictColor={conflictColor(act)}
                     {readOnly}

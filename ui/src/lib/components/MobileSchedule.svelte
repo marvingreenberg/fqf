@@ -2,6 +2,7 @@
     import type { ActSummary, ConflictLevel, MobileSortMode } from '$lib/types';
     import { CONFLICT_COLORS, MINUTES_PER_HOUR } from '$lib/constants';
     import { getWorstConflict, timeToMinutes } from '$lib/conflict';
+    import { isPicked as _isPicked } from '$lib/picks';
     import ActRow from './ActRow.svelte';
 
     interface Props {
@@ -68,7 +69,7 @@
     const UNPICKED_BORDER_COLOR = 'transparent';
 
     function conflictColor(act: ActSummary): string {
-        if (!picks.has(act.slug)) return UNPICKED_BORDER_COLOR;
+        if (!_isPicked(act.slug, picks)) return UNPICKED_BORDER_COLOR;
         const level: ConflictLevel = getWorstConflict(act, acts, picks);
         return CONFLICT_COLORS[level];
     }
