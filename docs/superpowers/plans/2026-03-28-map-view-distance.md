@@ -945,7 +945,7 @@ Create `ui/src/lib/components/StageMarker.svelte`:
         {/if}
 
         {#if !status.current && !status.next}
-            <div class="text-[8px] opacity-30">idle</div>
+            <div class="text-[10px] opacity-30">idle</div>
         {/if}
     </div>
 

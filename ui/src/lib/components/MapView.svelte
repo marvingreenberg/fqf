@@ -7,7 +7,8 @@
         GRID_END_HOUR,
         MINUTES_PER_HOUR,
         SCRUBBER_STEP_MINUTES,
-        FESTIVAL_START_ISO
+        FESTIVAL_START_ISO,
+        CONFLICT_COLORS
     } from '$lib/constants';
     import {
         latLngToPercent,
@@ -16,10 +17,11 @@
         pickedActsForDay,
         buildScheduleMarkers,
         buildPathArrows,
-        markerFillColor,
+        SCHEDULE_MARKER_PURPLE,
         formatTime12
     } from '$lib/map-utils';
     import StageMarker from '$lib/components/StageMarker.svelte';
+    import MapActLabel from '$lib/components/MapActLabel.svelte';
 
     type MapMode = 'scroll' | 'now' | 'my-schedule';
 
@@ -41,9 +43,21 @@
     const DEFAULT_HOUR = GRID_START_HOUR;
     const DEFAULT_TIME = DEFAULT_HOUR * MINUTES_PER_HOUR;
     const NOW_UPDATE_MS = 60_000;
-    // Marker sizes in CSS px
-    const FIRST_MARKER_SIZE = 28;
-    const OTHER_MARKER_SIZE = 20;
+    // My Schedule circle sizes (px) — first is prominent, rest subdued
+    const FIRST_MARKER_SIZE = 22;
+    const OTHER_MARKER_SIZE = 16;
+    const FIRST_CIRCLE_FONT = 10;
+    const OTHER_CIRCLE_FONT = 8;
+    // My Schedule conflict borders — thinner than time-view (less prominent)
+    const SCHED_BORDER_LEFT_PX = 2;
+    const SCHED_BORDER_BOTTOM_PX = 1;
+    const MUSIC_NOTE_STYLE =
+        'background: rgba(212, 168, 67, 0.35); border: 1px solid rgba(0, 0, 0, 0.5); border-radius: 3px;';
+    // Marker position offset from stage point (rem)
+    const MARKER_OFFSET_REM = 0.3;
+    // Stacking: vertical offset per additional act at same stage (rem)
+    const STACK_VERTICAL_REM = 1.4;
+    const STACK_HORIZONTAL_REM = 0.3;
     // SVG arrow layout
     const ARROW_MARKER_ID = 'fqf-path-arrow';
     const ARROW_MIDPOINT = 0.5;
@@ -89,6 +103,17 @@
             ? allStageStatuses(acts, stageLocations, currentMinutes)
             : []
     );
+
+    // Music note markers at active stage locations (all map modes)
+    const activeStagePositions = $derived.by(() => {
+        const stages = new Set(acts.map((a) => a.stage));
+        return [...stages]
+            .filter((s) => stageLocations.has(s))
+            .map((s) => ({
+                stage: s,
+                pos: latLngToPercent(stageLocations.get(s)!.lat, stageLocations.get(s)!.lng)
+            }));
+    });
 
     // My Schedule mode
     const orderedPicks = $derived(
@@ -208,17 +233,28 @@
                 draggable="false"
             />
 
+            <!-- Music note markers at active stage locations -->
+            {#each activeStagePositions as { pos, stage } (stage)}
+                <div
+                    class="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                    style="left: {pos.x}%; top: {pos.y}%;"
+                >
+                    <span class="text-[10px] px-0.5" style={MUSIC_NOTE_STYLE}> 🎶 </span>
+                </div>
+            {/each}
+
             {#if appState.mapMode !== 'my-schedule'}
-                <!-- Scroll Time / Now: existing stage-status markers -->
+                <!-- Scroll Time / Now: stage-status markers -->
                 {#each statuses as status (status.stage)}
                     {@const loc = stageLocations.get(status.stage)}
                     {#if loc}
                         {@const pos = latLngToPercent(loc.lat, loc.lng)}
-                        <StageMarker
-                            {status}
-                            {onActDetail}
-                            style="left: {pos.x}%; top: {pos.y}%;"
-                        />
+                        <div
+                            class="absolute"
+                            style="left: calc({pos.x}% + {MARKER_OFFSET_REM}rem); top: calc({pos.y}% + {MARKER_OFFSET_REM}rem);"
+                        >
+                            <StageMarker {status} {picks} {onActDetail} {allActs} />
+                        </div>
                     {/if}
                 {/each}
             {:else}
@@ -272,40 +308,49 @@
                 <!-- My Schedule: numbered act markers -->
                 {#each scheduleMarkers as marker (marker.act.slug)}
                     {@const size = marker.isFirst ? FIRST_MARKER_SIZE : OTHER_MARKER_SIZE}
-                    {@const fill = markerFillColor(marker.isFirst, marker.conflict)}
-                    <!-- svelte-ignore a11y_click_events_have_key_events -->
-                    <!-- svelte-ignore a11y_no_static_element_interactions -->
+                    {@const circleBg = marker.isFirst ? SCHEDULE_MARKER_PURPLE : '#ffffff'}
+                    {@const circleText = marker.isFirst ? '#ffffff' : 'var(--mg-text)'}
+                    {@const circleBorder = marker.isFirst
+                        ? 'none'
+                        : '1.5px solid rgba(74, 26, 107, 0.35)'}
+                    {@const conflictColor = CONFLICT_COLORS[marker.conflict]}
+                    {@const borderStyle = `border-left: ${SCHED_BORDER_LEFT_PX}px solid ${conflictColor}; border-bottom: ${SCHED_BORDER_BOTTOM_PX}px solid ${conflictColor};`}
                     <div
-                        class="absolute cursor-pointer"
-                        style="left: calc({marker.pos.x}% + 0.3rem + {marker.stageOffset *
-                            0.3}rem); top: calc({marker.pos.y}% + 0.3rem + {marker.stageOffset *
-                            1.875}rem);"
-                        onclick={(e) => {
-                            e.stopPropagation();
-                            onActDetail?.(marker.act);
-                        }}
-                        title={markerLabel(marker.order, marker.act)}
+                        class="absolute"
+                        style="left: calc({marker.pos
+                            .x}% + {MARKER_OFFSET_REM}rem + {marker.stageOffset *
+                            STACK_HORIZONTAL_REM}rem); top: calc({marker.pos
+                            .y}% + {MARKER_OFFSET_REM}rem + {marker.stageOffset *
+                            STACK_VERTICAL_REM}rem);"
                     >
-                        <div class="flex items-center gap-1 fqf-map-marker fqf-map-act-row">
-                            <!-- Numbered circle -->
-                            <div
-                                class="flex items-center justify-center rounded-full shrink-0 font-bold text-white"
-                                style="width: {size}px; height: {size}px; background: {fill}; font-size: {marker.isFirst
-                                    ? 12
-                                    : 10}px; box-shadow: 0 1px 4px rgba(0,0,0,0.35);"
-                            >
-                                {marker.order}
-                            </div>
-                            <!-- Label: time range + name -->
-                            <span
-                                class="text-[9px] font-medium truncate"
-                                style="max-width: 120px; color: var(--mg-text);"
-                            >
-                                {formatTime12(marker.act.start)}–{formatTime12(marker.act.end)}
-                                {marker.act.name}
-                            </span>
-                        </div>
-                        <div class="fqf-map-pin"></div>
+                        <MapActLabel
+                            name={marker.act.name}
+                            fleurFill={CONFLICT_COLORS.none}
+                            {borderStyle}
+                            isPicked={true}
+                            title={markerLabel(marker.order, marker.act)}
+                            onclick={(e) => {
+                                e.stopPropagation();
+                                onActDetail?.(marker.act);
+                            }}
+                        >
+                            {#snippet prefix()}
+                                <div
+                                    class="flex items-center justify-center rounded-full shrink-0 font-bold"
+                                    style="width: {size}px; height: {size}px; background: {circleBg}; color: {circleText}; font-size: {marker.isFirst
+                                        ? FIRST_CIRCLE_FONT
+                                        : OTHER_CIRCLE_FONT}px; border: {circleBorder}; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"
+                                >
+                                    {marker.order}
+                                </div>
+                                <span
+                                    class="text-[9px] shrink-0"
+                                    style="color: var(--mg-purple-deep);"
+                                >
+                                    {formatTime12(marker.act.start)}–{formatTime12(marker.act.end)}
+                                </span>
+                            {/snippet}
+                        </MapActLabel>
                     </div>
                 {/each}
 

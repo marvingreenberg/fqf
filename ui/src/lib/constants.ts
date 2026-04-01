@@ -6,10 +6,18 @@ export const GRID_COLUMN_MIN_WIDTH = 140;
 export const CONFLICT_THRESHOLD = 0.3;
 
 export const CONFLICT_COLORS = {
-    none: '#22c55e', // green-500
-    yellow: '#eab308', // yellow-500
-    red: '#ef4444' // red-500
+    none: '#22c55e',
+    yellow: '#fcbf19',
+    red: '#e02525'
 } as const;
+
+export const CONFLICT_COLOR_TEXT = {
+    none: '#22c55e',
+    yellow: '#7e610c',
+    red: '#901b1b'
+} as const;
+
+export const PICKED_FLEUR_FILL = CONFLICT_COLORS.none;
 
 export const MAX_MERGE_TOKENS = 5;
 

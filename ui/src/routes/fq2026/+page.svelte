@@ -158,7 +158,7 @@
             <h1 class="text-base font-semibold" style="color: var(--mg-gold-bright);">
                 FQF 2026 Schedule Builder
             </h1>
-            {#if isMobile && appState.viewMode !== 'my-schedule' && appState.viewMode !== 'share'}
+            {#if isMobile && appState.viewMode === 'grid'}
                 <div class="flex gap-1">
                     {#each SORT_MODES as mode (mode.value)}
                         <button

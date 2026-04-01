@@ -37,3 +37,4 @@ Thumbs.db
 .multiline/
 .htmlcov/
 .worktrees/
+firestore_dump.json

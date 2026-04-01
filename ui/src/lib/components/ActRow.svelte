@@ -1,7 +1,8 @@
 <script lang="ts">
     import type { ActSummary } from '$lib/types';
     import type { Snippet } from 'svelte';
-    import { FLEUR_PATH } from '$lib/constants';
+    import { FLEUR_PATH, PICKED_FLEUR_FILL } from '$lib/constants';
+    import { formatTime12 } from '$lib/map-utils';
 
     interface Props {
         act: ActSummary;
@@ -46,7 +47,7 @@
             aria-label={isPicked ? `Remove ${act.name} from picks` : `Add ${act.name} to picks`}
         >
             {#if isPicked}
-                <svg viewBox="0 0 16 16" width="18" height="18" fill="var(--mg-gold-rich)">
+                <svg viewBox="0 0 16 16" width="18" height="18" fill={PICKED_FLEUR_FILL}>
                     <path d={FLEUR_PATH} />
                 </svg>
             {:else}
@@ -67,7 +68,7 @@
     <div class="flex-1 min-w-0">
         <p class="text-sm font-semibold truncate">{act.name}</p>
         <p class="text-xs truncate" style="color: rgba(74, 26, 107, 0.5);">
-            {act.start}&#8211;{act.end} &middot; {act.stage}
+            {formatTime12(act.start)}&#8211;{formatTime12(act.end)} &middot; {act.stage}
         </p>
         {#if extraMain}
             {@render extraMain()}

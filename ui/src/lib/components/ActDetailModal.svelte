@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { ActDetail } from '$lib/types';
-    import { FLEUR_PATH } from '$lib/constants';
+    import { FLEUR_PATH, PICKED_FLEUR_FILL } from '$lib/constants';
+    import { formatTime12 } from '$lib/map-utils';
 
     interface Props {
         act: ActDetail | null;
@@ -59,7 +60,7 @@
                                 viewBox="0 0 16 16"
                                 width="20"
                                 height="20"
-                                fill={isPicked ? 'var(--mg-gold-rich)' : 'none'}
+                                fill={isPicked ? PICKED_FLEUR_FILL : 'none'}
                                 stroke={isPicked ? 'none' : 'rgba(74, 26, 107, 0.3)'}
                                 stroke-width="0.75"
                             >
@@ -142,7 +143,7 @@
                     class="text-sm mb-3 flex items-center gap-1.5"
                     style="color: rgba(74, 26, 107, 0.55);"
                 >
-                    {act.stage} &middot; {act.start}&#8211;{act.end}
+                    {act.stage} &middot; {formatTime12(act.start)}&#8211;{formatTime12(act.end)}
                 </p>
 
                 <p class="text-sm leading-relaxed">

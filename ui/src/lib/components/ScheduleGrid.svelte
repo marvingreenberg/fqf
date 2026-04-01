@@ -116,6 +116,8 @@
                             height={actHeight(act)}
                             isPicked={picks.has(act.slug)}
                             conflictLevel={conflictLevel(act)}
+                            allActs={acts}
+                            {picks}
                             onToggle={() => onTogglePick(act.slug)}
                             onDetail={() => onActDetail(act)}
                             {readOnly}
