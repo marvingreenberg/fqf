@@ -14,8 +14,10 @@
     interface Props {
         allActs: ActSummary[];
         picks: Set<string>;
+        maybes: Set<string>;
         stageLocations: Map<string, { lat: number; lng: number }>;
         onTogglePick: (slug: string) => void;
+        onToggleMaybe: (slug: string) => void;
         onActDetail: (act: ActSummary) => void;
         readOnly?: boolean;
     }
@@ -23,8 +25,10 @@
     let {
         allActs,
         picks,
+        maybes,
         stageLocations,
         onTogglePick,
+        onToggleMaybe,
         onActDetail,
         readOnly = false
     }: Props = $props();
@@ -118,9 +122,11 @@
                 <ActRow
                     {act}
                     isPicked={true}
+                    isMaybe={maybes.has(act.slug)}
                     conflictColor={conflictColor(act)}
                     {readOnly}
                     {onTogglePick}
+                    {onToggleMaybe}
                     {onActDetail}
                 >
                     {#snippet extraMain()}

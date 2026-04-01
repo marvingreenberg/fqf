@@ -12,12 +12,22 @@
     interface Props {
         acts: ActSummary[];
         picks: Set<string>;
+        maybes: Set<string>;
         onTogglePick: (slug: string) => void;
+        onToggleMaybe: (slug: string) => void;
         onActDetail: (act: ActSummary) => void;
         readOnly?: boolean;
     }
 
-    let { acts, picks, onTogglePick, onActDetail, readOnly = false }: Props = $props();
+    let {
+        acts,
+        picks,
+        maybes,
+        onTogglePick,
+        onToggleMaybe,
+        onActDetail,
+        readOnly = false
+    }: Props = $props();
 
     const GRID_START_MINUTES = GRID_START_HOUR * 60;
     const GRID_END_MINUTES = GRID_END_HOUR * 60;
@@ -115,10 +125,12 @@
                             top={actTop(act)}
                             height={actHeight(act)}
                             isPicked={picks.has(act.slug)}
+                            isMaybe={maybes.has(act.slug)}
                             conflictLevel={conflictLevel(act)}
                             allActs={acts}
                             {picks}
                             onToggle={() => onTogglePick(act.slug)}
+                            onToggleMaybe={() => onToggleMaybe(act.slug)}
                             onDetail={() => onActDetail(act)}
                             {readOnly}
                         />

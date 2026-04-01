@@ -1,20 +1,31 @@
 <script lang="ts">
     import type { ActDetail } from '$lib/types';
-    import { FLEUR_PATH, PICKED_FLEUR_FILL } from '$lib/constants';
     import { formatTime12 } from '$lib/map-utils';
+    import PickButtons from '$lib/components/PickButtons.svelte';
 
     interface Props {
         act: ActDetail | null;
         loading: boolean;
         stageLocations: Map<string, { lat: number; lng: number }>;
         isPicked: boolean;
+        isMaybe: boolean;
         readOnly: boolean;
         onTogglePick?: () => void;
+        onToggleMaybe?: () => void;
         onClose: () => void;
     }
 
-    let { act, loading, stageLocations, isPicked, readOnly, onTogglePick, onClose }: Props =
-        $props();
+    let {
+        act,
+        loading,
+        stageLocations,
+        isPicked,
+        isMaybe,
+        readOnly,
+        onTogglePick,
+        onToggleMaybe,
+        onClose
+    }: Props = $props();
 </script>
 
 <div
@@ -50,23 +61,14 @@
             {:else if act}
                 <div class="flex items-center gap-2 mb-3">
                     {#if !readOnly}
-                        <button
-                            class="fqf-fleur shrink-0"
-                            style="width: 1.5rem; height: 1.5rem;"
-                            title={isPicked ? 'Remove from picks' : 'Add to picks'}
-                            onclick={onTogglePick}
-                        >
-                            <svg
-                                viewBox="0 0 16 16"
-                                width="20"
-                                height="20"
-                                fill={isPicked ? PICKED_FLEUR_FILL : 'none'}
-                                stroke={isPicked ? 'none' : 'rgba(74, 26, 107, 0.3)'}
-                                stroke-width="0.75"
-                            >
-                                <path d={FLEUR_PATH} />
-                            </svg>
-                        </button>
+                        <PickButtons
+                            {isPicked}
+                            {isMaybe}
+                            size={20}
+                            onTogglePick={() => onTogglePick?.()}
+                            onToggleMaybe={() => onToggleMaybe?.()}
+                            ariaName={act?.name ?? 'act'}
+                        />
                     {/if}
 
                     {#if act.websites.length > 0}

@@ -145,6 +145,12 @@ h3,
     background-color: rgba(26, 122, 74, 0.28);
 }
 
+.fqf-act-block.maybe {
+    background: linear-gradient(to right, rgba(34, 197, 94, 0.2), rgba(200, 200, 200, 0.2));
+    border-color: var(--mg-green-deep);
+    border-width: 1.5px;
+}
+
 /* ── Grid background and time column ─────────────────────────────────────── */
 .fqf-grid-bg {
     background-color: #d6e6d0;

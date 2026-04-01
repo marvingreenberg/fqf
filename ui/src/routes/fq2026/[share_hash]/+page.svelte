@@ -216,8 +216,10 @@
                 <MySchedule
                     {allActs}
                     {picks}
+                    maybes={new Set()}
                     {stageLocations}
                     onTogglePick={() => {}}
+                    onToggleMaybe={() => {}}
                     onActDetail={openDetail}
                     readOnly={true}
                 />
@@ -231,8 +233,10 @@
                 <MobileSchedule
                     {acts}
                     {picks}
+                    maybes={new Set()}
                     sortMode={mobileSortMode}
                     onTogglePick={() => {}}
+                    onToggleMaybe={() => {}}
                     onActDetail={openDetail}
                     readOnly={true}
                 />
@@ -240,7 +244,9 @@
                 <ScheduleGrid
                     {acts}
                     {picks}
+                    maybes={new Set()}
                     onTogglePick={() => {}}
+                    onToggleMaybe={() => {}}
                     onActDetail={openDetail}
                     readOnly={true}
                 />
@@ -255,6 +261,7 @@
         loading={detailLoading}
         {stageLocations}
         isPicked={false}
+        isMaybe={false}
         readOnly={true}
         onClose={closeDetail}
     />

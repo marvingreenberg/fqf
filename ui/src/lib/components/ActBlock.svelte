@@ -1,13 +1,9 @@
 <script lang="ts">
     import type { ActSummary, ConflictLevel } from '$lib/types';
-    import {
-        FLEUR_PATH,
-        PICKED_FLEUR_FILL,
-        CONFLICT_COLORS,
-        CONFLICT_COLOR_TEXT
-    } from '$lib/constants';
+    import { CONFLICT_COLORS, CONFLICT_COLOR_TEXT } from '$lib/constants';
     import { timeToMinutes } from '$lib/conflict';
     import { formatTime12 } from '$lib/map-utils';
+    import PickButtons from '$lib/components/PickButtons.svelte';
 
     const MIN_HEIGHT_FOR_TIME = 50;
     const MIN_HEIGHT_FOR_GENRE = 65;
@@ -18,10 +14,12 @@
         top: number;
         height: number;
         isPicked: boolean;
+        isMaybe: boolean;
         conflictLevel: ConflictLevel;
         allActs: ActSummary[];
         picks: Set<string>;
         onToggle: () => void;
+        onToggleMaybe: () => void;
         onDetail: () => void;
         readOnly?: boolean;
     }
@@ -31,10 +29,12 @@
         top,
         height,
         isPicked,
+        isMaybe,
         conflictLevel,
         allActs,
         picks,
         onToggle,
+        onToggleMaybe,
         onDetail,
         readOnly = false
     }: Props = $props();
@@ -45,6 +45,7 @@
     const blockClass = $derived.by(() => {
         let cls = 'fqf-act-block';
         if (isPicked) cls += ' picked';
+        else if (isMaybe) cls += ' maybe';
         return cls;
     });
 
@@ -93,34 +94,14 @@
     <div class="flex flex-col gap-0 p-1.5 h-full">
         <div class="flex items-start gap-1">
             {#if !readOnly}
-                <button
-                    class="fqf-fleur mt-0.5 shrink-0"
-                    style="width: 1rem; height: 1rem;"
-                    onclick={(e) => {
-                        e.stopPropagation();
-                        onToggle();
-                    }}
-                    aria-label={isPicked
-                        ? `Remove ${act.name} from picks`
-                        : `Add ${act.name} to picks`}
-                >
-                    {#if isPicked}
-                        <svg viewBox="0 0 16 16" width="14" height="14" fill={PICKED_FLEUR_FILL}>
-                            <path d={FLEUR_PATH} />
-                        </svg>
-                    {:else}
-                        <svg
-                            viewBox="0 0 16 16"
-                            width="14"
-                            height="14"
-                            fill="none"
-                            stroke="rgba(74, 26, 107, 0.3)"
-                            stroke-width="0.75"
-                        >
-                            <path d={FLEUR_PATH} />
-                        </svg>
-                    {/if}
-                </button>
+                <PickButtons
+                    {isPicked}
+                    {isMaybe}
+                    size={14}
+                    onTogglePick={() => onToggle()}
+                    onToggleMaybe={() => onToggleMaybe()}
+                    ariaName={act.name}
+                />
             {/if}
             <div class="min-w-0 flex-1">
                 <p class="text-xs font-semibold leading-tight truncate">{act.name}</p>

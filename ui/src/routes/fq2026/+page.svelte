@@ -198,8 +198,10 @@
             <MySchedule
                 {allActs}
                 picks={appState.picks}
+                maybes={appState.maybes}
                 {stageLocations}
                 onTogglePick={(slug) => appState.togglePick(slug)}
+                onToggleMaybe={(slug) => appState.toggleMaybe(slug)}
                 onActDetail={openDetail}
             />
         {:else if appState.viewMode === 'map'}
@@ -218,6 +220,7 @@
             <ShareView
                 selfActs={allActs}
                 onTogglePick={(slug) => appState.togglePick(slug)}
+                onToggleMaybe={(slug) => appState.toggleMaybe(slug)}
                 onActDetail={openDetail}
             />
         {:else if loading}
@@ -228,15 +231,19 @@
             <MobileSchedule
                 acts={visibleActs}
                 picks={appState.picks}
+                maybes={appState.maybes}
                 sortMode={appState.mobileSortMode}
                 onTogglePick={(slug) => appState.togglePick(slug)}
+                onToggleMaybe={(slug) => appState.toggleMaybe(slug)}
                 onActDetail={openDetail}
             />
         {:else}
             <ScheduleGrid
                 acts={visibleActs}
                 picks={appState.picks}
+                maybes={appState.maybes}
                 onTogglePick={(slug) => appState.togglePick(slug)}
+                onToggleMaybe={(slug) => appState.toggleMaybe(slug)}
                 onActDetail={openDetail}
             />
         {/if}
@@ -249,8 +256,10 @@
         loading={detailLoading}
         {stageLocations}
         isPicked={detailAct ? appState.isPicked(detailAct.slug) : false}
+        isMaybe={detailAct ? appState.isMaybe(detailAct.slug) : false}
         readOnly={false}
         onTogglePick={() => detailAct && appState.togglePick(detailAct.slug)}
+        onToggleMaybe={() => detailAct && appState.toggleMaybe(detailAct.slug)}
         onClose={closeDetail}
     />
 {/if}

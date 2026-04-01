@@ -2,6 +2,7 @@ import type { ActSummary, SharedSchedule, ViewMode, MobileSortMode, ShareRef } f
 import { FESTIVAL_DATES, FINGERPRINT_COUNTER_KEY, IDENTITY_STORAGE_KEY } from '$lib/types';
 import { GRID_START_HOUR, MINUTES_PER_HOUR } from '$lib/constants';
 import {
+    MAYBE_PREFIX,
     isPicked as _isPicked,
     isMaybe as _isMaybe,
     isSelected as _isSelected,
@@ -54,6 +55,15 @@ class AppState {
 
     get picksArray(): string[] {
         return [...this.picks];
+    }
+
+    /** Set of slugs in the maybe state (without the `?` prefix). */
+    get maybes(): Set<string> {
+        const result = new Set<string>();
+        for (const entry of this.picks) {
+            if (entry.startsWith(MAYBE_PREFIX)) result.add(entry.slice(MAYBE_PREFIX.length));
+        }
+        return result;
     }
 
     loadFromStorage(): void {

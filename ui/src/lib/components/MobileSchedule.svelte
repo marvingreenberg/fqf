@@ -7,13 +7,24 @@
     interface Props {
         acts: ActSummary[];
         picks: Set<string>;
+        maybes: Set<string>;
         sortMode: MobileSortMode;
         onTogglePick: (slug: string) => void;
+        onToggleMaybe: (slug: string) => void;
         onActDetail: (act: ActSummary) => void;
         readOnly?: boolean;
     }
 
-    let { acts, picks, sortMode, onTogglePick, onActDetail, readOnly = false }: Props = $props();
+    let {
+        acts,
+        picks,
+        maybes,
+        sortMode,
+        onTogglePick,
+        onToggleMaybe,
+        onActDetail,
+        readOnly = false
+    }: Props = $props();
 
     const SLOT_INTERVAL_MINUTES = 30;
 
@@ -73,9 +84,11 @@
             <ActRow
                 {act}
                 isPicked={picks.has(act.slug)}
+                isMaybe={maybes.has(act.slug)}
                 conflictColor={conflictColor(act)}
                 {readOnly}
                 {onTogglePick}
+                {onToggleMaybe}
                 {onActDetail}
             />
         {/each}

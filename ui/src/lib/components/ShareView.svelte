@@ -13,10 +13,11 @@
     interface Props {
         selfActs: ActSummary[];
         onTogglePick: (slug: string) => void;
+        onToggleMaybe: (slug: string) => void;
         onActDetail: (act: ActSummary) => void;
     }
 
-    let { selfActs, onTogglePick, onActDetail }: Props = $props();
+    let { selfActs, onTogglePick, onToggleMaybe, onActDetail }: Props = $props();
 
     interface ScheduleEntry {
         id: string; // token for self, share_id for shared
@@ -246,8 +247,10 @@
                     <ActRow
                         {act}
                         isPicked={appState.picks.has(act.slug)}
+                        isMaybe={appState.isMaybe(act.slug)}
                         conflictColor={conflictColor(act)}
                         {onTogglePick}
+                        {onToggleMaybe}
                         {onActDetail}
                     >
                         {#snippet extra()}
