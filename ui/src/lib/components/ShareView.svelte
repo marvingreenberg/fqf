@@ -3,7 +3,8 @@
     import { DAY_LABELS } from '$lib/types';
     import { assignEmojis } from '$lib/emoji-mapper';
     import { getWorstConflict } from '$lib/conflict';
-    import { CONFLICT_COLORS } from '$lib/constants';
+    import { CONFLICT_COLORS, FLEUR_PATH, QUESTION_PATH, PICKED_FLEUR_FILL } from '$lib/constants';
+    import { bareSlug, isPicked, isMaybe } from '$lib/picks';
     import { appState } from '$lib/stores.svelte';
     import ActRow from './ActRow.svelte';
 
@@ -58,7 +59,8 @@
     const pickersBySlug = $derived.by(() => {
         const map = new Map<string, string[]>();
         for (const entry of activeEntries) {
-            for (const slug of entry.picks) {
+            for (const rawSlug of entry.picks) {
+                const slug = bareSlug(rawSlug);
                 if (!map.has(slug)) map.set(slug, []);
                 map.get(slug)!.push(entry.id);
             }
@@ -70,10 +72,16 @@
     const allPickSlugs = $derived.by(() => {
         const union = new Set<string>();
         for (const entry of activeEntries) {
-            for (const slug of entry.picks) union.add(slug);
+            for (const rawSlug of entry.picks) union.add(bareSlug(rawSlug));
         }
         return union;
     });
+
+    function getEntryPicks(entryId: string): Set<string> {
+        if (entryId === appState.token) return appState.picks;
+        const shared = appState.sharedSchedules.find((s) => s.share_id === entryId);
+        return shared ? new Set(shared.picks) : new Set();
+    }
 
     // All acts: self picks + shared schedules, deduped by slug
     const allActs = $derived.by((): ActSummary[] => {
@@ -257,12 +265,39 @@
                             <div class="flex gap-0.5">
                                 {#each pickers as id (id)}
                                     {@const entry = allEntries.find((e) => e.id === id)}
+                                    {@const entryPicks = getEntryPicks(id)}
+                                    {@const isPickedByEntry = isPicked(act.slug, entryPicks)}
+                                    {@const isMaybeByEntry = isMaybe(act.slug, entryPicks)}
                                     <span
                                         class="fqf-emoji-circle {badgeClass(id)}"
+                                        style="position: relative;"
                                         title={entry?.label ?? id}
                                         aria-label={entry?.label ?? id}
                                     >
                                         {emojiMap[id] ?? '?'}
+                                        {#if isPickedByEntry}
+                                            <span class="fqf-emoji-sub-indicator">
+                                                <svg
+                                                    viewBox="0 0 16 16"
+                                                    width="8"
+                                                    height="8"
+                                                    fill={PICKED_FLEUR_FILL}
+                                                >
+                                                    <path d={FLEUR_PATH} />
+                                                </svg>
+                                            </span>
+                                        {:else if isMaybeByEntry}
+                                            <span class="fqf-emoji-sub-indicator">
+                                                <svg
+                                                    viewBox="0 0 16 16"
+                                                    width="8"
+                                                    height="8"
+                                                    fill={PICKED_FLEUR_FILL}
+                                                >
+                                                    <path d={QUESTION_PATH} />
+                                                </svg>
+                                            </span>
+                                        {/if}
                                     </span>
                                 {/each}
                             </div>

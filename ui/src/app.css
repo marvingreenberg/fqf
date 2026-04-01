@@ -536,6 +536,19 @@ h3,
     line-height: 1;
 }
 
+.fqf-emoji-sub-indicator {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    background: white;
+    border-radius: 9999px;
+    padding: 1px;
+    line-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 /* ── Controls bar (page header below main header) ────────────────────────── */
 .fqf-controls-bar {
     background: linear-gradient(180deg, rgba(74, 26, 107, 0.88) 0%, rgba(74, 26, 107, 0.78) 100%);
