@@ -125,3 +125,53 @@ describe('getWorstConflict', () => {
         expect(getWorstConflict(act, [act, other], new Set(['a', 'b']))).toBe('none');
     });
 });
+
+describe('getWorstConflict with maybe picks', () => {
+    it('ignores maybe-prefixed picks in conflict calculation', () => {
+        // act2 is a maybe — should not cause conflict for act1
+        const act1 = {
+            slug: 'a',
+            name: 'A',
+            stage: 'S1',
+            date: '2026-04-16',
+            start: '11:00',
+            end: '12:00',
+            genre: 'Jazz'
+        };
+        const act2 = {
+            slug: 'b',
+            name: 'B',
+            stage: 'S2',
+            date: '2026-04-16',
+            start: '11:30',
+            end: '12:30',
+            genre: 'Jazz'
+        };
+        const picks = new Set(['a', '?b']);
+        expect(getWorstConflict(act1, [act1, act2], picks)).toBe('none');
+    });
+
+    it('returns none for a maybe act even if it overlaps picked acts', () => {
+        const act1 = {
+            slug: 'a',
+            name: 'A',
+            stage: 'S1',
+            date: '2026-04-16',
+            start: '11:00',
+            end: '12:00',
+            genre: 'Jazz'
+        };
+        const act2 = {
+            slug: 'b',
+            name: 'B',
+            stage: 'S2',
+            date: '2026-04-16',
+            start: '11:30',
+            end: '12:30',
+            genre: 'Jazz'
+        };
+        const picks = new Set(['?a', 'b']);
+        // a is maybe, so it has no conflicts
+        expect(getWorstConflict(act1, [act1, act2], picks)).toBe('none');
+    });
+});

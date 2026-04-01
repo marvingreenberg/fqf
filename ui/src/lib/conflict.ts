@@ -1,5 +1,6 @@
 import type { ActSummary, ConflictLevel } from '$lib/types';
 import { CONFLICT_THRESHOLD } from '$lib/constants';
+import { isPicked } from '$lib/picks';
 
 export function timeToMinutes(time: string): number {
     const [h, m] = time.split(':').map(Number);
@@ -43,13 +44,15 @@ export function getWorstConflict(
     allActs: ActSummary[],
     picks: Set<string>
 ): ConflictLevel {
+    if (!isPicked(act.slug, picks)) return 'none';
+
     let worst: ConflictLevel = 'none';
     const s1 = timeToMinutes(act.start);
     const e1 = timeToMinutes(act.end);
 
     for (const other of allActs) {
         if (other.slug === act.slug) continue;
-        if (!picks.has(other.slug)) continue;
+        if (!isPicked(other.slug, picks)) continue;
         if (other.date !== act.date) continue;
 
         const s2 = timeToMinutes(other.start);
