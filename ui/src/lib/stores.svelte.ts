@@ -1,6 +1,13 @@
 import type { ActSummary, SharedSchedule, ViewMode, MobileSortMode, ShareRef } from '$lib/types';
 import { FESTIVAL_DATES, FINGERPRINT_COUNTER_KEY, IDENTITY_STORAGE_KEY } from '$lib/types';
 import { GRID_START_HOUR, MINUTES_PER_HOUR } from '$lib/constants';
+import {
+    isPicked as _isPicked,
+    isMaybe as _isMaybe,
+    isSelected as _isSelected,
+    togglePick as _togglePick,
+    toggleMaybe as _toggleMaybe
+} from '$lib/picks';
 
 export type MapMode = 'scroll' | 'now' | 'my-schedule';
 const DEFAULT_MAP_MINUTES = GRID_START_HOUR * MINUTES_PER_HOUR;
@@ -127,18 +134,25 @@ class AppState {
     }
 
     togglePick(slug: string): void {
-        const next = new Set(this.picks);
-        if (next.has(slug)) {
-            next.delete(slug);
-        } else {
-            next.add(slug);
-        }
-        this.picks = next;
+        this.picks = _togglePick(slug, this.picks);
+        this.scheduleSave();
+    }
+
+    toggleMaybe(slug: string): void {
+        this.picks = _toggleMaybe(slug, this.picks);
         this.scheduleSave();
     }
 
     isPicked(slug: string): boolean {
-        return this.picks.has(slug);
+        return _isPicked(slug, this.picks);
+    }
+
+    isMaybe(slug: string): boolean {
+        return _isMaybe(slug, this.picks);
+    }
+
+    isSelected(slug: string): boolean {
+        return _isSelected(slug, this.picks);
     }
 
     clearPicks(): void {
