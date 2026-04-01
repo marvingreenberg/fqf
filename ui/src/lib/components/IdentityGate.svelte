@@ -1,8 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import { fuzzyLookup, loadSharedSchedule } from '$lib/api';
-    import { appState } from '$lib/stores.svelte';
-    import { createNewSchedule } from '$lib/auth-utils';
+    import { loadSharedSchedule } from '$lib/api';
+    import LoginForm from '$lib/components/LoginForm.svelte';
 
     interface Props {
         pendingShareId?: string | null;
@@ -15,17 +14,7 @@
     // Start as null only when there is a share to validate, otherwise false (no share)
     let shareValid = $state<boolean | null>(null);
     let shareValidName = $state<string>('');
-
-    let nameInput = $state('');
-    let tripleInput = $state('');
-    let errorMsg = $state('');
     let shareError = $state('');
-    let loading = $state(false);
-
-    // Pre-fill triple if a stored token exists (e.g. after page load with stored identity)
-    $effect(() => {
-        if (appState.token) tripleInput = appState.token;
-    });
 
     onMount(async () => {
         if (!pendingShareId) {
@@ -42,53 +31,9 @@
         }
     });
 
-    async function handleNewSchedule(): Promise<void> {
-        if (!nameInput.trim()) {
-            errorMsg = 'Please enter a name before creating a schedule.';
-            return;
-        }
-        loading = true;
-        errorMsg = '';
-        try {
-            await createNewSchedule(nameInput.trim());
-        } catch {
-            errorMsg = 'Could not create schedule. Please try again.';
-        } finally {
-            loading = false;
-        }
-    }
-
-    async function handleLoadSchedule(): Promise<void> {
-        const triple = tripleInput.trim();
-        if (!triple) {
-            errorMsg = 'Please enter your secret words.';
-            return;
-        }
-        loading = true;
-        errorMsg = '';
-        try {
-            const result = await fuzzyLookup(triple);
-            if (result.corrected) {
-                // Auto-fill the corrected triple so the user sees what was matched
-                tripleInput = result.token;
-            }
-            // Name comes from the stored schedule — no input required for load
-            await appState.confirm(result.token, result.name);
-        } catch {
-            errorMsg = 'Schedule not found. Check your secret words.';
-        } finally {
-            loading = false;
-        }
-    }
-
     function handleViewShareOnly(): void {
         if (!pendingShareId) return;
-        // Navigate to view-only route (Task 28)
         window.location.href = `/fq2026/${pendingShareId}`;
-    }
-
-    function handleKeydown(e: KeyboardEvent): void {
-        if (e.key === 'Enter') handleLoadSchedule();
     }
 </script>
 
@@ -114,80 +59,38 @@
                 </p>
             {/if}
 
-            <!-- Load existing schedule section -->
-            <div class="flex flex-col gap-2">
-                <p class="text-xs" style="color: rgba(74,26,107,0.65); font-style: italic;">
-                    If you have an existing schedule, you can load it
-                </p>
-                <button class="fqf-btn-gold w-full" onclick={handleLoadSchedule} disabled={loading}>
-                    {loading ? 'Loading…' : 'Load Schedule'}
-                </button>
-                <input
-                    id="identity-triple"
-                    class="input w-full text-sm"
-                    type="text"
-                    placeholder="enter your secret words"
-                    style={tripleInput
-                        ? 'color: #1a1a1a;'
-                        : 'color: rgba(74,26,107,0.4); font-style: italic; font-size: 0.8rem;'}
-                    bind:value={tripleInput}
-                    onkeydown={handleKeydown}
-                />
-            </div>
+            <LoginForm
+                loadLabel="If you have an existing schedule, you can load it"
+                newLabel="Create a schedule. Name for sharing, a nickname is fine"
+            >
+                {#snippet newSectionExtra()}
+                    {#if shareValid === true}
+                        <p
+                            class="text-xs"
+                            style="color: rgba(74,26,107,0.6); font-style: italic;"
+                        >
+                            Create a schedule to allow comparing with {shareValidName}
+                        </p>
+                    {/if}
+                {/snippet}
 
-            <!-- Divider -->
-            <hr style="border-color: rgba(74,26,107,0.15);" />
-
-            <!-- New schedule section -->
-            <div class="flex flex-col gap-2">
-                <p class="text-xs" style="color: rgba(74,26,107,0.65); font-style: italic;">
-                    Create a schedule. Name for sharing, a nickname is fine
-                </p>
-                {#if shareValid === true}
-                    <p class="text-xs" style="color: rgba(74,26,107,0.6); font-style: italic;">
-                        Create a schedule to allow comparing with {shareValidName}
-                    </p>
-                {/if}
-                <button class="fqf-btn-gold w-full" onclick={handleNewSchedule} disabled={loading}>
-                    {loading ? 'Creating…' : 'New Schedule'}
-                </button>
-                <div class="flex items-center gap-2">
-                    <label
-                        for="identity-name"
-                        class="text-sm font-semibold shrink-0"
-                        style="color: var(--mg-purple-deep);"
-                    >
-                        Name:
-                    </label>
-                    <input
-                        id="identity-name"
-                        class="input flex-1 text-sm"
-                        type="text"
-                        placeholder="Fred, BooBoo, …"
-                        style={nameInput
-                            ? ''
-                            : 'color: rgba(74,26,107,0.4); font-style: italic; font-size: 0.8rem;'}
-                        bind:value={nameInput}
-                    />
-                </div>
-            </div>
-
-            {#if errorMsg}
-                <p class="text-sm" style="color: #dc2626;">{errorMsg}</p>
-            {/if}
-
-            <!-- View-only share option -->
-            {#if pendingShareId && shareValid === true}
-                <button class="fqf-btn-ghost" onclick={handleViewShareOnly} disabled={loading}>
-                    View {shareValidName}'s schedule?
-                    <span
-                        class="block text-xs"
-                        style="color: rgba(74,26,107,0.5); font-style: italic;"
-                    >
-                        view only, no changes can be made
-                    </span>
-                </button>
-            {/if}
+                {#snippet footer()}
+                    {#if pendingShareId && shareValid === true}
+                        <button
+                            class="fqf-btn-ghost"
+                            onclick={handleViewShareOnly}
+                        >
+                            View {shareValidName}'s schedule?
+                            <span
+                                class="block text-xs"
+                                style="color: rgba(74,26,107,0.5); font-style: italic;"
+                            >
+                                view only, no changes can be made
+                            </span>
+                        </button>
+                    {/if}
+                {/snippet}
+            </LoginForm>
         </div>
     </div>
 </div>

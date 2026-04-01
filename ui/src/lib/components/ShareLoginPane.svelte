@@ -1,8 +1,8 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
-    import { fuzzyLookup, loadSharedSchedule } from '$lib/api';
+    import { loadSharedSchedule } from '$lib/api';
     import { appState } from '$lib/stores.svelte';
-    import { createNewSchedule } from '$lib/auth-utils';
+    import LoginForm from '$lib/components/LoginForm.svelte';
 
     interface Props {
         shareName: string;
@@ -14,12 +14,7 @@
 
     const MAIN_SCHEDULE_ROUTE = '/fq2026';
 
-    let tripleInput = $state('');
-    let nameInput = $state('');
-    let errorMsg = $state('');
-    let loading = $state(false);
-
-    async function loadAndAttachShare(): Promise<void> {
+    async function attachShare(): Promise<void> {
         const shared = await loadSharedSchedule(shareHash);
         await appState.addSharedSchedule({
             share_id: shareHash,
@@ -27,59 +22,8 @@
             picks: shared.picks,
             acts: shared.acts
         });
-    }
-
-    async function handleLoad(): Promise<void> {
-        const triple = tripleInput.trim();
-        if (!triple) {
-            errorMsg = 'Please enter your secret words.';
-            return;
-        }
-        loading = true;
-        errorMsg = '';
-        try {
-            const result = await fuzzyLookup(triple);
-            await appState.confirm(result.token, result.name);
-            await loadAndAttachShare();
-            appState.setViewMode('share');
-            goto(MAIN_SCHEDULE_ROUTE);
-        } catch {
-            errorMsg = 'Schedule not found. Check your secret words.';
-        } finally {
-            loading = false;
-        }
-    }
-
-    async function handleNew(): Promise<void> {
-        const name = nameInput.trim();
-        if (!name) {
-            errorMsg = 'Please enter a name for your schedule.';
-            return;
-        }
-        loading = true;
-        errorMsg = '';
-        try {
-            await createNewSchedule(name);
-            await loadAndAttachShare();
-            appState.setViewMode('share');
-            goto(MAIN_SCHEDULE_ROUTE);
-        } catch {
-            errorMsg = 'Could not create schedule. Please try again.';
-        } finally {
-            loading = false;
-        }
-    }
-
-    function handleSee(): void {
-        ondismiss();
-    }
-
-    function handleTripleKeydown(e: KeyboardEvent): void {
-        if (e.key === 'Enter') handleLoad();
-    }
-
-    function handleNameKeydown(e: KeyboardEvent): void {
-        if (e.key === 'Enter') handleNew();
+        appState.setViewMode('share');
+        goto(MAIN_SCHEDULE_ROUTE);
     }
 </script>
 
@@ -91,74 +35,26 @@
     </div>
 
     <div class="fqf-dialog-body flex flex-col gap-4">
-        <!-- Load existing schedule -->
-        <div class="flex flex-col gap-2">
-            <p class="text-xs" style="color: rgba(74,26,107,0.65); font-style: italic;">
-                If you have an existing schedule, load it
-            </p>
-            <p class="text-xs font-medium" style="color: rgba(74,26,107,0.8);">
-                🪄 {shareName}'s schedule will be added as a share
-            </p>
-            <button class="fqf-btn-gold w-full" onclick={handleLoad} disabled={loading}>
-                {loading ? 'Loading…' : 'Load Schedule'}
-            </button>
-            <input
-                id="share-triple"
-                class="input w-full text-sm"
-                type="text"
-                placeholder="enter your secret words"
-                style={tripleInput
-                    ? 'color: #1a1a1a;'
-                    : 'color: rgba(74,26,107,0.4); font-style: italic; font-size: 0.8rem;'}
-                bind:value={tripleInput}
-                onkeydown={handleTripleKeydown}
-            />
-        </div>
+        <LoginForm
+            loadLabel="If you have an existing schedule, load it"
+            newLabel="Create a new schedule, to compare with {shareName}'s picks!"
+            onConfirmed={attachShare}
+        >
+            {#snippet newSectionExtra()}
+                <p class="text-xs" style="color: rgba(74,26,107,0.65); font-style: italic;">
+                    Give your schedule a name to share back
+                </p>
+                <p class="text-xs font-medium" style="color: rgba(74,26,107,0.8);">
+                    🪄 {shareName}'s schedule will be added as a share
+                </p>
+            {/snippet}
 
-        <hr style="border-color: rgba(74,26,107,0.15);" />
-
-        <!-- New schedule -->
-        <div class="flex flex-col gap-2">
-            <p class="text-xs" style="color: rgba(74,26,107,0.65); font-style: italic;">
-                Create a new schedule, to compare with {shareName}'s picks!
-            </p>
-            <p class="text-xs" style="color: rgba(74,26,107,0.65); font-style: italic;">
-                Give your schedule a name to share back
-            </p>
-            <button class="fqf-btn-gold w-full" onclick={handleNew} disabled={loading}>
-                {loading ? 'Creating…' : 'New Schedule'}
-            </button>
-            <div class="flex items-center gap-2">
-                <label
-                    for="share-name"
-                    class="text-sm font-semibold shrink-0"
-                    style="color: var(--mg-purple-deep);"
-                >
-                    Name:
-                </label>
-                <input
-                    id="share-name"
-                    class="input flex-1 text-sm"
-                    type="text"
-                    placeholder="Fred, BooBoo, …"
-                    style={nameInput
-                        ? ''
-                        : 'color: rgba(74,26,107,0.4); font-style: italic; font-size: 0.8rem;'}
-                    bind:value={nameInput}
-                    onkeydown={handleNameKeydown}
-                />
-            </div>
-        </div>
-
-        {#if errorMsg}
-            <p class="text-sm" style="color: #dc2626;">{errorMsg}</p>
-        {/if}
-
-        <hr style="border-color: rgba(74,26,107,0.15);" />
-
-        <!-- See read-only -->
-        <button class="fqf-btn-gold w-full" onclick={handleSee} disabled={loading}>
-            See {shareName}'s schedule
-        </button>
+            {#snippet footer()}
+                <hr style="border-color: rgba(74,26,107,0.15);" />
+                <button class="fqf-btn-gold w-full" onclick={ondismiss}>
+                    See {shareName}'s schedule
+                </button>
+            {/snippet}
+        </LoginForm>
     </div>
 </div>
