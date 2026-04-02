@@ -1,14 +1,15 @@
 """Schedule data and query functions."""
 
+# NOTE: The per-day Python files (thursday.py, friday.py, saturday.py, sunday.py)
+# are deprecated. The authoritative data source is src/fqf/data/fq2026_acts.yaml,
+# loaded via fqf.schedule.loader.
+
 from datetime import date, time
 
 from fqf.models import STAGE_ORDER, Act
-from fqf.schedule.friday import FRIDAY_ACTS
-from fqf.schedule.saturday import SATURDAY_ACTS
-from fqf.schedule.sunday import SUNDAY_ACTS
-from fqf.schedule.thursday import THURSDAY_ACTS
+from fqf.schedule.loader import load_schedule
 
-SCHEDULE: list[Act] = THURSDAY_ACTS + FRIDAY_ACTS + SATURDAY_ACTS + SUNDAY_ACTS
+SCHEDULE: list[Act] = load_schedule()
 
 _SLUG_INDEX: dict[str, Act] = {act.slug: act for act in SCHEDULE}
 

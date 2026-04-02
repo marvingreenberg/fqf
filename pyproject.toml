@@ -11,6 +11,7 @@ dependencies = [
     "fastapi>=0.115",
     "uvicorn[standard]>=0.30",
     "google-cloud-firestore>=2.19",
+    "pyyaml>=6.0",
 ]
 
 [project.optional-dependencies]
@@ -22,13 +23,14 @@ dev = [
     "black>=24.0",
     "isort>=5.13",
     "mypy>=1.11",
+    "types-PyYAML>=6.0",
 ]
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-fqf = ["static/**/*"]
+fqf = ["static/**/*", "data/*.yaml"]
 
 [tool.setuptools_scm]
 version_scheme = "guess-next-dev"

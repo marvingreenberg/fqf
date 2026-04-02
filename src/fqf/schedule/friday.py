@@ -1,4 +1,9 @@
-"""Friday April 17, 2026 — FQF schedule data."""
+"""Friday April 17, 2026 — FQF schedule data.
+
+DEPRECATED: This file is no longer the authoritative source of schedule data.
+The canonical data lives in src/fqf/data/fq2026_acts.yaml.
+This file is kept for reference only and is not imported by the package.
+"""
 
 from fqf.models import (
     ABITA,
