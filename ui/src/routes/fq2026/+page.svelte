@@ -69,7 +69,7 @@
     onDayActsLoaded={(acts) => (dayActs = acts)}
 >
     {#snippet filterPanel()}
-        <FilterPanel genres={uniqueGenres} stages={uniqueStages} />
+        <FilterPanel genres={uniqueGenres} stages={uniqueStages} acts={dayActs} />
     {/snippet}
 
     {#snippet extraView({ allActs })}

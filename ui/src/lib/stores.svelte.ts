@@ -58,6 +58,7 @@ class AppState {
     hiddenGenres = $state<Set<string>>(new Set());
     hiddenStages = $state<Set<string>>(new Set());
     showAll = $state<boolean>(false);
+    showSelected = $state<boolean>(false);
 
     // Network / save status
     isOnline = $state<boolean>(true);
@@ -357,8 +358,10 @@ class AppState {
         this.hiddenStages = next;
     }
 
-    isActVisible(act: { genre: string; stage: string }): boolean {
+    isActVisible(act: { genre: string; stage: string; slug: string }): boolean {
         if (this.showAll) return true;
+        const hiddenByFilter = this.hiddenGenres.has(act.genre) || this.hiddenStages.has(act.stage);
+        if (hiddenByFilter && this.showSelected && this.isSelected(act.slug)) return true;
         if (this.hiddenGenres.has(act.genre)) return false;
         if (this.hiddenStages.has(act.stage)) return false;
         return true;
