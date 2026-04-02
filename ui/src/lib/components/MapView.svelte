@@ -56,6 +56,7 @@
         'background: rgba(212, 168, 67, 0.35); border: 1px solid rgba(0, 0, 0, 0.5); border-radius: 3px;';
     // Marker position offset from stage point (rem)
     const MARKER_OFFSET_REM = 0.3;
+    const MAYBE_FILL_COLOR = '#7c3aed'; // purple for ? icon
     // Stacking: vertical offset per additional act at same stage (rem)
     const STACK_VERTICAL_REM = 1.4;
     const STACK_HORIZONTAL_REM = 0.3;
@@ -329,7 +330,7 @@
                     >
                         <MapActLabel
                             name={marker.act.name}
-                            fleurFill={CONFLICT_COLORS.none}
+                            fleurFill={actIsMaybe ? MAYBE_FILL_COLOR : CONFLICT_COLORS.none}
                             {borderStyle}
                             isPicked={!actIsMaybe}
                             isMaybe={actIsMaybe}

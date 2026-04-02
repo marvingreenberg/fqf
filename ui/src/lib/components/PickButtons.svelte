@@ -4,6 +4,7 @@
     const FLEUR_VIEWBOX = '0 0 16 16';
     const UNPICKED_STROKE = 'rgba(74, 26, 107, 0.3)';
     const UNPICKED_STROKE_WIDTH = 0.75;
+    const MAYBE_FILL = '#7c3aed'; // purple for ? icon
 
     interface Props {
         isPicked: boolean;
@@ -58,7 +59,7 @@
             viewBox={FLEUR_VIEWBOX}
             width={size}
             height={size}
-            fill={isMaybe ? PICKED_FLEUR_FILL : 'none'}
+            fill={isMaybe ? MAYBE_FILL : 'none'}
             stroke={isMaybe ? 'none' : UNPICKED_STROKE}
             stroke-width={isMaybe ? 0 : UNPICKED_STROKE_WIDTH}
         >

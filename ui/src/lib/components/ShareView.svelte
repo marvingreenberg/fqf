@@ -68,11 +68,20 @@
         return map;
     });
 
-    // Union of all picks across active entries
+    // Union of all picks across active entries (bare slugs for visibility filtering)
     const allPickSlugs = $derived.by(() => {
         const union = new Set<string>();
         for (const entry of activeEntries) {
             for (const rawSlug of entry.picks) union.add(bareSlug(rawSlug));
+        }
+        return union;
+    });
+
+    // Raw picks union preserving ?-prefixes (for conflict detection)
+    const allPicksRaw = $derived.by(() => {
+        const union = new Set<string>();
+        for (const entry of activeEntries) {
+            for (const rawSlug of entry.picks) union.add(rawSlug);
         }
         return union;
     });
@@ -110,7 +119,7 @@
     });
 
     function conflictColor(act: ActSummary): string {
-        const level: ConflictLevel = getWorstConflict(act, allActs, allPickSlugs);
+        const level: ConflictLevel = getWorstConflict(act, allActs, allPicksRaw);
         return CONFLICT_COLORS[level];
     }
 
@@ -279,8 +288,8 @@
                                             <span class="fqf-emoji-sub-indicator">
                                                 <svg
                                                     viewBox="0 0 16 16"
-                                                    width="8"
-                                                    height="8"
+                                                    width="10"
+                                                    height="10"
                                                     fill={PICKED_FLEUR_FILL}
                                                 >
                                                     <path d={FLEUR_PATH} />
@@ -290,9 +299,9 @@
                                             <span class="fqf-emoji-sub-indicator">
                                                 <svg
                                                     viewBox="0 0 16 16"
-                                                    width="8"
-                                                    height="8"
-                                                    fill={PICKED_FLEUR_FILL}
+                                                    width="10"
+                                                    height="10"
+                                                    fill="#7c3aed"
                                                 >
                                                     <path d={QUESTION_PATH} />
                                                 </svg>

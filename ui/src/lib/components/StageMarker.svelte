@@ -9,6 +9,7 @@
     const PICKED_BORDER_LEFT_PX = 3;
     const PICKED_BORDER_BOTTOM_PX = 2;
     const UNSELECTED_FLEUR_FILL = '#c8c8c8';
+    const MAYBE_FILL = '#7c3aed'; // purple for ? icon
 
     interface Props {
         status: StageStatus;
@@ -35,9 +36,11 @@
         return getWorstConflict(displayAct, allActs, picks);
     });
 
-    const fleurFill = $derived(
-        isPicked || isMaybeAct ? CONFLICT_COLORS.none : UNSELECTED_FLEUR_FILL
-    );
+    const fleurFill = $derived.by(() => {
+        if (isMaybeAct) return MAYBE_FILL;
+        if (isPicked) return CONFLICT_COLORS.none;
+        return UNSELECTED_FLEUR_FILL;
+    });
 
     const timeText = $derived.by(() => {
         if (showNext && status.next) return `${status.nextMinutesUntil}m`;
