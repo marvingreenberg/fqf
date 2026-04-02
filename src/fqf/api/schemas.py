@@ -5,6 +5,16 @@ from datetime import date, time
 from pydantic import BaseModel, field_serializer
 
 
+class FestivalConfigResponse(BaseModel):
+    """Festival metadata returned by GET /api/v1/config."""
+
+    name: str
+    short_name: str
+    year: int
+    dates: list[str]  # ISO date strings, e.g. ["2026-04-16", ...]
+    day_labels: dict[str, str]  # ISO date -> display label, e.g. {"2026-04-16": "Thu 16"}
+
+
 class ActSummary(BaseModel):
     """Lightweight act representation for list endpoints."""
 

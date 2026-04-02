@@ -5,6 +5,7 @@ from datetime import date, time
 from enum import StrEnum
 from typing import NamedTuple
 
+from fqf.festival_config import FESTIVAL_DATES as _FESTIVAL_DATES
 from fqf.slugify import slugify
 
 
@@ -40,12 +41,10 @@ class AboutSource(StrEnum):
 
 
 # ── Date constants ─────────────────────────────────────────────────────
-THU = date(2026, 4, 16)
-FRI = date(2026, 4, 17)
-SAT = date(2026, 4, 18)
-SUN = date(2026, 4, 19)
+# These are convenience aliases for the schedule files; authoritative source is festival_config.py.
+THU, FRI, SAT, SUN = _FESTIVAL_DATES
 
-FESTIVAL_DATES = [THU, FRI, SAT, SUN]
+FESTIVAL_DATES = _FESTIVAL_DATES
 
 # ── Stage constants ────────────────────────────────────────────────────
 ABITA = "Abita Beer Stage"
