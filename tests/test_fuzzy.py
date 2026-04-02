@@ -28,14 +28,14 @@ class TestNormalizeTriple:
 
 # ── find_closest_word ────────────────────────────────────────────────────────
 
-EXACT_PLACE = "treme"
-EXACT_MUSIC = "funky"
-EXACT_NOLA = "crawfish"
+# Use the first entry of each pool so these tests stay correct across pool reworks.
+EXACT_PLACE = POOL_PLACES[0]
+EXACT_MUSIC = POOL_MUSIC[0]
+EXACT_NOLA = POOL_NOLA[0]
 
-TYPO_ONE_CHAR = "funku"
-CORRECTED_ONE_CHAR = "funky"
-
-TYPO_TWO_CHAR = "zznky"
+# One-char typo of EXACT_MUSIC — change last character
+TYPO_ONE_CHAR = EXACT_MUSIC[:-1] + ("z" if EXACT_MUSIC[-1] != "z" else "x")
+CORRECTED_ONE_CHAR = EXACT_MUSIC
 
 
 class TestFindClosestWord:
@@ -60,16 +60,16 @@ class TestFindClosestWord:
         assert dist == 1
 
     def test_two_char_diff_returns_distance_two_plus(self) -> None:
-        _word, dist = find_closest_word(TYPO_TWO_CHAR, _ALL_POOLS)
+        _word, dist = find_closest_word("zznky", _ALL_POOLS)
         assert dist >= 2
 
 
 # ── fuzzy_resolve ─────────────────────────────────────────────────────────────
 
-EXACT_TRIPLE = "treme-funky-crawfish"
-TYPO_TRIPLE = "treme-funku-crawfish"
-REVERSED_TRIPLE = "crawfish-funky-treme"
-UNRESOLVABLE_TRIPLE = "treme-zzzzz-crawfish"
+EXACT_TRIPLE = f"{EXACT_PLACE}-{EXACT_MUSIC}-{EXACT_NOLA}"
+TYPO_TRIPLE = f"{EXACT_PLACE}-{TYPO_ONE_CHAR}-{EXACT_NOLA}"
+REVERSED_TRIPLE = f"{EXACT_NOLA}-{EXACT_MUSIC}-{EXACT_PLACE}"
+UNRESOLVABLE_TRIPLE = f"{EXACT_PLACE}-zzzzz-{EXACT_NOLA}"
 
 
 class TestFuzzyResolve:
@@ -83,8 +83,8 @@ class TestFuzzyResolve:
     def test_typo_returns_suggestion(self) -> None:
         token, suggestion = fuzzy_resolve(TYPO_TRIPLE)
         assert suggestion is not None
-        assert "funku" in suggestion
-        assert "funky" in suggestion
+        assert TYPO_ONE_CHAR in suggestion
+        assert CORRECTED_ONE_CHAR in suggestion
 
     def test_sorted_output_consistent_regardless_of_order(self) -> None:
         token_forward, _ = fuzzy_resolve(EXACT_TRIPLE)
@@ -93,7 +93,7 @@ class TestFuzzyResolve:
 
     def test_wrong_word_count_raises(self) -> None:
         with pytest.raises(ValueError):
-            fuzzy_resolve("treme-funky")
+            fuzzy_resolve(f"{EXACT_PLACE}-{EXACT_MUSIC}")
 
     def test_unresolvable_word_raises(self) -> None:
         with pytest.raises(ValueError):

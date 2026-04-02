@@ -4,7 +4,7 @@ import hashlib
 import re
 import secrets
 
-from fqf.tokens.words import POOL_MUSIC, POOL_NOLA, POOL_PLACES
+from fqf.tokens.words import POOL1, POOL2, POOL3
 
 TOKEN_WORD_COUNT = 3
 _TOKEN_PATTERN = re.compile(r"^[a-z]+-[a-z]+-[a-z]+$")
@@ -19,10 +19,10 @@ FINGERPRINT_HASH_SEPARATOR = ":"
 
 def generate_token() -> str:
     """Generate a random three-word NOLA-themed token (words in sorted order)."""
-    place = secrets.choice(POOL_PLACES)
-    music = secrets.choice(POOL_MUSIC)
-    nola = secrets.choice(POOL_NOLA)
-    return "-".join(sorted([place, music, nola]))
+    word1 = secrets.choice(POOL1)
+    word2 = secrets.choice(POOL2)
+    word3 = secrets.choice(POOL3)
+    return "-".join(sorted([word1, word2, word3]))
 
 
 def generate_token_deterministic(fingerprint_hash: str, counter: int) -> str:
@@ -33,14 +33,10 @@ def generate_token_deterministic(fingerprint_hash: str, counter: int) -> str:
     """
     seed = f"{fingerprint_hash}{FINGERPRINT_HASH_SEPARATOR}{counter}"
     digest = hashlib.sha256(seed.encode()).digest()
-    place_idx = int.from_bytes(digest[0:_HASH_SLICE_SIZE], "big") % len(POOL_PLACES)
-    music_idx = int.from_bytes(digest[_HASH_SLICE_SIZE : _HASH_SLICE_SIZE * 2], "big") % len(
-        POOL_MUSIC
-    )
-    nola_idx = int.from_bytes(digest[_HASH_SLICE_SIZE * 2 : _HASH_SLICE_SIZE * 3], "big") % len(
-        POOL_NOLA
-    )
-    words = sorted([POOL_PLACES[place_idx], POOL_MUSIC[music_idx], POOL_NOLA[nola_idx]])
+    idx1 = int.from_bytes(digest[0:_HASH_SLICE_SIZE], "big") % len(POOL1)
+    idx2 = int.from_bytes(digest[_HASH_SLICE_SIZE : _HASH_SLICE_SIZE * 2], "big") % len(POOL2)
+    idx3 = int.from_bytes(digest[_HASH_SLICE_SIZE * 2 : _HASH_SLICE_SIZE * 3], "big") % len(POOL3)
+    words = sorted([POOL1[idx1], POOL2[idx2], POOL3[idx3]])
     return "-".join(words)
 
 

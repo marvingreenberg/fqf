@@ -2,9 +2,26 @@
 
 import re
 
-from fqf.tokens.words import POOL_MUSIC, POOL_NOLA, POOL_PLACES, levenshtein_distance
+from fqf.tokens.words import (
+    LEGACY_POOL_MUSIC,
+    LEGACY_POOL_NOLA,
+    LEGACY_POOL_PLACES,
+    POOL1,
+    POOL2,
+    POOL3,
+    levenshtein_distance,
+)
 
-_ALL_POOLS: list[list[str]] = [POOL_PLACES, POOL_MUSIC, POOL_NOLA]
+# Active pools used for new token generation.
+# Legacy pools are included so tokens minted from the old scheme can still be resolved.
+_ALL_POOLS: list[list[str]] = [
+    POOL1,
+    POOL2,
+    POOL3,
+    LEGACY_POOL_PLACES,
+    LEGACY_POOL_MUSIC,
+    LEGACY_POOL_NOLA,
+]
 
 # Maximum Levenshtein distance allowed for a fuzzy correction
 MAX_CORRECTION_DISTANCE = 1
