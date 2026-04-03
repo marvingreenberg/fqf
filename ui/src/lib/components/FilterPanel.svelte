@@ -29,7 +29,7 @@
                     type="checkbox"
                     checked={appState.showAll}
                     onchange={() => (appState.showAll = !appState.showAll)}
-                    class="accent-purple-700"
+                    class="shrink-0"
                 />
                 Show All
             </label>
@@ -56,7 +56,7 @@
                             type="checkbox"
                             checked={appState.showAll}
                             onchange={() => (appState.showAll = !appState.showAll)}
-                            class="accent-purple-700"
+                            class="shrink-0"
                         />
                         Show All
                     </label>
@@ -72,7 +72,7 @@
                                 checked={!appState.hiddenGenres.has(genre)}
                                 onchange={() => appState.toggleGenre(genre)}
                                 disabled={appState.showAll}
-                                class="accent-purple-700"
+                                class="shrink-0"
                             />
                             {genre}
                         </label>
@@ -94,7 +94,7 @@
                                 checked={!appState.hiddenStages.has(stage)}
                                 onchange={() => appState.toggleStage(stage)}
                                 disabled={appState.showAll}
-                                class="accent-purple-700"
+                                class="shrink-0"
                             />
                             {stage}
                         </label>
