@@ -13,7 +13,7 @@
     const sortedGenres = $derived([...genres].sort());
     const sortedStages = $derived(stages);
 
-    const hasFilters = $derived((appState.hiddenGenres.size > 0 || appState.hiddenStages.size > 0));
+    const hasFilters = $derived(appState.hiddenGenres.size > 0 || appState.hiddenStages.size > 0);
 
     const hiddenSelectionCount = $derived(
         hasFilters && !appState.showAll
@@ -33,39 +33,38 @@
             Filters {expanded ? '▲' : '▼'}
         </button>
         {#if hasFilters}
-        <label
-            class="flex items-center gap-1.5 text-sm cursor-pointer select-none"
-            style="color: rgba(74, 26, 107, 0.65);"
-        >
-            <input
-                type="checkbox"
-                checked={appState.showAll}
-                onchange={() => (appState.showAll = !appState.showAll)}
-                class="shrink-0"
-            />
-            Show All
-        </label>
-                <label
-                    class="flex items-center gap-1.5 text-sm cursor-pointer select-none"
-                    style="color: rgba(74, 26, 107, 0.65);"
-                >
-                    <input
-                        type="checkbox"
-                        checked={appState.showSelected}
-                        onchange={() => (appState.showSelected = !appState.showSelected)}
-                        class="shrink-0"
-                    />
-                    Show Selected
-                </label>
-                <span class="text-xs font-medium fqf-filter-warning" >
-                    {appState.hiddenGenres.size + appState.hiddenStages.size} filter(s) active
-                </span>
+            <label
+                class="flex items-center gap-1.5 text-sm cursor-pointer select-none"
+                style="color: rgba(74, 26, 107, 0.65);"
+            >
+                <input
+                    type="checkbox"
+                    checked={appState.showAll}
+                    onchange={() => (appState.showAll = !appState.showAll)}
+                    class="shrink-0"
+                />
+                Show All
+            </label>
+            <label
+                class="flex items-center gap-1.5 text-sm cursor-pointer select-none"
+                style="color: rgba(74, 26, 107, 0.65);"
+            >
+                <input
+                    type="checkbox"
+                    checked={appState.showSelected}
+                    onchange={() => (appState.showSelected = !appState.showSelected)}
+                    class="shrink-0"
+                />
+                Show Selected
+            </label>
+            <span class="text-xs font-medium fqf-filter-warning">
+                {appState.hiddenGenres.size + appState.hiddenStages.size} filter(s) active
+            </span>
             {#if hiddenSelectionCount}
-                <span class="text-xs font-medium fqf-filter-warning" >
+                <span class="text-xs font-medium fqf-filter-warning">
                     - {hiddenSelectionCount} selection(s) hidden
                 </span>
             {/if}
-
         {/if}
     </div>
 

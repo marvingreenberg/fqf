@@ -108,8 +108,9 @@
             <p class="opacity-80">
                 When two picked acts overlap in time, both get colored borders:
                 <span class="font-medium" style="color: #eab308;">yellow</span> for minor overlap,
-                <span class="font-medium" style="color: #ef4444;">red</span> for major. Acts marked as "maybe" do not
-                trigger conflicts. In My Schedule, walking distances between stages help you plan transitions.
+                <span class="font-medium" style="color: #ef4444;">red</span> for major. Acts marked as
+                "maybe" do not trigger conflicts. In My Schedule, walking distances between stages help
+                you plan transitions.
             </p>
         </section>
 
