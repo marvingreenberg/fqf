@@ -17,6 +17,7 @@ htmlcov/
 # Node / Frontend
 node_modules/
 ui/build/
+ui/test-results/
 ui/.svelte-kit/
 .pnpm-store/
 
