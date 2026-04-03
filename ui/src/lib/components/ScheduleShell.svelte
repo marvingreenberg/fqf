@@ -9,6 +9,7 @@
     import MySchedule from '$lib/components/MySchedule.svelte';
     import MapView from '$lib/components/MapView.svelte';
     import ActDetailModal from '$lib/components/ActDetailModal.svelte';
+    import HelpPanel from '$lib/components/HelpPanel.svelte';
 
     const MOBILE_BREAKPOINT = 768;
     const CACHE_TTL_MS = 10 * 60 * 1000;
@@ -96,6 +97,7 @@
         { value: 'by-stage', label: 'By Stage' }
     ];
 
+    let showHelp = $state(false);
     let acts = $state<ActSummary[]>([]);
     let allActs = $state<ActSummary[]>([]);
     let allActsLoaded = $state(false);
@@ -268,9 +270,20 @@
 <div class="flex flex-col h-full overflow-hidden">
     <header class="shrink-0 fqf-controls-bar px-4 py-2">
         <div class="flex items-center justify-between">
-            <h1 class="text-base font-semibold" style="color: var(--mg-gold-bright);">
-                {title}
-            </h1>
+            <div class="flex items-center gap-2">
+                <h1 class="text-base font-semibold" style="color: var(--mg-gold-bright);">
+                    {title}
+                </h1>
+                <button
+                    class="flex items-center justify-center w-5 h-5 rounded-full text-xs font-bold"
+                    style="background: rgba(212, 168, 67, 0.3); color: var(--mg-gold-bright); border: 1px solid rgba(212, 168, 67, 0.5);"
+                    onclick={() => (showHelp = true)}
+                    aria-label="Help"
+                    title="About this app"
+                >
+                    ℹ
+                </button>
+            </div>
             {#if isMobile && viewMode === 'all-acts'}
                 <div class="flex gap-1">
                     {#each SORT_MODES as mode (mode.value)}
@@ -375,4 +388,8 @@
         onToggleMaybe={() => detailAct && onToggleMaybe?.(detailAct.slug)}
         onClose={closeDetail}
     />
+{/if}
+
+{#if showHelp}
+    <HelpPanel onClose={() => (showHelp = false)} />
 {/if}
