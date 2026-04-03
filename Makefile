@@ -5,9 +5,9 @@ GCP_REGION     ?= us-central1
 GCP_REPOSITORY := container-images
 GCP_IMAGE      := $(GCP_REGION)-docker.pkg.dev/$(GCP_PROJECT)/$(GCP_REPOSITORY)/$(SERVICE_NAME)
 
-.PHONY: help setup check-prereqs setup-api setup-ui build build-api build-ui test test-api test-ui \
+.PHONY: help setup check-prereqs setup-api setup-ui build build-api build-ui test test-api test-e2e test-ui \
         lint lint-api lint-ui format format-api format-ui dev dev-firestore clean \
-        build-image docker-run deploy e2e
+        build-image docker-run deploy test-e2e
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -36,13 +36,16 @@ build-ui: ## Build SvelteKit frontend
 	pnpm --dir ui build
 
 # ── Test ───────────────────────────────────────────────────────────────
-test: test-api test-ui ## Run all tests
+test: test-api test-ui test-e2e ## Run all tests
 
 test-api: ## Run Python tests with coverage
 	uv run pytest
 
 test-ui: ## Run frontend unit tests
 	pnpm --dir ui test
+
+test-e2e:
+	pnpm --dir ui exec playwright test
 
 # ── Lint ───────────────────────────────────────────────────────────────
 lint: lint-api lint-ui ## Run all linters
@@ -116,10 +119,6 @@ deploy: build-image ## Build, push, and deploy to Cloud Run
 	  --max-instances=3 \
 	  --service-account=fqf-SA@$(GCP_PROJECT).iam.gserviceaccount.com \
 	  --allow-unauthenticated
-
-# ── E2E ────────────────────────────────────────────────────────────────
-e2e: ## Run E2E tests
-	pnpm --dir ui exec playwright test
 
 # ── Clean ──────────────────────────────────────────────────────────────
 clean: ## Remove build artifacts

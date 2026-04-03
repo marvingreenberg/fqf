@@ -34,6 +34,33 @@ jobs:
       - run: pnpm --dir ui install --frozen-lockfile
       - run: pnpm --dir ui test -- --run
 
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: ui/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: ui/pnpm-lock.yaml
+      - run: pnpm --dir ui install --frozen-lockfile
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ hashFiles('ui/pnpm-lock.yaml') }}
+      - name: Install Playwright browsers
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: pnpm --dir ui exec playwright install --with-deps chromium
+      - name: Install Playwright system deps only
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: pnpm --dir ui exec playwright install-deps chromium
+      - run: pnpm --dir ui exec playwright test
+
   lint:
     runs-on: ubuntu-latest
     steps:
