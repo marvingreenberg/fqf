@@ -503,6 +503,11 @@ h3,
     vertical-align: middle;
 }
 
+.fqf-filter-warning {
+    background: var(--mg-gold-rich);
+    border-color: var(--mg-gold-rich);
+}
+
 .fqf-filter-panel input[type='checkbox']:checked {
     background: var(--mg-purple);
     border-color: var(--mg-purple);

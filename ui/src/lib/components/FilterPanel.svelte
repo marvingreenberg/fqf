@@ -13,21 +13,13 @@
     const sortedGenres = $derived([...genres].sort());
     const sortedStages = $derived(stages);
 
-    const hasActiveFilters = $derived(
-        !appState.showAll && (appState.hiddenGenres.size > 0 || appState.hiddenStages.size > 0)
-    );
+    const hasFilters = $derived((appState.hiddenGenres.size > 0 || appState.hiddenStages.size > 0));
 
     const hiddenSelectionCount = $derived(
-        hasActiveFilters
-            ? acts.filter(
-                  (a) =>
-                      appState.isSelected(a.slug) &&
-                      (appState.hiddenGenres.has(a.genre) || appState.hiddenStages.has(a.stage))
-              ).length
+        hasFilters && !appState.showAll
+            ? acts.filter((a) => appState.isSelected(a.slug) && !appState.isActVisible(a)).length
             : 0
     );
-
-    const showOverrideControls = $derived(hasActiveFilters && hiddenSelectionCount > 0);
 </script>
 
 <div class="fqf-filter-panel border-b">
@@ -40,20 +32,19 @@
         >
             Filters {expanded ? '▲' : '▼'}
         </button>
-        {#if appState.hiddenGenres.size || appState.hiddenStages.size}
-            <label
-                class="flex items-center gap-1.5 text-sm cursor-pointer select-none"
-                style="color: rgba(74, 26, 107, 0.65);"
-            >
-                <input
-                    type="checkbox"
-                    checked={appState.showAll}
-                    onchange={() => (appState.showAll = !appState.showAll)}
-                    class="shrink-0"
-                />
-                Show All
-            </label>
-            {#if showOverrideControls}
+        {#if hasFilters}
+        <label
+            class="flex items-center gap-1.5 text-sm cursor-pointer select-none"
+            style="color: rgba(74, 26, 107, 0.65);"
+        >
+            <input
+                type="checkbox"
+                checked={appState.showAll}
+                onchange={() => (appState.showAll = !appState.showAll)}
+                class="shrink-0"
+            />
+            Show All
+        </label>
                 <label
                     class="flex items-center gap-1.5 text-sm cursor-pointer select-none"
                     style="color: rgba(74, 26, 107, 0.65);"
@@ -66,15 +57,15 @@
                     />
                     Show Selected
                 </label>
-                <span class="text-xs font-medium" style="color: var(--mg-gold-rich);">
-                    Hides {hiddenSelectionCount} selection{hiddenSelectionCount === 1 ? '' : 's'}
-                </span>
-            {/if}
-            {#if !appState.showAll && !showOverrideControls}
-                <span class="text-xs font-medium" style="color: var(--mg-gold-rich);">
+                <span class="text-xs font-medium fqf-filter-warning" >
                     {appState.hiddenGenres.size + appState.hiddenStages.size} filter(s) active
                 </span>
+            {#if hiddenSelectionCount}
+                <span class="text-xs font-medium fqf-filter-warning" >
+                    - {hiddenSelectionCount} selection(s) hidden
+                </span>
             {/if}
+
         {/if}
     </div>
 

@@ -361,9 +361,7 @@ class AppState {
     isActVisible(act: { genre: string; stage: string; slug: string }): boolean {
         if (this.showAll) return true;
         const hiddenByFilter = this.hiddenGenres.has(act.genre) || this.hiddenStages.has(act.stage);
-        if (hiddenByFilter && this.showSelected && this.isSelected(act.slug)) return true;
-        if (this.hiddenGenres.has(act.genre)) return false;
-        if (this.hiddenStages.has(act.stage)) return false;
+        if (hiddenByFilter) return (this.showSelected && this.isSelected(act.slug));
         return true;
     }
 }
