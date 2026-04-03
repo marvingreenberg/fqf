@@ -19,26 +19,26 @@
         >
             Filters {expanded ? '▲' : '▼'}
         </button>
-
-        {#if !expanded}
-            <label
-                class="flex items-center gap-1.5 text-sm cursor-pointer select-none"
-                style="color: rgba(74, 26, 107, 0.65);"
-            >
-                <input
-                    type="checkbox"
-                    checked={appState.showAll}
-                    onchange={() => (appState.showAll = !appState.showAll)}
-                    class="shrink-0"
-                />
-                Show All
-            </label>
-        {/if}
-
-        {#if !appState.showAll && (appState.hiddenGenres.size > 0 || appState.hiddenStages.size > 0)}
-            <span class="text-xs font-medium" style="color: var(--mg-gold-rich);">
-                {appState.hiddenGenres.size + appState.hiddenStages.size} filter(s) active
-            </span>
+        {#if appState.hiddenGenres.size || appState.hiddenStages.size}
+            {#if !expanded}
+                <label
+                    class="flex items-center gap-1.5 text-sm cursor-pointer select-none"
+                    style="color: rgba(74, 26, 107, 0.65);"
+                >
+                    <input
+                        type="checkbox"
+                        checked={appState.showAll}
+                        onchange={() => (appState.showAll = !appState.showAll)}
+                        class="shrink-0"
+                    />
+                    Show All
+                </label>
+            {/if}
+            {#if !appState.showAll}
+                <span class="text-xs font-medium" style="color: var(--mg-gold-rich);">
+                    {appState.hiddenGenres.size + appState.hiddenStages.size} filter(s) active
+                </span>
+            {/if}
         {/if}
     </div>
 
