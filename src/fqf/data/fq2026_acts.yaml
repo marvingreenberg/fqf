@@ -21,7 +21,7 @@ acts:
     and the Crescent City. His ensemble Ivorie Spectacle is a drum-and-dance
     celebration of Ivorian music, costume, and rhythm that will get the whole crowd
     on their feet.
-  about_source: researched
+  about_source: https://www.nola.com/entertainment_life/article_1b151fa4-7c8b-575f-89c3-cef802ee538d.html
   websites:
   - https://nolajazzmuseum.org/events/2022/12/15/the-new-orleans-jazz-museum-and-jazz-national-historical-park-presents-the-kone-residency-show
 - name: The Quickening
@@ -37,7 +37,7 @@ acts:
     their chemistry drives a sound soaked in soul, exploratory jamming, and
     Grateful Dead storytelling. A rotating cast of horns, pedal steel, and strings
     keeps every show unpredictable and dance-floor ready.
-  about_source: researched
+  about_source: https://www.whereyat.com/the-quickening
   websites:
   - https://thequickeningmusic.bandcamp.com/
   - https://www.instagram.com/thequickeningmusic/
@@ -54,7 +54,7 @@ acts:
     the perfect festival act -- tight traditional jazz with a party vibe, and Kermit
     himself might fire up the grill right on stage. Catch him if you want a genuine
     taste of New Orleans in every sense of the word.
-  about_source: researched
+  about_source: https://www.kermitslounge.com/
   websites:
   - https://www.kermitslounge.com/
   - https://www.basinstreetrecords.com/artists/kermit-ruffins/
@@ -72,7 +72,7 @@ acts:
     crosses boundaries while honoring deep cultural roots. Pardo is also a published
     author and visual artist, making this one of the most multidimensional acts on
     the schedule.
-  about_source: researched
+  about_source: https://ragman.org/tribal-gold
   websites:
   - https://ellanola.org/ellanotes/big-chief-juan-pardo-born-into-the-tradition-and-bringing-it-forward
   - https://ragman.org/tribal-gold
@@ -90,7 +90,7 @@ acts:
     Vocalist awards and collaborations with Allen Toussaint, Dr. John, and Sting
     speak to her standing. Her band Vintage Soul delivers exactly what the name
     promises -- timeless R&B that never left.
-  about_source: researched
+  about_source: https://www.ericafalls.com/
   websites:
   - https://www.ericafalls.com/
 - name: The Soul Rebels
@@ -107,7 +107,7 @@ acts:
     they have landed on NPR's Tiny Desk, The Late Show with Stephen Colbert, and
     scored music for Disney's Haunted Mansion. Their late-afternoon set is the
     perfect send-off for Thursday's festival crowd.
-  about_source: researched
+  about_source: https://thesoulrebels.com/
   websites:
   - https://thesoulrebels.com/
 - name: Preservation Brass
@@ -123,7 +123,7 @@ acts:
     nomination for Best Regional Roots Music Album with their record For Fat Man.
     Hearing them outside the intimate Hall setting lets you appreciate the full
     power of their horn section in the open air.
-  about_source: researched
+  about_source: https://www.preservationhall.com/people/preservation-brass/
   websites:
   - https://www.preservationhall.com/people/preservation-brass/
 - name: Banu Gibson
@@ -139,7 +139,7 @@ acts:
     The ensemble has played with symphony orchestras from the Boston Pops to San
     Diego, and Gibson also runs the New Orleans Trad Jazz Camp. Her swinging stage
     presence makes her a perennial FQF favorite.
-  about_source: researched
+  about_source: http://www.banugibson.com/
   websites:
   - http://www.banugibson.com/
 - name: Mahogany Hall All Stars Band
@@ -154,7 +154,7 @@ acts:
     decades of experience to every performance. The five-piece group keeps the
     flame of traditional New Orleans jazz burning bright with tight arrangements
     and an easy, swinging feel that sounds right at home on a French Quarter stage.
-  about_source: researched
+  about_source: https://www.wwoz.org/organizations/mahogany-jazz-hall
   websites:
   - https://www.wwoz.org/organizations/mahogany-jazz-hall
 - name: Leroy Jones & New Orleans' Finest
@@ -170,7 +170,7 @@ acts:
     the New Orleans Jazz Hall of Fame. With his group New Orleans' Finest, he
     delivers the real deal: warm tone, impeccable swing, and a direct line back to
     the earliest days of jazz in this city.
-  about_source: researched
+  about_source: https://www.preservationhall.com/people/leroy-jones/
   websites:
   - https://www.preservationhall.com/people/leroy-jones/
 - name: The Lilli Lewis Project
@@ -186,7 +186,7 @@ acts:
     and jazz into something uniquely personal. Her album Americana landed on NPR
     Music's Top 10 Albums of the Week, and her rich mezzo-soprano voice fills every
     corner of whatever stage she takes.
-  about_source: researched
+  about_source: https://lillilewisproject.com/
   websites:
   - https://www.lillilewis.com/2022/
   - https://lillilewisproject.com/
@@ -203,7 +203,7 @@ acts:
     A Cab Driver's Blues, earned critical acclaim, and his song S.U.V. won Living
     Blues magazine's Critics Poll Song of the Year. Shannon and The Membership
     deliver gritty, original New Orleans blues with a storyteller's touch.
-  about_source: researched
+  about_source: https://www.memshannon.com/
   websites:
   - https://www.memshannon.com/
 - name: Sir Chantz Powell & The Sound Of Funk (S.O.F.)
@@ -219,7 +219,7 @@ acts:
     high-energy show rooted in funk and soul that draws on the city's brass
     tradition while pushing it into contemporary territory. His band The Sound Of
     Funk keeps the groove tight and the audience moving.
-  about_source: researched
+  about_source: https://www.chantz.com/home/
   websites:
   - https://www.chantz.com/home/
   - https://playingforchange.com/artists/chantz-powell
@@ -236,7 +236,7 @@ acts:
     joining the Continental Drifters and later going solo. Rolling Stone called
     her album Lighthouse 'an earthy, often crunchy folk-rock gem.' Her lived-in
     voice and warm stage presence make her a natural fit for an afternoon set.
-  about_source: researched
+  about_source: https://susancowsillband.bandcamp.com/
   websites:
   - https://susancowsillband.bandcamp.com/
 - name: Yusa & Mahmoud Chouki
@@ -270,7 +270,7 @@ acts:
     year. Their repertoire spans classic R&B, blues, pop, and dance music, with
     influences from Ray Charles to Stevie Wonder. Expect polished choreography,
     tight horn arrangements, and that unmistakable Big Easy party energy.
-  about_source: researched
+  about_source: https://royalessenceshowband.com/
   websites:
   - https://royalessenceshowband.com/
 - name: Bag of Donuts
@@ -287,7 +287,7 @@ acts:
     and boundless energy. They were the first cover band to play Jazz Fest and
     the first to sell out House of Blues. Closing out the Tropical Isle stage on
     Thursday, they are guaranteed to leave the crowd grinning.
-  about_source: researched
+  about_source: https://bagofdonuts.com/
   websites:
   - https://bagofdonuts.com/
 - name: R & R Smokin' Foundation
@@ -317,7 +317,7 @@ acts:
     indie dance rock -- think Amy Winehouse meets Florence and the Machine with
     a New Orleans twist. Offbeat named them Best Emerging Artist of 2018, and
     their Jazz Fest debut in 2022 cemented their arrival on the big stage.
-  about_source: researched
+  about_source: https://www.bonbonvivantmusic.com/
   websites:
   - https://www.bonbonvivantmusic.com/
 - name: Juice
@@ -333,7 +333,7 @@ acts:
     Offbeat Best Emerging Funk/Soul/R&B Band award in 2000. Their creative mix of
     New Orleans funk, blues, second line, and rock keeps the dance floor packed
     from the first note.
-  about_source: researched
+  about_source: https://www.nolajuicemusic.com/
   websites:
   - https://www.nolajuicemusic.com/
 - name: Sierra Green and the Giants
@@ -349,7 +349,7 @@ acts:
     Her band the Giants -- bassist Miguel Perez, guitarist Paul Provosty, and a
     full horn section -- backs her on soulful originals that live at the crossroads
     of soul, blues, and R&B. Their album Here We Are is proof this crew has arrived.
-  about_source: researched
+  about_source: https://sierragreenandthegiants.com/
   websites:
   - https://sierragreenandthegiants.com/
 - name: Rebirth Brass Band
@@ -365,7 +365,7 @@ acts:
     Orleans, they fuse traditional second-line brass with funk, hip-hop, and soul
     in a way that is simultaneously reverent and revolutionary. If you see one
     brass band at the festival, make it this one.
-  about_source: researched
+  about_source: https://rebirthbrassband.com/
   websites:
   - https://rebirthbrassband.com/
 - name: Bobby Rush
@@ -381,7 +381,7 @@ acts:
     in Chicago before developing a style he calls 'folk funk' -- deeply rooted yet
     decidedly modern. At 92, his live show remains one of the most colorful and
     energetic in the blues world. Do not miss this legend.
-  about_source: researched
+  about_source: https://www.bobbyrushbluesman.com/
   websites:
   - https://www.bobbyrushbluesman.com/
 - name: T'Monde
@@ -398,7 +398,7 @@ acts:
     from early country to ancient French and Creole ballads. Offbeat calls them
     'a creative fusion of classic country and out-of-the-way Cajun.' The perfect
     way to kick off the Willow stage's Cajun and zydeco Thursday.
-  about_source: researched
+  about_source: http://www.tmonde.com/
   websites:
   - http://www.tmonde.com/
 - name: Gerard Delafose and The Zydeco Gators
@@ -414,7 +414,7 @@ acts:
     nominated international touring act, the band plays over 100 shows a year,
     from Jazz Fest to Switzerland's Blues to Bop festival. Expect hard-driving
     accordion and washboard grooves that will have you two-stepping in the grass.
-  about_source: researched
+  about_source: https://gerarddelafose.com/
   websites:
   - https://gerarddelafose.com/
 - name: Waylon Thibodeaux Band
@@ -430,7 +430,7 @@ acts:
     pop, and a little rock and roll. He is a Louisiana Music Hall of Famer who has
     played throughout the US, Canada, France, and Central and South America. Over
     40 years in, his energy on stage has not dimmed one bit.
-  about_source: researched
+  about_source: https://www.waylont.com/
   websites:
   - https://www.waylont.com/
 - name: Nathan and the Zydeco Cha Chas
@@ -447,7 +447,7 @@ acts:
     Lafayette to Lincoln Center and the Grand Ole Opry. Their 2023 Grammy
     nomination for Lucky Man confirmed what fans already knew: Nathan is the real
     deal.
-  about_source: researched
+  about_source: https://zydecochachas.com/
   websites:
   - https://zydecochachas.com/
 - name: Amanda Shaw
@@ -464,7 +464,7 @@ acts:
     and the Macy's Thanksgiving Day Parade. A Louisiana Music Hall of Famer with
     nine releases and counting, she brings a joyful, fiddle-driven energy that
     bridges Cajun tradition and modern showmanship.
-  about_source: researched
+  about_source: https://amandashaw.com/
   websites:
   - https://amandashaw.com/
 - name: Johnny Sketch and the Dirty Notes
@@ -481,7 +481,7 @@ acts:
     crafted live show blends jazz, blues, funk, and rock, and has earned them a
     devoted national following. Closing out the Willow stage Thursday night, they
     will leave nothing on the table.
-  about_source: researched
+  about_source: https://www.johnnysketch.com/
   websites:
   - https://www.johnnysketch.com/
 - name: Red Hot Brass Band
@@ -496,7 +496,7 @@ acts:
     the traditions that accompany the jazz culture of New Orleans, they play a
     straight-ahead traditional brass sound that sets the right mood for a day of
     music on the Louisiana Fish Fry Stage.
-  about_source: researched
+  about_source: https://frenchquarterfest.org/artists/red-hot-brass-band/
   websites:
   - https://frenchquarterfest.org/artists/red-hot-brass-band/
 - name: 504 Millz
@@ -511,7 +511,7 @@ acts:
     projects. Known for fiery remixes and original productions, 504 Millz keeps
     the party going with bass-heavy beats and Mardi Gras Indian-influenced
     rhythms that are impossible to stand still to.
-  about_source: researched
+  about_source: generated
   websites:
   - https://soundcloud.com/killa-millz
 - name: J.A.M. Brass Band
@@ -526,7 +526,7 @@ acts:
     down regular gigs at Balcony Music Club and have become a familiar presence
     at local festivals. Their set on the Fish Fry Stage is a chance to catch a
     rising group keeping the brass tradition fresh.
-  about_source: researched
+  about_source: generated
   websites: []
 - name: Zeus
   stage: Louisiana Fish Fry Stage
@@ -554,7 +554,7 @@ acts:
     funk, hip-hop, and soul, capturing the sound and spirit of modern New Orleans.
     Known for electrifying performances at Jazz Fest and French Quarter Fest, they
     are expanding the legacy of New Orleans brass for audiences worldwide.
-  about_source: researched
+  about_source: https://soulbrassband.com/
   websites:
   - https://soulbrassband.com/
 - name: DJ Legatron Prime
@@ -570,7 +570,7 @@ acts:
     party and co-curates Where My Girls At? NOLA, the city's only monthly women's
     party. Featured on Boiler Room, nominated for Offbeat Best DJ, and recognized
     in Gambit's 40 Under 40, she spins Black girl magic across every genre.
-  about_source: researched
+  about_source: https://www.legatronprime.com/
   websites:
   - https://www.legatronprime.com/
 - name: New Orleans Nightcrawlers
@@ -586,7 +586,7 @@ acts:
     Perrine, and Kevin Clark as a writers' workshop for brass band music, the group
     stood apart from day one with clever songwriting and Latin-tinged arrangements.
     Their set is one of Thursday's can't-miss performances.
-  about_source: researched
+  about_source: https://neworleansnightcrawlersbrassband.com/
   websites:
   - https://neworleansnightcrawlersbrassband.com/
 - name: Raj Smoove
@@ -602,7 +602,7 @@ acts:
     collaborated with Juvenile, Mannie Fresh, PJ Morton, and Tank Ball. A member
     of the Recording Academy with deep roots in the city's hip-hop scene, he
     closes out Thursday's Fish Fry Stage in style.
-  about_source: researched
+  about_source: http://rajsmoove.com/
   websites:
   - http://rajsmoove.com/
 - name: Gal Holiday and the Honky Tonk Revue
@@ -618,7 +618,7 @@ acts:
     delivers Americana, country, and rockabilly with infectious dance-hall energy.
     They have shared the stage with Willie Nelson, Marcia Ball, and the Blind Boys
     of Alabama, and are staples at Jazz Fest and other major events.
-  about_source: researched
+  about_source: https://www.galholiday.com/
   websites:
   - https://www.galholiday.com/
 - name: The Tin Men
@@ -634,7 +634,7 @@ acts:
     array of American pop from jug band swing to Motown to easy listening. Offbeat
     called them 'one of the most interesting bands to emerge from New Orleans in
     years.' An only-in-New-Orleans act that should not be missed.
-  about_source: researched
+  about_source: https://www.tinmenmusic.com/
   websites:
   - https://www.tinmenmusic.com/
 - name: T-Ray & The Trendsetters
@@ -650,7 +650,7 @@ acts:
     and collaborated with Big Freedia and Tank and the Bangas. With his band
     The Trendsetters, he delivers a genre-bending live show that blends R&B, funk,
     and soul through the lens of his electric violin.
-  about_source: researched
+  about_source: https://www.traytheviolinist.com/
   websites:
   - https://www.traytheviolinist.com/
 - name: Muévelo
@@ -666,7 +666,7 @@ acts:
     ensemble blends Cuban son, salsa, and tropical rhythms with the soulful essence
     of the Crescent City. They hold a monthly La Noche Caliente residency and have
     ignited dance floors at Jazz Fest, French Quarter Fest, and Bayou Boogaloo.
-  about_source: researched
+  about_source: https://www.wwoz.org/acts/muevelo
   websites:
   - https://www.wwoz.org/acts/muevelo
 - name: John Mooney
@@ -683,7 +683,7 @@ acts:
     Professor Longhair. His group Bluesiana has been his vehicle since 1981,
     touring the US, Europe, Australia, and Japan. A masterclass in where the
     Delta meets the Crescent City.
-  about_source: researched
+  about_source: https://intrepidartists.com/artists/john-mooney/
   websites:
   - https://intrepidartists.com/artists/john-mooney/
 - name: The New Orleans Klezmer All Stars
@@ -700,7 +700,7 @@ acts:
     the Neville Brothers and Galactic's Stanton Moore. The result is energetic,
     aggressive, and often hilarious -- a musical conversation that could only
     happen in New Orleans.
-  about_source: researched
+  about_source: https://www.klezmerallstars.com/
   websites:
   - https://www.klezmerallstars.com/
 - name: Jake Landry
@@ -716,7 +716,7 @@ acts:
     work across an energetic mix of blues, jazz, R&B, and covers. Whether fronting
     a small combo or a full nine-piece band, Landry keeps the Voodoo Garden crowd
     locked in.
-  about_source: researched
+  about_source: https://www.wwoz.org/acts/jake-landry
   websites:
   - https://www.instagram.com/jakelandrymusic/
 - name: Funky Lampshades
@@ -732,7 +732,7 @@ acts:
     performers at New Orleans venues including the House of Blues. Their sly
     interpretations of funk and soul classics make them a natural fit for an
     afternoon set in the Voodoo Garden.
-  about_source: researched
+  about_source: https://www.wwoz.org/acts/funky-lampshades
   websites:
   - https://www.instagram.com/funky.lampshades/
 - name: Cary Hudson
@@ -749,7 +749,7 @@ acts:
     Country Guitarists of all time. Since Blue Mountain's final tour in 2013, his
     solo work continues to mine Southern roots, rock, and Americana with an honest,
     lived-in voice.
-  about_source: researched
+  about_source: http://caryhudson.com/
   websites:
   - http://caryhudson.com/
   - https://caryhudson.bandcamp.com/
@@ -766,7 +766,7 @@ acts:
     Square to concert halls across Europe. An NPR World Cafe spotlight artist, he
     brings guitar-driven storytelling soaked in the spirit of south Louisiana to
     the Voodoo Garden's closing set on Thursday.
-  about_source: researched
+  about_source: https://www.julianprimeaux.com/bio
   websites:
   - https://www.julianprimeaux.com/
 - name: Bo Dollis Jr. and the Wild Magnolias
@@ -784,7 +784,7 @@ acts:
     Chip Off the Old Block fuses Indian traditions with Memphis soul.
     Expect feathered suits, call-and-response chants, and a groove
     that will have the whole crowd moving.
-  about_source: researched
+  about_source: https://www.wildmagnoliasfunk.com/
   websites:
   - https://www.wildmagnoliasfunk.com/
 - name: Irvin Mayfield
@@ -802,7 +802,7 @@ acts:
     Kravitz to Wynton Marsalis and Dr. John. Whether leading a
     tight combo or a full orchestra, Mayfield channels the deep
     lineage of New Orleans trumpet masters.
-  about_source: researched
+  about_source: https://www.basinstreetrecords.com/artists/irvin-mayfield/
   websites:
   - https://www.basinstreetrecords.com/artists/irvin-mayfield/
 - name: The Dixie Cups
@@ -819,7 +819,7 @@ acts:
     define the girl-group sound of the 1960s. They also recorded the
     Mardi Gras classic Iko Iko. Decades later they still bring that
     joyful energy to festival stages.
-  about_source: researched
+  about_source: https://dixiecups.bandcamp.com/
   websites:
   - https://dixiecups.bandcamp.com/
 - name: Bonerama
@@ -836,7 +836,7 @@ acts:
     The current lineup features three trombones, guitar, sousaphone,
     and drums. They have collaborated with R.E.M. and Tom Morello,
     and their Plays Zeppelin album was a Jazz Fest bestseller.
-  about_source: researched
+  about_source: https://www.boneramabrass.com/
   websites:
   - https://www.boneramabrass.com/
 - name: Jon Cleary & the Absolute Monster Gentlemen
@@ -854,7 +854,7 @@ acts:
     crack rhythm section of New Orleans natives, Cleary delivers
     shows that swing from Professor Longhair-style piano workouts to
     deep soul ballads. A Tipitina's and Jazz Fest mainstay.
-  about_source: researched
+  about_source: https://www.joncleary.com/
   websites:
   - https://www.joncleary.com/
 - name: PJ Morton
@@ -872,7 +872,7 @@ acts:
     staying rooted in the musical traditions of his hometown.
     Closing out the Abita stage on Friday, Morton brings a headliner
     set packed with silky grooves and gospel-tinged power.
-  about_source: researched
+  about_source: https://www.wwoz.org/acts/pj-morton
   websites:
   - https://www.instagram.com/pjmorton/
 - name: John Boutté
@@ -890,7 +890,7 @@ acts:
     His repertoire crosses jazz, R&B, gospel, Latin, and blues with
     effortless warmth. Sister Lillian Boutté is also a renowned
     singer, making music a family affair.
-  about_source: researched
+  about_source: https://www.wwoz.org/acts/john-boutte
   websites:
   - https://www.wwoz.org/acts/john-boutte
 - name: Don Vappie and the Creole Jazz Serenaders
@@ -908,7 +908,7 @@ acts:
     at Jazz Fest for over twenty years. Vappie's album The Bluebook
     of Storyville was named 2020 Album of the Year by The Times of
     London. Deep, swinging, and steeped in Creole heritage.
-  about_source: researched
+  about_source: https://www.donvappie.com/
   websites:
   - https://www.donvappie.com/
 - name: Lawrence Cotton Legendary Experience
@@ -925,7 +925,7 @@ acts:
     Named a Master Practitioner by the Preservation Hall Foundation,
     Cotton leads his own band with the steady swing and irrepressible
     joy of someone who has spent a lifetime making people dance.
-  about_source: researched
+  about_source: https://salon726.com/home/meet-the-collective-lawrence-cotton
   websites:
   - https://salon726.com/home/meet-the-collective-lawrence-cotton
 - name: Kyle Roussel's Church of New Orleans
@@ -943,7 +943,7 @@ acts:
     piano tradition with street beats and sacred-music roots.
     Roussel studied under legends Alvin Batiste and Ellis Marsalis
     Jr. at NOCCA and UNO. Expect a soulful, spirit-lifting set.
-  about_source: researched
+  about_source: https://www.kyleroussel.com/
   websites:
   - https://www.kyleroussel.com/
 - name: Robin Barnes & The Fiya Birds
@@ -961,7 +961,7 @@ acts:
     The Fiya Birds, she delivers a high-energy blend that draws
     comparisons to Chaka Khan meets Ella Fitzgerald. Named Best
     Local Artist/Band by Gambit in 2024.
-  about_source: researched
+  about_source: https://robinbarnesmusic.com/
   websites:
   - https://robinbarnesmusic.com/
 - name: Maji Melodies - Semaj & The Blues Experiment
@@ -978,7 +978,7 @@ acts:
     through relentless gigging and genre-blending sets. Under the
     Maji Melodies banner, the act channels blues tradition through
     a modern, eclectic lens.
-  about_source: researched
+  about_source: generated
   websites: []
 - name: Joe Lastie's Jazz to Brass feat. Dr. Pathorn
   stage: Tropical Isle Hand Grenade Stage
@@ -995,7 +995,7 @@ acts:
     family legacy that helped bring drumming into the New Orleans
     spiritual church. Here he is joined by Dr. Pathorn for a set
     steeped in the city's oldest musical traditions.
-  about_source: researched
+  about_source: https://www.joelastie.com/
   websites:
   - https://www.joelastie.com/
 - name: Ashton Hines and the Big Easy Brawlers
@@ -1012,7 +1012,7 @@ acts:
     routines, epic solos, crowd surfing, and motivational speeches.
     Their path from street performance to main stages paved the way
     for a generation of New Orleans musicians.
-  about_source: researched
+  about_source: https://smokinonsomebrass.com/
   websites:
   - https://smokinonsomebrass.com/
 - name: Sally Baby's Silver Dollars
@@ -1029,7 +1029,7 @@ acts:
     the 2024 competition. Their self-titled debut EP, recorded at
     Big Tone Studios, captures the band's inherently funky, timeless
     sound. One of the most exciting new acts in the city.
-  about_source: researched
+  about_source: https://www.npr.org/artists/g-s1-107000/sally-babys-silver-dollars
   websites:
   - https://sallybaby.bandcamp.com/
 - name: Deezle
@@ -1047,7 +1047,7 @@ acts:
     Deezle has stepped from the control room to center stage as a
     performer in his own right, blending R&B vocals with his
     production expertise.
-  about_source: researched
+  about_source: https://www.sofndopemagazine.com/post/deezle-from-the-control-room-to-center-stage-r-b-s-next-leading-man-emerges
   websites:
   - https://www.sofndopemagazine.com/post/deezle-from-the-control-room-to-center-stage-r-b-s-next-leading-man-emerges
 - name: Lisa Amos
@@ -1064,7 +1064,7 @@ acts:
     her Saturday night sets with The Royal Essence Show Band. With
     singles like You Used to Love Me and Love Me Now Baby, Amos
     brings polished, danceable soul to the Tropical Isle stage.
-  about_source: researched
+  about_source: generated
   websites: []
 - name: Khris Royal and Dark Matter
   stage: Jack Daniel's Stage
@@ -1081,7 +1081,7 @@ acts:
     moving. Royal is a Grammy-nominated multi-instrumentalist who
     plays sax, bass, keys, and DJ sets, and has shared stages with
     Ellis Marsalis, Branford Marsalis, and Bobby Brown.
-  about_source: researched
+  about_source: https://khrisroyal.band/home
   websites:
   - https://khrisroyal.band/home
 - name: Cole Williams
@@ -1099,7 +1099,7 @@ acts:
     People and a stirring rendition of Sam Cooke's A Change is Gonna
     Come showcase a voice used as an agent for social change. She has
     appeared on NCIS: New Orleans and Big Freedia Means Business.
-  about_source: researched
+  about_source: https://colewilliamsmusic.com/
   websites:
   - https://colewilliamsmusic.com/
 - name: The Iguanas
@@ -1116,7 +1116,7 @@ acts:
     the band's members have collectively played with Charlie Rich,
     Alex Chilton, Emmylou Harris, and Allen Toussaint. Their dance
     floors fill fast and stay packed.
-  about_source: researched
+  about_source: https://www.iguanas.com/
   websites:
   - https://www.iguanas.com/
 - name: People Museum
@@ -1134,7 +1134,7 @@ acts:
     They have shared stages with Thundercat and Big Freedia, and
     even performed with the Louisiana Philharmonic Orchestra.
     Genre-bending music that could only come from New Orleans.
-  about_source: researched
+  about_source: https://www.peoplemuseumband.com/
   websites:
   - https://www.peoplemuseumband.com/
 - name: LSD Clown System
@@ -1152,7 +1152,7 @@ acts:
     and bonks. What started as a joke for a 2018 cover-band show
     has grown into must-see events like Big Top Ball and 20,000
     Clowns Under the Sea.
-  about_source: researched
+  about_source: https://www.lsdclownsystem.com/
   websites:
   - https://www.lsdclownsystem.com/
 - name: The Dirty Dozen Brass Band
@@ -1170,7 +1170,7 @@ acts:
     continents, twelve studio albums, and collaborations from Modest
     Mouse to Norah Jones. They gave brass bands worldwide visibility
     and remain the gold standard.
-  about_source: researched
+  about_source: http://dirtydozenbrassband.com/
   websites:
   - http://dirtydozenbrassband.com/
 - name: T Marie and Bayou Juju
@@ -1188,7 +1188,7 @@ acts:
     of front-porch gatherings and levee jams. Their debut album hit
     the initial Grammy ballot for Best Regional Roots Music and
     topped Bandcamp's Cajun/Zydeco chart.
-  about_source: researched
+  about_source: https://tmarieandbayoujuju.bandcamp.com/
   websites:
   - https://tmarieandbayoujuju.bandcamp.com/
 - name: T'Canaille
@@ -1205,7 +1205,7 @@ acts:
     and Chris Senac on bass, the trio are favorites at the Tropical
     Isle Bayou Club and French Market Festival. Friendly, energetic,
     and always ready to get the dance floor moving.
-  about_source: researched
+  about_source: https://tcanaille.wordpress.com/
   websites:
   - https://tcanaille.wordpress.com/
 - name: B. Cam & The Zydeco Young Bucks
@@ -1238,7 +1238,7 @@ acts:
     Cajun French. Two-time Grammy winners, they contributed to the
     Oscar-nominated film Beasts of the Southern Wild and Jack
     White's American Epic project.
-  about_source: researched
+  about_source: https://lostbayouramblers.com/
   websites:
   - https://lostbayouramblers.com/
 - name: Sunpie and the Louisiana Sunspots
@@ -1256,7 +1256,7 @@ acts:
     has also led the Northside Skull and Bones Gang, a legendary
     Mardi Gras group dating to 1819. Six albums and over fifty
     countries toured with the Louisiana Sunspots.
-  about_source: researched
+  about_source: https://www.sunpiebarnes.live/
   websites:
   - https://www.sunpiebarnes.live/
 - name: Brass-A-Holics
@@ -1274,7 +1274,7 @@ acts:
     adds electric bass, guitar, and a full drum kit to traditional
     brass, covering everything from Louis Armstrong to Lil Wayne.
     High-energy dance music guaranteed.
-  about_source: researched
+  about_source: https://thebrassaholics.com/
   websites:
   - https://thebrassaholics.com/
 - name: Kirkland Green
@@ -1291,7 +1291,7 @@ acts:
     the Analog Machine on Frenchmen Street, he made his Jazz Fest
     and Bayou Boogaloo debuts in 2025. Beyond performing, he directs
     arts education programs for young children through Mess Arts.
-  about_source: researched
+  about_source: https://kirklandgreenmusic.com/
   websites:
   - https://kirklandgreenmusic.com/
 - name: Tuller, Not Related, Liam Escame, and Surco
@@ -1324,7 +1324,7 @@ acts:
     songwriters and performers collaborating in a stripped-down
     format, the group delivers warm, crafted songs rooted in New
     Orleans' deep musical soil. Featured at Jazz Fest 2026.
-  about_source: researched
+  about_source: http://riverbendersnola.com/
   websites:
   - http://riverbendersnola.com/
 - name: Pellow Talk & Alfred Banks
@@ -1342,7 +1342,7 @@ acts:
     Fader, HipHopDx, and Okayplayer. Their joint EP The Survivor's
     Condition pairs atmospheric production with introspective bars.
     Together they bridge hip-hop, soul, and indie sensibilities.
-  about_source: researched
+  about_source: http://pellyeah.com/
   websites:
   - http://pellyeah.com/
   - https://www.underdogcentral.com/presskit
@@ -1379,7 +1379,7 @@ acts:
     frontman Honey Bannister in stunning traditional Indian regalia.
     Their albums Spyboy and My People both earned Grammy nods. Wild,
     colorful, and impossible to stand still for.
-  about_source: researched
+  about_source: http://www.chawaband.com/
   websites:
   - http://www.chawaband.com/
 - name: Magnetic Ear
@@ -1396,7 +1396,7 @@ acts:
     brass band traditions, and African rhythms. With tenor and
     baritone sax, two trombones, sousaphone, and drums, they turn
     cerebral compositions into irresistible dance-floor material.
-  about_source: researched
+  about_source: https://www.magneticear.com/the-band
   websites:
   - https://www.magneticear.com/
 - name: Tidal Wave Brass Band
@@ -1413,7 +1413,7 @@ acts:
     music. The five-piece ensemble covers everything from gospel to
     rock, jazz to Caribbean, and has quickly built a reputation for
     joyous second-line energy at festivals and events.
-  about_source: researched
+  about_source: http://tidalwavebrassband.com/
   websites:
   - http://tidalwavebrassband.com/
 - name: DJ ChiNola
@@ -1429,7 +1429,7 @@ acts:
     energy high between brass band sets on the Fish Fry stage with
     a deep crate of grooves. The name says it all: Chicago roots,
     New Orleans soul.
-  about_source: researched
+  about_source: generated
   websites: []
 - name: Young Pinstripe Brass Band
   stage: Louisiana Fish Fry Stage
@@ -1445,7 +1445,7 @@ acts:
     perennial at Jazz Fest and a go-to for second-line parades,
     jazz funerals, and celebrations. Expect tight horn lines, heavy
     bass drum, and the kind of groove that makes New Orleans move.
-  about_source: researched
+  about_source: https://www.nola.com/gambit/news/the_latest/he-fell-off-the-apple-tree-herbert-mccarver-iv-leader-of-the-young-pinstripe-brass/article_c9ce7ace-348d-55c4-8367-242fea1227d3.html
   websites: []
 - name: Kidd Love
   stage: Louisiana Fish Fry Stage
@@ -1461,7 +1461,7 @@ acts:
     Threestyle and DMC, and hosts weekly residencies at Dragon's
     Den. A sharp selector who bridges hip-hop, funk, and electronic
     sounds with vinyl-digging authenticity.
-  about_source: researched
+  about_source: https://kiddlove.bandcamp.com/
   websites:
   - https://kiddlove.bandcamp.com/
 - name: Treme Brass Band
@@ -1478,7 +1478,7 @@ acts:
     and call-and-response, and anchor the city's second-line parades
     and jazz funerals. Recipients of a National Heritage Fellowship
     from the NEA, they are living guardians of a sacred tradition.
-  about_source: researched
+  about_source: https://www.arts.gov/honors/heritage/treme-brass-band
   websites: []
 - name: DJ Polo504
   stage: Louisiana Fish Fry Stage
@@ -1495,7 +1495,7 @@ acts:
     floors packed at celebrity events, clubs, and festivals. When
     not commanding crowds at home, he travels the world delivering
     his explosive sound.
-  about_source: researched
+  about_source: https://www.djpolo504.com/
   websites:
   - https://www.djpolo504.com/
 - name: Sporty's Brass Band
@@ -1513,7 +1513,7 @@ acts:
     funerals. Regulars at the Hi-Ho Lounge and Brass Hall on
     Decatur Street, they have played Jazz Fest, French Quarter Fest,
     and Mardi Gras, and were featured in the New York Post.
-  about_source: researched
+  about_source: https://sportysbrassband.com/about
   websites:
   - https://sportysbrassband.com/
 - name: Don Paul and Rivers Answer Moons
@@ -1531,7 +1531,7 @@ acts:
     Their double album Louisiana Stories weaves vivid poetic
     narratives with genre-crossing arrangements. On stage, expect
     an immersive experience shaped by the city's sonic traditions.
-  about_source: researched
+  about_source: https://donpaul1.bandcamp.com/
   websites:
   - https://donpaul1.bandcamp.com/
 - name: Lisbon Girls
@@ -1547,7 +1547,7 @@ acts:
     percussion that reflects their heritage. Their album Te Love
     You dropped in 2024, and the band made its Jazz Fest debut in
     2025. A fresh, bilingual voice in the city's indie scene.
-  about_source: researched
+  about_source: https://lisbongirls1.bandcamp.com/
   websites:
   - https://lisbongirls1.bandcamp.com/
 - name: Kelly Love Jones
@@ -1565,7 +1565,7 @@ acts:
     Kravitz and Meshell Ndegeocello. Her recent album Surrender
     captures the spirit of her live shows, where she wields an
     acoustic guitar and cajon with intimate, healing energy.
-  about_source: researched
+  about_source: https://www.kellylovejonesmusic.com/
   websites:
   - https://www.kellylovejonesmusic.com/
 - name: Johnny Sansone
@@ -1583,7 +1583,7 @@ acts:
     tone and swamp-roots accordion give his twelve albums a
     distinctly Louisiana flavor. A life-changing Howlin' Wolf show
     at age twelve set the course for his career.
-  about_source: researched
+  about_source: https://www.johnnysansone.com/
   websites:
   - https://www.johnnysansone.com/
 - name: Max Bien-Kahn
@@ -1601,7 +1601,7 @@ acts:
     his fourth solo album Flowers came out in late 2024. Witty,
     melodic, and cathartic, his songwriting feels like partying to
     someone's diary.
-  about_source: researched
+  about_source: https://www.maxbienkahn.com/
   websites:
   - https://www.maxbienkahn.com/
 - name: Lulu and the Broadsides
@@ -1619,7 +1619,7 @@ acts:
     roll, blues, and soul. Formed to feed New Orleans' underground
     dance scene, they bring deep-pitched, honeyed vocals that
     smolder over tight grooves.
-  about_source: researched
+  about_source: https://luluandthebroadsides.com/
   websites:
   - https://luluandthebroadsides.com/
 - name: Arsène Delay & Charlie Wooton
@@ -1638,7 +1638,7 @@ acts:
     and soul into a set that spans the breadth of Louisiana music.
     Both are seasoned festival performers with global touring
     credits.
-  about_source: researched
+  about_source: https://www.arsenedelaymusic.com/
   websites:
   - https://www.arsenedelaymusic.com/
   - http://www.charliewooton.com/
@@ -1657,7 +1657,7 @@ acts:
     Executive Director of BlackAmericana Fest, she champions Black
     artists in Americana, folk, and country music. A rising voice
     in New Orleans' rootsy singer-songwriter circle.
-  about_source: researched
+  about_source: https://www.duskywaters.com/
   websites:
   - https://www.duskywaters.com/
 - name: Amigos do Samba
@@ -1674,7 +1674,7 @@ acts:
     songs by the legendary 1970s Rio band Fundo de Quintal, using
     a variety of Brazilian percussion and string instruments played
     around a table. Interactive, joyful, and irresistibly danceable.
-  about_source: researched
+  about_source: https://www.facebook.com/amigosdosambanola/
   websites:
   - https://www.facebook.com/amigosdosambanola/
 - name: Camile Baudoin and Friends
@@ -1692,7 +1692,7 @@ acts:
     Stew, and The Gatorators. His latest release This Old House
     celebrates the New Orleans dance party tradition. A living
     legend of Crescent City rock.
-  about_source: researched
+  about_source: http://camilebaudoin.com/
   websites:
   - http://camilebaudoin.com/
 - name: Bill Summers & Jazalsa
@@ -1745,7 +1745,7 @@ acts:
     of the A2D2 Experience with Arsene DeLay, Diel brings polished
     vocal technique and infectious energy. He also teaches voice at
     Loyola University.
-  about_source: researched
+  about_source: https://www.antoinediel.com/
   websites:
   - https://www.antoinediel.com/
 - name: Chucky C & Friends
@@ -1780,7 +1780,7 @@ acts:
     and other global party music. Hundreds of nightclub gigs,
     festivals, crawfish boils, and Mardi Gras parades later, they
     remain one of the city's most adventurous trad-jazz acts.
-  about_source: researched
+  about_source: https://panoramalandnola.com/
   websites:
   - https://panoramalandnola.com/
 - name: Rickie Monie & the Traditional Jazz Ramblers
@@ -1798,7 +1798,7 @@ acts:
     dazzled audiences on five continents with his gospel-infused
     traditional jazz piano. The Ramblers carry that Preservation
     Hall spirit to the French Market stage.
-  about_source: researched
+  about_source: https://rickiemonie.com/
   websites:
   - https://rickiemonie.com/
 - name: The New Orleans Flairs
@@ -1883,7 +1883,7 @@ acts:
     to the Ascona Jazz Festival. They played themselves in an
     episode of HBO's Treme and have shared stages with Linda
     Ronstadt and Dr. John.
-  about_source: researched
+  about_source: https://pfistersisters.com/
   websites:
   - https://pfistersisters.com/
 - name: New Orleans Classic Jazz Orchestra
@@ -1918,7 +1918,7 @@ acts:
     Square at Jazz Fest and Switzerland's Jazz Ascona Festival.
     In the intimate Voodoo Garden, her magnetic voice fills every
     corner.
-  about_source: researched
+  about_source: https://shawanmusic.com/
   websites:
   - https://shawanmusic.com/
 - name: Joey Houcke
@@ -1935,7 +1935,7 @@ acts:
     A presence on the WWOZ live-music calendar and the local club
     circuit, Houck brings a raw, guitar-driven energy perfect for
     the Voodoo Garden's outdoor vibe.
-  about_source: researched
+  about_source: https://www.josephhouckmusic.com/
   websites:
   - https://www.josephhouckmusic.com/
 - name: Electric Ramble
@@ -1953,7 +1953,7 @@ acts:
     to let you stand still. They secured their first major festival
     slot at the 2024 French Quarter Fest and have been building
     momentum ever since.
-  about_source: researched
+  about_source: https://www.electricramble.com/
   websites:
   - https://www.electricramble.com/
 - name: Borders Trio
@@ -1971,7 +1971,7 @@ acts:
     a booking agency elevating women, LGBTQ+, and BIPOC artists,
     and founded the Borders Foundation. A powerhouse vocalist with
     a community mission.
-  about_source: researched
+  about_source: https://www.miaborders.com/
   websites:
   - https://www.miaborders.com/
 - name: Tanglers
@@ -1989,7 +1989,7 @@ acts:
     has earned them a reputation as one of New Orleans' top
     bluegrass acts. Regular performers at Jazz Fest and local
     venues like The Howlin' Wolf and d.b.a.
-  about_source: researched
+  about_source: https://thetanglers.bandcamp.com/
   websites:
   - https://thetanglers.bandcamp.com/
 - name: Gregg Martinez & the Delta Kings
@@ -2005,7 +2005,7 @@ acts:
     Delta Kings backing him, he delivers a dance-floor set steeped in
     south Louisiana groove. His album Soul of the Bayou reached the top
     five on the national R&B chart.
-  about_source: researched
+  about_source: https://www.greggmartinez.com
   websites:
   - https://www.greggmartinez.com
 - name: Ryan Batiste and Raw Revolution
@@ -2039,7 +2039,7 @@ acts:
     African diaspora culture. His electrifying stage presence and
     deep-rooted chants make every performance a spiritual event
     you do not want to miss.
-  about_source: researched
+  about_source: https://bigchiefmonkboudreaux.com/
   websites:
   - https://bigchiefmonkboudreaux.com/
 - name: Dawn Richard
@@ -2055,7 +2055,7 @@ acts:
     Second Line, she fuses R&B, electronic, and experimental sounds
     into boundary-pushing pop. Her father played in Chocolate Milk
     and that Crescent City DNA runs through everything she creates.
-  about_source: researched
+  about_source: https://www.mergerecords.com/artist/dawn_richard
   websites:
   - https://www.mergerecords.com/artist/dawn_richard
 - name: George Porter Jr & Runnin' Pardners
@@ -2071,7 +2071,7 @@ acts:
     New Orleans groove into tight, improvisational sets beloved on the
     festival and jam-band circuits. At any FQF, catching George lay
     down a bass line is practically a pilgrimage.
-  about_source: researched
+  about_source: https://www.georgeporterjr.com
   websites:
   - https://www.georgeporterjr.com
 - name: Flow Tribe
@@ -2088,7 +2088,7 @@ acts:
     post-Katrina return, the band celebrated twenty years running in
     2024. Their album BOSS, produced by Mannie Fresh, cracked the
     Billboard R&B chart.
-  about_source: researched
+  about_source: https://www.flowtribe.com
   websites:
   - https://www.flowtribe.com
 - name: Tim Laughlin
@@ -2104,7 +2104,7 @@ acts:
     he is the first New Orleans clarinetist to record an entire album of
     originals. During the pandemic he became beloved for daily 'balcony
     concerts' on Royal Street in the French Quarter.
-  about_source: researched
+  about_source: http://www.timlaughlin.com
   websites:
   - http://www.timlaughlin.com
 - name: The Big Easy Boys
@@ -2120,7 +2120,7 @@ acts:
     Backed by a seven-piece band and the Big Easy Babes, their tight
     harmonies and choreography make for a feel-good revue that
     celebrates the city's rich musical heritage.
-  about_source: researched
+  about_source: https://www.bigeasyboys.com
   websites:
   - https://www.bigeasyboys.com
 - name: Wendell Brunious
@@ -2136,7 +2136,7 @@ acts:
     Valentine's passing in 1987 and in 2023 was named Preservation
     Hall's first-ever musical director. His smooth trumpet tone and deep
     ballad interpretations are the sound of the city's living tradition.
-  about_source: researched
+  about_source: https://www.preservationhall.com/people/wendell-brunious/
   websites:
   - https://www.preservationhall.com/people/wendell-brunious/
 - name: Charmaine Neville
@@ -2153,7 +2153,7 @@ acts:
     and funk-inflected sets draw on collaborations with Dr. John,
     Harry Connick Jr., and Bobby McFerrin, and she is a passionate
     advocate for the preservation of the city's musical culture.
-  about_source: researched
+  about_source: https://www.charmainenevilleband.com
   websites:
   - https://www.charmainenevilleband.com
 - name: James Andrews
@@ -2169,7 +2169,7 @@ acts:
     cutting his teeth with the Treme Brass Band and New Birth Brass Band,
     he formed the Crescent City Allstars. His 1998 album, produced by
     Allen Toussaint with Dr. John on every track, is a local classic.
-  about_source: researched
+  about_source: https://www.crescentcityallstars.com
   websites:
   - https://www.crescentcityallstars.com
 - name: Christian Serpas & Ghost Town
@@ -2185,7 +2185,7 @@ acts:
     rock 'n' roll.' Inducted into the Louisiana Music Hall of Fame in
     2024, they have shared stages with Kenny Chesney, Merle Haggard,
     Dwight Yoakam, and nearly a hundred other touring acts.
-  about_source: researched
+  about_source: https://csghosttown.com
   websites:
   - https://csghosttown.com
 - name: Ovi-G presents 'Xtra Cash!'
@@ -2217,7 +2217,7 @@ acts:
     Hot Rod Lincoln is a Sha Na Na-style oldies act of lawyers and
     businessmen, and together the combined bill makes for a joyful,
     retro variety show that is pure New Orleans spectacle.
-  about_source: researched
+  about_source: https://www.lamarque.com
   websites:
   - https://www.lamarque.com
 - name: Victor Campbell & Timba Swamp
@@ -2248,7 +2248,7 @@ acts:
     up over a million YouTube views and was licensed by the NFL for
     Super Bowl LIX. He also contributed costume work to Marvel's Black
     Panther sequel. Expect chants, beadwork, and serious energy.
-  about_source: researched
+  about_source: https://flagboygiz.com
   websites:
   - https://flagboygiz.com
 - name: Higher Heights Reggae Band
@@ -2279,7 +2279,7 @@ acts:
     with honky-tonk grit and blues undertones. Formed in the city,
     they have been building a devoted following through spirited live
     shows at local venues and touring across the South.
-  about_source: researched
+  about_source: https://lilyunlessandtheifonlys.bandcamp.com
   websites:
   - https://lilyunlessandtheifonlys.bandcamp.com
 - name: Paul Sanchez
@@ -2295,7 +2295,7 @@ acts:
     appeared as himself on HBO's Treme. After Katrina, his tribute
     song 'Home' became an anthem featured in the documentary New
     Orleans Music in Exile.
-  about_source: researched
+  about_source: https://paulsanchez.com
   websites:
   - https://paulsanchez.com
 - name: Water Seed
@@ -2312,7 +2312,7 @@ acts:
     in 2014 and headlining a sold-out night at Harlem's Apollo
     Theater. Their immersive 'Journey to Funkstar' concerts blend
     music with visual storytelling.
-  about_source: researched
+  about_source: https://waterseed.bandcamp.com
   websites:
   - https://waterseed.bandcamp.com
 - name: Iceman Special
@@ -2328,7 +2328,7 @@ acts:
     Hunter Romero blend dirty funk, disco, psych-rock, and reggae
     into danceable jams. They have headlined Tipitina's, graced
     the cover of Offbeat, and launched their own music festival.
-  about_source: researched
+  about_source: https://www.theicemanspecial.com
   websites:
   - https://www.theicemanspecial.com
 - name: The Original Pinettes Brass Band
@@ -2344,7 +2344,7 @@ acts:
     'Street Queens,' and played the Met Gala afterparty for Katy Perry
     in 2017. Their Friday-night residency at Bullet's Sports Bar in
     the Seventh Ward is a local institution.
-  about_source: researched
+  about_source: https://www.originalpinettes.com
   websites:
   - https://www.originalpinettes.com
 - name: Big Freedia
@@ -2377,7 +2377,7 @@ acts:
     accordion and formed his own band. His Sunday fais do-do at Tipitina's
     ran for thirty years, making him the venue's all-time performance
     leader with over 1,400 shows on that stage alone.
-  about_source: researched
+  about_source: http://www.brucedaigrepont.org
   websites:
   - http://www.brucedaigrepont.org
 - name: Magnolia Sisters
@@ -2394,7 +2394,7 @@ acts:
     beautiful harmonies and rediscovery of little-known traditional
     repertoire have earned two Grammy-nominated albums and extensive
     touring in Europe and the US.
-  about_source: researched
+  about_source: https://magnoliasisters.com
   websites:
   - https://magnoliasisters.com
 - name: Donna Angelle & the Zydeco Posse
@@ -2426,7 +2426,7 @@ acts:
     combusts zydeco, blues, jazz, and guitar-shredding rock into
     dance-floor fuel. His latest, Live In Alaska, captures that
     energy in full.
-  about_source: researched
+  about_source: https://coreyledet.com
   websites:
   - https://coreyledet.com
 - name: Dwayne Dopsie and the Zydeco Hellraisers
@@ -2442,7 +2442,7 @@ acts:
     Grammy nomination for Best Regional Roots Album and multiple
     Offbeat awards. Dwayne's high-energy style blends traditional
     zydeco with funk, R&B, rock, and reggae, defying every stereotype.
-  about_source: researched
+  about_source: https://dwaynedopsie.com
   websites:
   - https://dwaynedopsie.com
 - name: Sweet Crude
@@ -2459,7 +2459,7 @@ acts:
     their heritage through indie pop and rock. They signed with
     Verve Forecast and released their major-label debut Officiel/
     Artificiel in 2020.
-  about_source: researched
+  about_source: https://www.sweetcrudeband.com
   websites:
   - https://www.sweetcrudeband.com
 - name: Loyola University Commercial Ensemble
@@ -2489,7 +2489,7 @@ acts:
     Wind, released on Righteous Babe Records, explores self-discovery
     as a Black, queer young woman in the South. Her songcraft pairs
     sophisticated progressions with themes of freedom and love.
-  about_source: researched
+  about_source: https://joyclarkmusic.com
   websites:
   - https://joyclarkmusic.com
 - name: Tay/Heavensworld/Ja Fierce & Azure Skye et al.
@@ -2520,7 +2520,7 @@ acts:
     she runs Third Coast Entertainment, a booking agency elevating
     women, LGBTQ+, and BIPOC artists, and founded The Borders
     Foundation to support marginalized musicians.
-  about_source: researched
+  about_source: https://www.miaborders.com
   websites:
   - https://www.miaborders.com
 - name: John 'Papa' Gros
@@ -2536,7 +2536,7 @@ acts:
     twelve-year Monday night residency at the Maple Leaf Bar. Now a
     solo touring act, he has served as go-to keys man for Little Feat,
     the Neville Brothers, the Funky Meters, and Anders Osborne.
-  about_source: researched
+  about_source: https://johnpapagros.com
   websites:
   - https://johnpapagros.com
 - name: Red Wolf Brass Band
@@ -2552,7 +2552,7 @@ acts:
     guest spots from Shamarr Allen and members of the Soul Rebels.
     They bring jazz back to its roots as dance music, blending old and
     new schools with infectious charisma.
-  about_source: researched
+  about_source: https://www.redwolfbrassband.com
   websites:
   - https://www.redwolfbrassband.com
 - name: DJ Hollaback
@@ -2581,7 +2581,7 @@ acts:
     South America, and Asia, they stay faithful to the roots while
     most modern brass bands lean into funk and R&B. Their sound is
     pure, joyful New Orleans tradition.
-  about_source: researched
+  about_source: http://www.storyvillestompers.com
   websites:
   - http://www.storyvillestompers.com
 - name: DJ Spin
@@ -2626,7 +2626,7 @@ acts:
     Glasper, Erykah Badu, and Bilal, and his ability to create a
     distinct vibe has captured ears from Frenchmen Street to the
     pubs of London.
-  about_source: researched
+  about_source: https://djrqaway.com
   websites:
   - https://djrqaway.com
 - name: Big 6 Brass Band
@@ -2642,7 +2642,7 @@ acts:
     Their debut album was hailed by Offbeat as 'the sound of New
     Orleans streets today,' blending smooth R&B vocals with the
     rough-and-ready brass band tradition.
-  about_source: researched
+  about_source: https://bigsixbrassband.com
   websites:
   - https://bigsixbrassband.com
 - name: DJ Poppa
@@ -2673,7 +2673,7 @@ acts:
     taught guitar and songwriting at Loyola for over thirty years and
     received Offbeat's Lifetime Achievement Award in Music Education.
     His powerful harmonica playing adds real impact to his songs.
-  about_source: researched
+  about_source: https://johnrankin.net
   websites:
   - https://johnrankin.net
 - name: Beth Patterson
@@ -2689,7 +2689,7 @@ acts:
     eight-string instrument she plays with fiery skill. She has toured
     twenty countries, released nine solo albums, and recently appeared
     in the pub band in Spinal Tap II.
-  about_source: researched
+  about_source: https://bethpattersonmusic.com
   websites:
   - https://bethpattersonmusic.com
 - name: Kyle Alexander
@@ -2720,7 +2720,7 @@ acts:
     with Preservation Hall and Squirrel Nut Zippers musicians. Bold
     horn charts, gritty Southern guitar, and poetic storytelling
     define her sets.
-  about_source: researched
+  about_source: https://www.daphneparkerpowell.com
   websites:
   - https://www.daphneparkerpowell.com
 - name: AdoSoul and the Tribe
@@ -2736,7 +2736,7 @@ acts:
     featuring fiery horn arrangements from Alijah Jett and thunderous
     guitar work from Gregg Molinario. They have performed at the
     New Orleans Jazz Museum and venues across the city.
-  about_source: researched
+  about_source: https://adosoulmusic.com
   websites:
   - https://adosoulmusic.com
 - name: Legendary Barbara Shorts and Blue Jazz
@@ -2767,7 +2767,7 @@ acts:
     Best Country Singer/Songwriter award in 2003 and has released
     ten albums of originals, including 2024's High Tide. Her sultry,
     sweet songs can turn funky at the drop of a hat.
-  about_source: researched
+  about_source: https://lynndrury.com
   websites:
   - https://lynndrury.com
 - name: Vivaz
@@ -2783,7 +2783,7 @@ acts:
     Orleans from La Paz in the early 1980s and built the band into
     a mainstay of the city's Latin music and salsa-dancing scene,
     performing at festivals and dance events for decades.
-  about_source: researched
+  about_source: https://www.vivazmusic.com
   websites:
   - https://www.vivazmusic.com
 - name: Ever More Nest
@@ -2800,7 +2800,7 @@ acts:
     delivers lush, church-pew harmonies over expansive arrangements.
     Their debut was nominated for Best Alt-Country Album at the
     Independent Music Awards.
-  about_source: researched
+  about_source: https://evermorenest.com
   websites:
   - https://evermorenest.com
 - name: Troy Sawyer and the Elementz
@@ -2818,7 +2818,7 @@ acts:
     of the Year from the New Orleans Tourism and Cultural Fund.
     He also founded Girls Play Trumpets Too, a nonprofit empowering
     young female musicians.
-  about_source: researched
+  about_source: https://www.troysawyermusic.com
   websites:
   - https://www.troysawyermusic.com
 - name: Fermín Ceballos + Merengue4FOUR
@@ -2850,7 +2850,7 @@ acts:
     masterful improvisation, and playful banter, and with her band
     the CrawZaddies she has become one of the city's hottest new
     jazz acts.
-  about_source: researched
+  about_source: https://www.audreylecronemusic.com
   websites:
   - https://www.audreylecronemusic.com
 - name: The Wolfe Johns Blues Band
@@ -2867,7 +2867,7 @@ acts:
     performed daily on Royal Street, becoming a French Quarter fixture.
     They have shared stages with Little Freddie King, Jon Cleary, and
     Charlie Musselwhite.
-  about_source: researched
+  about_source: https://wjblues.com
   websites:
   - https://wjblues.com
 - name: Richard 'Piano' Scott & The Twisty River Band
@@ -2883,7 +2883,7 @@ acts:
     Orleans and the early jazz era, performing them with irresistible
     warmth and swing. Their albums Port of New Orleans and Hey Day
     Drinkers feature originals alongside deep-cut standards.
-  about_source: researched
+  about_source: https://www.richardpianoscott.com
   websites:
   - https://www.richardpianoscott.com
 - name: Secret Six Jazz Band
@@ -2899,7 +2899,7 @@ acts:
     most exciting traditional jazz ensembles, handling stomps, blues,
     rags, and hot jazz with deep-cut repertoire from King Oliver,
     Louis Armstrong's Hot Five, and the New Orleans revival era.
-  about_source: researched
+  about_source: https://www.secretsixjazzband.com
   websites:
   - https://www.secretsixjazzband.com
 - name: Special Dance Performance by the NOLA Chorus Girls
@@ -2944,7 +2944,7 @@ acts:
     opera, jazz, gospel, blues, and R&B, and she has performed with
     Eric Clapton, Roy Hargrove, the Preservation Hall Jazz Band, and
     Jon Batiste. She is a regular at Preservation Hall and Snug Harbor.
-  about_source: researched
+  about_source: https://aliciareneeakablueeyes.com
   websites:
   - https://aliciareneeakablueeyes.com
 - name: The Jump Hounds
@@ -2960,7 +2960,7 @@ acts:
     on trumpet, they transcribe material from the original masters
     while writing new tunes within the idiom, delivering energetic
     up-tempo numbers, slow blues, and cozy mid-tempo swingers.
-  about_source: researched
+  about_source: https://www.thejumphounds.com
   websites:
   - https://www.thejumphounds.com
 - name: Kid Simmons Jazz Band
@@ -2992,7 +2992,7 @@ acts:
     Dirty Dozen Brass Band, Walker's ensemble blends gospel roots,
     traditional jazz, funk, Latin, and contemporary sounds into
     one swinging package.
-  about_source: researched
+  about_source: https://www.stephenwalkermusic.com
   websites:
   - https://www.stephenwalkermusic.com
 - name: Kevin Ray Clark and Bourbon Street All Stars
@@ -3008,7 +3008,7 @@ acts:
     moved to New Orleans in 1992 and has performed with Pete Fountain,
     the Dukes of Dixieland, and the New Orleans Nightcrawlers. His
     Bourbon Street All Stars keep traditional jazz alive nightly.
-  about_source: researched
+  about_source: https://kevinrayclark.com
   websites:
   - https://kevinrayclark.com
 - name: New Orleans Ragtime Orchestra ft. Lars Edegran
@@ -3039,7 +3039,7 @@ acts:
     2021. Renee, a New Orleans native and self-proclaimed 'Dive Bar
     Diva,' blends folk storytelling with Southern rock and soul.
     Together they made their Jazz Fest debut in 2024.
-  about_source: researched
+  about_source: https://www.reneegros.com
   websites:
   - https://www.reneegros.com
   - https://tiagoguy.com
@@ -3056,7 +3056,7 @@ acts:
     genres, delivering a modern take on the styles that founded the
     city's musical culture. Their debut EP Live From New Orleans
     captures the raw energy of their Gulf Coast shows.
-  about_source: researched
+  about_source: https://www.pocketchocolatemusic.com
   websites:
   - https://www.pocketchocolatemusic.com
 - name: Jamey St. Pierre
@@ -3073,7 +3073,7 @@ acts:
     Orleans blues alongside interpretations of Bill Withers, Nina
     Simone, and Allen Toussaint. He calls his style 'New Orleans
     Authentic Soul.'
-  about_source: researched
+  about_source: https://jameystpierremusic.com
   websites:
   - https://jameystpierremusic.com
 - name: Eric Johanson
@@ -3090,7 +3090,7 @@ acts:
     and the Dirty debuted at number one on the Billboard blues chart.
     He has toured with Cyril Neville, Anders Osborne, and the Neville
     Brothers.
-  about_source: researched
+  about_source: https://www.ericjohanson.com
   websites:
   - https://www.ericjohanson.com
 - name: Sansone & John Fohl
@@ -3107,7 +3107,7 @@ acts:
     extensively with Dr. John. Together, their deep-blues duo and
     trio configurations deliver raw Louisiana grit distilled from
     decades of Crescent City nightlife.
-  about_source: researched
+  about_source: https://www.johnnysansone.com
   websites:
   - https://www.johnnysansone.com
 - name: Congo Square Preservation Society
@@ -3124,7 +3124,7 @@ acts:
     Gras Indian culture. Every Sunday they host drum circles in the
     park, and at FQF their performance is a communal, rhythmic
     experience rooted in centuries of tradition.
-  about_source: researched
+  about_source: https://www.congosquarepreservationsociety.org
   websites:
   - https://www.congosquarepreservationsociety.org
 - name: Jamil Sharif Quartet
@@ -3141,7 +3141,7 @@ acts:
     with Dr. John. His quartet navigates jazz, blues, swing, Latin,
     and funk with the effortless versatility of a true Crescent City
     musician.
-  about_source: researched
+  about_source: http://www.jamilsharif.com
   websites:
   - http://www.jamilsharif.com
 - name: Shake Em Up Jazz Band
@@ -3157,7 +3157,7 @@ acts:
     garnered attention and now performs at Preservation Hall, Jazz Fest,
     and FQF. Their album A Woman's Place features songs exclusively
     from women composers of the 1910s through 1930s.
-  about_source: researched
+  about_source: https://shakeemupjazzband.com
   websites:
   - https://shakeemupjazzband.com
 - name: Young Tuxedo Brass Band
@@ -3188,7 +3188,7 @@ acts:
     Victor Campbell. The ensemble delivers swinging standards and
     original arrangements that reflect the full spectrum of New
     Orleans jazz, from traditional to contemporary.
-  about_source: researched
+  about_source: https://www.saskiasmusic.com
   websites:
   - https://www.saskiasmusic.com
 - name: Lycée Français Musicians
@@ -3264,7 +3264,7 @@ acts:
     Butch Thompson — revive repertoire from Kid Ory, Louis Armstrong,
     and Jelly Roll Morton with the warmth of decades-long musical
     friendships forged in jam sessions, parades, and jazz funerals.
-  about_source: researched
+  about_source: https://www.clivewilsonmusic.com
   websites:
   - https://www.clivewilsonmusic.com
 - name: Caleb Tokarska
@@ -3297,7 +3297,7 @@ acts:
     listeners and dancers, seamlessly blending tradition and
     innovation. From solo piano to jazz quartet, every configuration
     swings.
-  about_source: researched
+  about_source: https://www.mahoneymusic.com
   websites:
   - https://www.mahoneymusic.com
 - name: Steve Pistorius & the Southern Syncopators
@@ -3313,7 +3313,7 @@ acts:
     built a repertoire spanning the New Orleans revival, Sidney Bechet,
     Clarence Williams, and Sam Morgan. A regular at Preservation Hall,
     he has recorded with Wynton Marsalis, Bob Wilber, and many others.
-  about_source: researched
+  about_source: https://www.stevepistorius.com
   websites:
   - https://www.stevepistorius.com
 - name: Garden District Jazz Band
@@ -3329,7 +3329,7 @@ acts:
     with swing, bossa nova, samba, and a unique New Orleans feel on a
     seven-foot Steinway. They have played internationally in Argentina,
     Brazil, Japan, Malaysia, and Turkey.
-  about_source: researched
+  about_source: https://gardendistrictband.com
   websites:
   - https://gardendistrictband.com
 - name: Marlon Jordan and Quartet
@@ -3345,7 +3345,7 @@ acts:
     Kidd Jordan and a graduate of NOCCA, he draws comparisons to
     Charlie Parker and Coltrane. His true joy remains performing
     in the streets and nightclubs of his hometown.
-  about_source: researched
+  about_source: https://www.marlonjordanmusic.com
   websites:
   - https://www.marlonjordanmusic.com
 - name: Louis Michot and Swamp Magic
@@ -3361,7 +3361,7 @@ acts:
     Louisiana French, local folklore, and the disappearing wetlands
     of Acadiana. His solo album Reve du Troubadour features Nigerian
     Tuareg guitarist Bombino and cellist Leyla McCalla.
-  about_source: researched
+  about_source: https://lostbayouramblers.com
   websites:
   - https://lostbayouramblers.com
 - name: The Crybabies
@@ -3377,7 +3377,7 @@ acts:
     melodies. The all-female band blends Americana, folk, and
     traditional-music influences into a sound that is equal parts
     tender and spirited.
-  about_source: researched
+  about_source: https://thecrybabies.bandcamp.com
   websites:
   - https://thecrybabies.bandcamp.com
 - name: Bad Penny Pleasuremakers
@@ -3393,7 +3393,7 @@ acts:
     ragtime, and acoustic and country blues from the pre-WWII era,
     all made for dancing. Their albums include T'aint No Sin and
     Hello Bluebird!
-  about_source: researched
+  about_source: https://badpennypleasuremakers.bandcamp.com
   websites:
   - https://badpennypleasuremakers.bandcamp.com
 - name: Washboard Chaz Blues Trio
@@ -3410,7 +3410,7 @@ acts:
     2004, Chaz has shared stages with Bonnie Raitt, Taj Mahal, and
     John Hammond. Their sets are a festival highlight for blues
     purists.
-  about_source: researched
+  about_source: https://www.washboardchaz.com
   websites:
   - https://www.washboardchaz.com
 - name: Nanci Zhang
@@ -3442,7 +3442,7 @@ acts:
     has performed at Montreal Jazz, Istanbul Jazz, and Lincoln Center.
     The Big Easy Awards named her Best Female Performer in 2016 and
     the Royal Roses Best Traditional Jazz Band in 2015 and 2017.
-  about_source: researched
+  about_source: http://www.auroranealand.com
   websites:
   - http://www.auroranealand.com
 - name: The Beignet Orchestra
@@ -3458,7 +3458,7 @@ acts:
     band, and mainstream jazz into a warm, accessible show that is
     the perfect musical accompaniment to a plate of beignets and
     a cup of cafe au lait.
-  about_source: researched
+  about_source: https://daveruffnermusic.com
   websites:
   - https://daveruffnermusic.com
 - name: Zach Wiggins Trio
@@ -3474,7 +3474,7 @@ acts:
     scholarly depth and genuine swing. He also directs The Nash Summer
     Trad Jazz Workshop, passing the tradition to the next generation
     of players.
-  about_source: researched
+  about_source: https://drzachwiggins.com
   websites:
   - https://drzachwiggins.com
 - name: Sam Price & the True Believers
@@ -3491,7 +3491,7 @@ acts:
     group OTRA, Price brings a genre-hopping sensibility to the band's
     self-described soul-rock and funk-roll sound. Their debut EP was
     named Best Roots Rock Album of 2017.
-  about_source: researched
+  about_source: https://sampricemusic.com/
   websites:
   - https://sampricemusic.com/
   - https://sampriceandthetruebelievers.bandcamp.com/
@@ -3509,7 +3509,7 @@ acts:
     Gambit Reader's Poll win for Best Band That Doesn't Fit Any
     Category, plus ten Offbeat Best of the Beat Awards. Expect
     non-stop dancing from start to finish.
-  about_source: researched
+  about_source: https://www.bucktownallstars.com/
   websites:
   - https://www.bucktownallstars.com/
 - name: New Orleans Suspects
@@ -3526,7 +3526,7 @@ acts:
     and Americana-based rhythm and blues with a pinch of jamband
     groove. Over the years they've built a devout following across
     the festival and club circuits nationwide.
-  about_source: researched
+  about_source: https://neworleanssuspects.com/
   websites:
   - https://neworleanssuspects.com/
 - name: Jelly Joseph
@@ -3581,7 +3581,7 @@ acts:
     includes collaborations with Bob Dylan, Robbie Robertson, Dr. John,
     and Royal Southern Brotherhood. A living link to the deepest roots
     of New Orleans music.
-  about_source: researched
+  about_source: https://www.cyrilnevillemusic.com/
   websites:
   - https://www.cyrilnevillemusic.com/
 - name: Tuba Skinny
@@ -3599,7 +3599,7 @@ acts:
     to Australia, and attracted high-profile fans including R. Crumb,
     Amanda Palmer, and Neil Gaiman. Named after a passerby's joke
     about tubist Todd Burdick's slender frame.
-  about_source: researched
+  about_source: http://tubaskinny.com/
   websites:
   - http://tubaskinny.com/
 - name: Lena Prima
@@ -3616,7 +3616,7 @@ acts:
     Carousel Bar. With eight albums, a Billboard Jazz Top Ten release,
     and a high-energy stage show that channels swing, jazz, and rock,
     she is a powerhouse vocalist who fills every room she enters.
-  about_source: researched
+  about_source: https://www.lenaprima.com/
   websites:
   - https://www.lenaprima.com/
 - name: Jeremy Davenport
@@ -3633,7 +3633,7 @@ acts:
     the Davenport Lounge at The Ritz-Carlton, New Orleans, is a local
     institution. His smooth vocal style and polished horn work blend
     jazz standards with swinging originals.
-  about_source: researched
+  about_source: https://jeremydavenport.com/
   websites:
   - https://jeremydavenport.com/
 - name: Judith Owen & Her Gentlemen Callers
@@ -3650,7 +3650,7 @@ acts:
     to her name. Her 2022 release 'Come On & Get It' pays tribute to
     female jazz and blues singers of the 1940s and '50s. Married to
     actor and fellow New Orleans resident Harry Shearer.
-  about_source: researched
+  about_source: https://judithowen.net/
   websites:
   - https://judithowen.net/
 - name: Delfeayo Marsalis & the Uptown Jazz Orchestra
@@ -3668,7 +3668,7 @@ acts:
     energy of the Dirty Dozen with the sophistication of Basie,
     Ellington, Mingus, and Coltrane. One of the premier large
     jazz ensembles in the world.
-  about_source: researched
+  about_source: https://theujo.org/
   websites:
   - https://theujo.org/
   - https://www.dmarsalis.com/
@@ -3701,7 +3701,7 @@ acts:
     Big Easy awards for Best Roots Rock Artist and Album of the Year,
     he's been performing at Jazz Fest since 1993 and played himself
     on HBO's Treme.
-  about_source: researched
+  about_source: https://alexmcmurray.com/
   websites:
   - https://alexmcmurray.com/
 - name: Assata Renay
@@ -3718,7 +3718,7 @@ acts:
     in The Bodyguard at the Anthony Bean Theatre. Whether curating
     beats for the dance floor or delivering soul-stirring live vocals,
     she brings passion and precision to every stage.
-  about_source: researched
+  about_source: https://assatarenay.com/
   websites:
   - https://assatarenay.com/
 - name: Wanda Rouzan and a Taste of New Orleans
@@ -3736,7 +3736,7 @@ acts:
     since 1979, she also holds a Master's degree and teaches Theatre
     Arts at Audubon Charter School. Featured in HBO's Treme and the
     film Ray.
-  about_source: researched
+  about_source: https://wandarouzan.com/
   websites:
   - https://wandarouzan.com/
 - name: Big Frank & Lil Frank & the Dirty Old Men
@@ -3770,7 +3770,7 @@ acts:
     each been named Roots Rock Album of the Year by Offbeat Magazine.
     Now celebrating their 20th anniversary, they remain one of the
     city's most reliable good-time acts.
-  about_source: researched
+  about_source: https://www.honeyislandswampband.com/
   websites:
   - https://www.honeyislandswampband.com/
 - name: Roderick 'Rev' Paulin and The Congregation
@@ -3804,7 +3804,7 @@ acts:
     is also the daughter of jazz legend Sullivan Dabney. From NBA
     halftime shows to Jazz Fest, the Allstars keep the Neville
     family legacy burning bright.
-  about_source: researched
+  about_source: https://jnevillefunkysoulband.com/
   websites:
   - https://jnevillefunkysoulband.com/
 - name: Gumbeaux Juice
@@ -3838,7 +3838,7 @@ acts:
     Leaf.' Their songs blend Indian chants, brass band traditions,
     jazz, and hip-hop into a modern sound rooted in the oldest
     musical traditions of New Orleans.
-  about_source: researched
+  about_source: https://therumbleband.com/
   websites:
   - https://therumbleband.com/
 - name: Irma Thomas, Soul Queen of New Orleans
@@ -3872,7 +3872,7 @@ acts:
     Tom Joyner, and performed everywhere from Germany to Dubai. With
     his reconstituted Dance Party Express Band, Cupid delivers
     guaranteed non-stop dancing to close out the festival.
-  about_source: researched
+  about_source: https://newcupidonline.com/
   websites:
   - https://newcupidonline.com/
 - name: Les Femmes Farouches
@@ -3905,7 +3905,7 @@ acts:
     Acadiens et Creoles and launched their rise. Their self-titled
     debut album earned a Grammy nomination for Best Regional Roots
     Music Album in 2020.
-  about_source: researched
+  about_source: https://www.cajuntroubadours.com/
   websites:
   - https://www.cajuntroubadours.com/
   - https://cajuntroubadours.bandcamp.com/
@@ -3923,7 +3923,7 @@ acts:
     Creole, blues, and honky-tonk grooves. A teacher, author, and
     storyteller from Breaux Bridge, Landry proves it's never too
     late to follow your musical calling.
-  about_source: researched
+  about_source: https://yvettelandry.com/
   websites:
   - https://yvettelandry.com/
 - name: Buckwheat Zydeco Jr. & The Legendary Ils Sont Partis Band
@@ -3940,7 +3940,7 @@ acts:
     performances worldwide. In 2024 the band won the Grammy for Best
     Regional Roots Music Album and was inducted into the Louisiana
     Music Hall of Fame.
-  about_source: researched
+  about_source: https://www.productionslb.com/
   websites:
   - https://www.productionslb.com/
 - name: Chubby Carrier and the Bayou Swamp Band
@@ -3957,7 +3957,7 @@ acts:
     recorded ten albums over a career that's taken him across the
     U.S., Canada, North Africa, and Europe. A tireless ambassador
     for Louisiana's zydeco tradition.
-  about_source: researched
+  about_source: https://chubbycarrierzydeco.com/
   websites:
   - https://chubbycarrierzydeco.com/
 - name: Rockin' Dopsie Jr. & the Zydeco Twisters
@@ -3974,7 +3974,7 @@ acts:
     and Beyonce, and appeared in the 2024 film Roadhouse. His 2024
     album 'More Fun With Rockin' Dopsie Jr.' showcases 12 tracks
     of soul-stirring, body-moving zydeco.
-  about_source: researched
+  about_source: https://www.rockindopsiejr.com/
   websites:
   - https://www.rockindopsiejr.com/
 - name: Casme
@@ -3991,7 +3991,7 @@ acts:
     Jay Leno, and The View. Her latest collection 'Gumbo' spans soul,
     funk, blues, jazz, hip-hop, and pop. She also runs Casme Cares,
     a community outreach program feeding hundreds monthly.
-  about_source: researched
+  about_source: https://www.iamcasme.com/
   websites:
   - https://www.iamcasme.com/
 - name: Across Phoenix, James Wyzten, Kissing Disease
@@ -4027,7 +4027,7 @@ acts:
     by Dave Cobb in Nashville, was applauded by NPR and American
     Songwriter as one of the year's best. She is also a faculty
     member at Loyola's College of Music.
-  about_source: researched
+  about_source: https://kristindiable.com/
   websites:
   - https://kristindiable.com/
 - name: 'Helen Gillet: ReBelle Musique'
@@ -4045,7 +4045,7 @@ acts:
     Orleans band featuring Alex McMurray on guitar and Rex Gregory
     on saxophone. She holds a master's in classical cello from Loyola
     and has spent decades proving cellists belong in jazz bands.
-  about_source: researched
+  about_source: https://www.helengillet.com/
   websites:
   - https://www.helengillet.com/
 - name: Creole String Beans
@@ -4063,7 +4063,7 @@ acts:
     exuberance and faithful renditions have made them a growing
     favorite at Jazz Fest, French Quarter Festival, and Bayou
     Boogaloo.
-  about_source: researched
+  about_source: https://creolestringbeans.com/
   websites:
   - https://creolestringbeans.com/
 - name: Astral Project
@@ -4081,7 +4081,7 @@ acts:
     and the quest for a higher plane of experience, they blend jazz,
     funk, rock, and world music at their long-running residency at
     Snug Harbor.
-  about_source: researched
+  about_source: https://www.astralproject.com/
   websites:
   - https://www.astralproject.com/
 - name: Smokin' on Some Brass
@@ -4098,7 +4098,7 @@ acts:
     Funktet, brings a fresh perspective to the second line tradition.
     The collective has quickly earned a reputation for high-energy
     sets on Frenchmen Street and beyond.
-  about_source: researched
+  about_source: https://smokinonsomebrass.com/
   websites:
   - https://smokinonsomebrass.com/
 - name: New Birth Brass Band
@@ -4179,7 +4179,7 @@ acts:
     lineup of up to ten members delivers a wall of sound that's bigger
     and bolder than most brass bands. Regulars at Sunday afternoon
     second line parades and jazz funerals across the city.
-  about_source: researched
+  about_source: http://www.hot8brassband.com/
   websites:
   - http://www.hot8brassband.com/
 - name: ANTWIGADEE!
@@ -4212,7 +4212,7 @@ acts:
     mentorship. Their adventurous sound fuses Louisiana roots with
     rock, funk, soul, hip-hop, and Caribbean rhythms. A second Grammy
     nomination followed for 'Second Line Sunday.'
-  about_source: researched
+  about_source: https://www.newbreedbrassband.com/
   websites:
   - https://www.newbreedbrassband.com/
 - name: Andy J Forest Treeaux
@@ -4229,7 +4229,7 @@ acts:
     Blue Bland, and Champion Jack Dupree. Beyond music, he's a
     published novelist and outsider artist whose paintings depict
     blues and jazz legends.
-  about_source: researched
+  about_source: https://andyjforestmusic.com/
   websites:
   - https://andyjforestmusic.com/
 - name: Luke Allen
@@ -4246,7 +4246,7 @@ acts:
     local club circuit and festival scene, Allen brings literary
     songcraft and understated charisma to the Entergy Songwriter
     Stage.
-  about_source: researched
+  about_source: https://lukespurrallen.com/
   websites:
   - https://lukespurrallen.com/
 - name: Justin Garner
@@ -4263,7 +4263,7 @@ acts:
     sung the National Anthem for the Saints, Giants, Spurs, and
     Chiefs, and in 2026 will perform at both French Quarter Fest and
     a Jazz Fest tribute to Frankie Beverly & Maze.
-  about_source: researched
+  about_source: https://www.justingarner.com/
   websites:
   - https://www.justingarner.com/
 - name: Bobbi Rae
@@ -4281,7 +4281,7 @@ acts:
     released the collaboration 'Nobody Knows' with MacInfinity.
     Her live performances fuse inspirational energy with razor-sharp
     vocal precision.
-  about_source: researched
+  about_source: https://therealbobbirae.com/
   websites:
   - https://therealbobbirae.com/
 - name: Cristina Kaminis
@@ -4298,7 +4298,7 @@ acts:
     with bolero, samba, ranchera, and Great American Songbook
     standards. Her debut album 'Temperance' reflects the many
     cultural layers of her music and life.
-  about_source: researched
+  about_source: https://www.cristinakaminismusic.com/
   websites:
   - https://www.cristinakaminismusic.com/
 - name: Bamboula 2000
@@ -4315,7 +4315,7 @@ acts:
     Group three times and been nominated eight more. The group also
     reaches thousands of children annually through their 'Imagination
     Tour' drum and dance workshops.
-  about_source: researched
+  about_source: http://www.bamboula2000.com/
   websites:
   - http://www.bamboula2000.com/
 - name: Anaïs St. John
@@ -4365,7 +4365,7 @@ acts:
     Tuba Skinny), giving the traditional cumbia sound a uniquely NOLA
     twist. Their monthly cumbia dance party at the Saturn Bar is
     one of the hottest tickets in town.
-  about_source: researched
+  about_source: https://losguiros.com/
   websites:
   - https://losguiros.com/
   - https://losguiros.bandcamp.com/
@@ -4402,7 +4402,7 @@ acts:
     Quarter streets with Bach's Cello Suites. Her critically acclaimed
     album 'Vari-Colored Songs' adapts Langston Hughes poems alongside
     Haitian folk songs and originals.
-  about_source: researched
+  about_source: https://leylamccalla.com/
   websites:
   - https://leylamccalla.com/
 - name: Jenna McSwain Jazz Band
@@ -4420,7 +4420,7 @@ acts:
     classic and contemporary jazz, Brazilian music, and progressive
     rock with her band Bionica. She has opened for Patti Austin and
     Ramsey Lewis.
-  about_source: researched
+  about_source: https://jennamcswain.com/
   websites:
   - https://jennamcswain.com/
 - name: Jeanne Marie Harris
@@ -4437,7 +4437,7 @@ acts:
     Orleans. She performs with acclaimed ensembles including the Shim
     Sham Band and the Nola Dukes, breathing new life into beloved
     standards in both trio and full-band settings.
-  about_source: researched
+  about_source: https://jeanne-mariemusic.com/
   websites:
   - https://jeanne-mariemusic.com/
 - name: Gerald French & The Original Tuxedo Jazz Band
@@ -4454,7 +4454,7 @@ acts:
     his grandfather Albert 'Papa' French. An accomplished drummer
     and vocalist, Gerald has shared the stage with Dr. John, Harry
     Connick Jr., and Preservation Hall Jazz Band.
-  about_source: researched
+  about_source: https://www.geraldfrench.com/
   websites:
   - https://www.geraldfrench.com/
 - name: Smoking Time Jazz Club
@@ -4472,7 +4472,7 @@ acts:
     running weekly gigs at the Spotted Cat and The Maison, and has
     recorded over 90 tracks. Nominated by Offbeat for Best
     Traditional Jazz Band.
-  about_source: researched
+  about_source: http://www.smokingtimejazzclub.com/
   websites:
   - http://www.smokingtimejazzclub.com/
 - name: Charlie Halloran and the Tropicales
@@ -4490,7 +4490,7 @@ acts:
     New Orleans' history as the northernmost Caribbean port. Their
     2024 album 'Jump Up' features guest vocalists Cyrille Aimee
     and Quiana Lynell.
-  about_source: researched
+  about_source: https://www.charliehalloran.com/
   websites:
   - https://www.charliehalloran.com/
 - name: The New Orleans Swinging Gypsies
@@ -4507,7 +4507,7 @@ acts:
     is tap dancer Giselle Anguizola, whose percussive flamenco-
     flavored footwork adds a visual and rhythmic dimension that sets
     the band apart on the festival circuit.
-  about_source: researched
+  about_source: https://swinginggypsies.com/
   websites:
   - https://swinginggypsies.com/
 - name: Sullivan Dabney's Muzik Jazz Band
@@ -4540,7 +4540,7 @@ acts:
     band's acoustic string instrumentation evoke the hot jazz and
     swing of the 1930s while keeping things fresh for contemporary
     audiences on Frenchmen Street and beyond.
-  about_source: researched
+  about_source: https://www.russellwelch.com/
   websites:
   - https://www.russellwelch.com/
 - name: Mayumi Shara & New Orleans Jazz Letters
@@ -4557,7 +4557,7 @@ acts:
     blues band Pink Magnolias and Taiko drum ensemble MaDeTo. Her
     cross-cultural approach to traditional jazz brings a unique
     perspective to the New Orleans scene.
-  about_source: researched
+  about_source: https://about.me/mayumishara
   websites:
   - https://about.me/mayumishara
 - name: Jade Perdue
@@ -4575,7 +4575,7 @@ acts:
     jazz, blues, and funk with the Arrowhead Jazz Band. She regularly
     shares the bandstand with Herlin Riley and Nicholas Payton at the
     New Orleans Jazz Museum.
-  about_source: researched
+  about_source: https://www.jadesantrell.com/
   websites:
   - https://www.jadesantrell.com/
 - name: Tom Saunders and the Hotcats
@@ -4605,7 +4605,7 @@ acts:
     music, show tunes, and pop. A product of NOCCA, she entertains
     as a solo act or with a jazz combo, bringing an intimate
     cocktail-lounge vibe to the Voodoo Garden.
-  about_source: researched
+  about_source: https://www.sophiaparigi.com/
   websites:
   - https://www.sophiaparigi.com/
 - name: Sean Riley
@@ -4622,7 +4622,7 @@ acts:
     touring extensively in Europe and Australia as well. His debut
     full-length 'Stone Cold Hands' established him as a distinctive
     voice in the modern Southern blues tradition.
-  about_source: researched
+  about_source: https://www.seanrileyandthewater.com/
   websites:
   - https://www.seanrileyandthewater.com/
 - name: Craig Klein's New Orleans Allstars
@@ -4639,7 +4639,7 @@ acts:
     and Bonerama, he assembles his Allstars from the cream of the
     city's jazz talent for a set rooted in the traditional New
     Orleans sound.
-  about_source: researched
+  about_source: https://www.craigkleinmusic.com/
   websites:
   - https://www.craigkleinmusic.com/
 - name: Matt Lemmler presents 'New Orleans in Stride'
@@ -4657,7 +4657,7 @@ acts:
     home to play with Bob French's Original Tuxedo Jazz Band and
     Pete Fountain. It took Hurricane Katrina for him to share his
     soulful singing voice with the world.
-  about_source: researched
+  about_source: https://www.mattlemmler.com/
   websites:
   - https://www.mattlemmler.com/
 - name: Crescent City Sisters
@@ -4690,7 +4690,7 @@ acts:
     Loyola's music program, Ford is one of the foremost practitioners
     of traditional jazz clarinet and performs regularly at
     Preservation Hall.
-  about_source: researched
+  about_source: https://fordmusicproductions.com/
   websites:
   - https://fordmusicproductions.com/
 - name: Arrowhead Jazz Band feat. NPS Rangers et al.
@@ -4707,7 +4707,7 @@ acts:
     Kerry Lewis Sr., and Hunter Miles Davis anchor the band, with
     special guests rotating through for each performance. A free,
     living expression of the park's mission to celebrate jazz.
-  about_source: researched
+  about_source: https://home.nps.gov/jazz/learn/arrowhead-jazz-band.htm
   websites:
   - https://home.nps.gov/jazz/learn/arrowhead-jazz-band.htm
 - name: Greater New Orleans Youth Orchestras
@@ -4800,7 +4800,7 @@ acts:
     roots, she defies the trad jazz category with inflections of
     reggae, funk, and soul. She is also proprietor of the popular
     Three Muses restaurant and music club.
-  about_source: researched
+  about_source: https://misssophielee.com/
   websites:
   - https://misssophielee.com/
 - name: Mark Brooks
@@ -4817,7 +4817,7 @@ acts:
     and Fats Domino's band. His film and TV credits include Clint
     Eastwood's Bridges of Madison County, the Ray Charles biopic,
     HBO's Roots, and Interview with the Vampire.
-  about_source: researched
+  about_source: https://markabrooks.net/
   websites:
   - https://markabrooks.net/
 - name: New Orleans High Society
@@ -4833,7 +4833,7 @@ acts:
     influences. Their contemporary sensibility keeps the traditional
     jazz sound vital and danceable for audiences who appreciate both
     deep history and creative reinterpretation.
-  about_source: researched
+  about_source: https://nohighsociety.com/
   websites:
   - https://nohighsociety.com/
 - name: Jason Mingledorff
@@ -4850,7 +4850,7 @@ acts:
     teaches saxophone and conducts the jazz workshop at Loyola
     University. His 2023 debut solo album 'Start It!' showcases
     nine original compositions of melodic, bluesy tenor saxophone.
-  about_source: researched
+  about_source: https://www.jasonmingledorff.com/
   websites:
   - https://www.jasonmingledorff.com/
 - name: Father Ron and Friends
@@ -4867,7 +4867,7 @@ acts:
     on bass, they balance polished musicianship with approachable
     charm. Their album 'Forever The Seasons' won a Bronze Medal at
     the Global Music Awards.
-  about_source: researched
+  about_source: https://www.fatherronandfriends.com/
   websites:
   - https://www.fatherronandfriends.com/
 - name: Sweetie Pies of New Orleans
@@ -4900,7 +4900,7 @@ acts:
     is the only one in New Orleans where all members are teachers,
     including two university professors. Their monthly shows at the
     Spotted Cat regularly draw lines down the street.
-  about_source: researched
+  about_source: https://twisteddixienola.com/
   websites:
   - https://twisteddixienola.com/
 - name: Capivaras Jazz Quartet
@@ -4931,7 +4931,7 @@ acts:
     without a drum kit. Braun's original 'I Hope You're Coming
     Back to New Orleans' was featured in HBO's Treme and included
     on the Grammy-nominated soundtrack.
-  about_source: researched
+  about_source: https://www.neworleansjazzvipers.com/
   websites:
   - https://www.neworleansjazzvipers.com/
 - name: Seva Venet's Traditional Line-Up
@@ -4949,7 +4949,7 @@ acts:
     Today he performs with Dr. Michael White, Greg Stafford's Jazz
     Hounds, and his own ensembles, and is a key figure in the Danny
     Barker Guitar and Banjo Festival.
-  about_source: researched
+  about_source: https://sevavenet.com/
   websites:
   - https://sevavenet.com/
 - name: Harry Mayronne & Chloe Marie
@@ -4966,7 +4966,7 @@ acts:
     name in indie folk and soul. Together, their intimate piano-and-
     voice format breathes new life into standards at cocktail bars
     like the Bombay Club.
-  about_source: researched
+  about_source: https://harrymayronne.com/
   websites:
   - https://harrymayronne.com/
 - name: Steamboat Willy
