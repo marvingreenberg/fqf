@@ -1,8 +1,6 @@
 """Schedule data and query functions."""
 
-# NOTE: The per-day Python files (thursday.py, friday.py, saturday.py, sunday.py)
-# are deprecated. The authoritative data source is src/fqf/data/fq2026_acts.yaml,
-# loaded via fqf.schedule.loader.
+# Data source: src/fqf/data/fq2026_acts.yaml, loaded via fqf.schedule.loader.
 
 from datetime import date, time
 

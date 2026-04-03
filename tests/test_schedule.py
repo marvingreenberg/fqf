@@ -14,10 +14,11 @@ from fqf.models import (
     t,
 )
 from fqf.schedule import SCHEDULE, at, get_by_slug, on, search
-from fqf.schedule.friday import FRIDAY_ACTS
-from fqf.schedule.saturday import SATURDAY_ACTS
-from fqf.schedule.sunday import SUNDAY_ACTS
-from fqf.schedule.thursday import THURSDAY_ACTS
+
+THURSDAY_ACTS = [a for a in SCHEDULE if a.date == THU]
+FRIDAY_ACTS = [a for a in SCHEDULE if a.date == FRI]
+SATURDAY_ACTS = [a for a in SCHEDULE if a.date == SAT]
+SUNDAY_ACTS = [a for a in SCHEDULE if a.date == SUN]
 
 EXPECTED_ACT_COUNT = 302
 EXPECTED_THURSDAY_COUNT = 47
