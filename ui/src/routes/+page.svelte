@@ -1,6 +1,10 @@
 <script lang="ts">
-    const APP_DESCRIPTION =
-        'This app is not associated with any public or private festival, but provides publicly available fest schedules for fest-goers\u2019 convenience.';
+    const APP_DESCRIPTION = `festschedule.org is not associated with any public or private festival.
+        It provides publicly available fest schedules for fest-goers\u2019
+        convenience. No login, no email, no personal data, no ads.
+        Just three magic "secret words" you have to remember if you
+        need to get your schedule on a different device.
+        You can share your schedule with someone by texting a link`;
 </script>
 
 <div
