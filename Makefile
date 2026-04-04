@@ -81,15 +81,17 @@ dev: ## Start API + UI dev servers with hot reload, open browser
 	  wait
 
 dev-firestore: ## Start dev with Firestore emulator
-	@echo "Starting Firestore emulator..."
-	@FIRESTORE_EMULATOR_HOST=localhost:8081 gcloud beta emulators firestore start --host-port=localhost:8081 &
-	@sleep 3
-	@trap 'kill 0 2>/dev/null; wait 2>/dev/null' EXIT; \
-	  FIRESTORE_EMULATOR_HOST=localhost:8081 uv run uvicorn fqf.api.app:create_app --factory --reload --port 8000 & \
+	@trap 'kill -9 0 2>/dev/null; wait 2>/dev/null' EXIT; \
+	  echo "Starting Firestore emulator..."; \
+	  export FIRESTORE_EMULATOR_HOST=localhost:8081; \
+	   gcloud beta emulators \
+	    firestore start --host-port=localhost:8081 & \
+	  sleep 3; \
+	  uv run uvicorn fqf.api.app:create_app --factory --reload --port 8000 & \
 	  sleep 1; kill -0 $$! 2>/dev/null || { echo "ERROR: API server failed to start"; exit 1; }; \
 	  pnpm --dir ui dev & \
 	  for i in 1 2 3 4 5 6 7 8 9 10; do curl -s http://localhost:5173 >/dev/null 2>&1 && break; sleep 1; done; \
-	  open http://localhost:5173; \
+	  echo "Connect to  http://localhost:5173"; \
 	  wait
 
 # ── Docker ─────────────────────────────────────────────────────────────
