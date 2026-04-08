@@ -71,7 +71,6 @@
         {picks}
         maybes={new Set()}
         readOnly={true}
-        title="{ownerName}'s Schedule"
         viewTabs={VIEW_TABS}
         loadAllForModes={LOAD_ALL_FOR_MODES}
     />

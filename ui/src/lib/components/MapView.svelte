@@ -32,12 +32,21 @@
         picks: Set<string>;
         selectedDate: string;
         stageLocations: Map<string, { lat: number; lng: number }>;
+        big?: boolean;
         onActDetail?: (act: ActSummary) => void;
         onDayChange?: (date: string) => void;
     }
 
-    let { acts, allActs, picks, selectedDate, stageLocations, onActDetail, onDayChange }: Props =
-        $props();
+    let {
+        acts,
+        allActs,
+        picks,
+        selectedDate,
+        stageLocations,
+        big = false,
+        onActDetail,
+        onDayChange
+    }: Props = $props();
 
     const SCRUBBER_START = GRID_START_HOUR * MINUTES_PER_HOUR;
     const SCRUBBER_END = GRID_END_HOUR * MINUTES_PER_HOUR;
@@ -193,7 +202,7 @@
         {#if appState.mapMode === 'scroll'}
             <div class="flex items-center gap-3">
                 <span
-                    class="text-sm font-semibold shrink-0"
+                    class="fqf-scrubber-time shrink-0"
                     style="color: var(--mg-purple-deep); min-width: 5.5rem;"
                 >
                     {timeLabel}
@@ -257,7 +266,7 @@
                             class="absolute"
                             style="left: calc({pos.x}% + {MARKER_OFFSET_REM}rem); top: calc({pos.y}% + {MARKER_OFFSET_REM}rem);"
                         >
-                            <StageMarker {status} {picks} {onActDetail} {allActs} />
+                            <StageMarker {status} {picks} {onActDetail} {allActs} {big} />
                         </div>
                     {/if}
                 {/each}
@@ -334,6 +343,7 @@
                             {borderStyle}
                             isPicked={!actIsMaybe}
                             isMaybe={actIsMaybe}
+                            {big}
                             title={markerLabel(marker.order, marker.act)}
                             onclick={(e) => {
                                 e.stopPropagation();

@@ -27,8 +27,8 @@ test.describe('Share flow', () => {
         // Wait for acts to load as a proxy for "confirmed" state
         await expect(page.getByText(MOCK_ACTS[0].name)).toBeVisible({ timeout: 10_000 });
 
-        // Avatar button has aria-label="Identity menu"
-        await expect(page.getByRole('button', { name: 'Identity menu' })).toBeVisible();
+        // Avatar button has aria-label="Settings menu"
+        await expect(page.getByRole('button', { name: 'Settings menu' })).toBeVisible();
     });
 
     test('generate share link produces a URL containing share=', async ({ page }) => {
@@ -36,7 +36,7 @@ test.describe('Share flow', () => {
         await expect(page.getByText(MOCK_ACTS[0].name)).toBeVisible({ timeout: 10_000 });
 
         // Open avatar menu
-        await page.getByRole('button', { name: 'Identity menu' }).click();
+        await page.getByRole('button', { name: 'Settings menu' }).click();
 
         // Click the "Share my schedule" button inside the menu
         await page.getByRole('button', { name: 'Share my schedule' }).click();

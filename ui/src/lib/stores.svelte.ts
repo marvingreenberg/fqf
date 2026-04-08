@@ -25,6 +25,15 @@ const SAVE_AFTER_CHANGES = 4;
 const SAVE_DEBOUNCE_MS = 5_000;
 const SAVED_FLASH_MS = 2_000;
 
+const DISPLAY_PREFS_KEY = 'fqf:display-prefs:v1';
+
+export type LayoutKind = 'mobile' | 'desktop';
+
+interface StoredDisplayPrefs {
+    mobile?: boolean;
+    desktop?: boolean;
+}
+
 interface StoredIdentity {
     token: string;
     name: string;
@@ -64,6 +73,13 @@ class AppState {
     isOnline = $state<boolean>(true);
     saveError = $state<boolean>(false);
     savedFlash = $state<boolean>(false);
+
+    // Display sizing preference, persisted per-layout in localStorage.
+    // Mobile defaults Big (more readable in the field); desktop defaults Small
+    // (more density on a wide screen). Each is independent — toggling one
+    // never touches the other.
+    displayBigMobile = $state<boolean>(true);
+    displayBigDesktop = $state<boolean>(false);
 
     private _saveTimeout: ReturnType<typeof setTimeout> | null = null;
     private _unsavedChanges = 0;
@@ -111,6 +127,36 @@ class AppState {
                 // Corrupt — ignore
             }
         }
+        this._loadDisplayPrefs();
+    }
+
+    private _loadDisplayPrefs(): void {
+        if (typeof localStorage === 'undefined') return;
+        const raw = localStorage.getItem(DISPLAY_PREFS_KEY);
+        if (!raw) return;
+        try {
+            const prefs = JSON.parse(raw) as StoredDisplayPrefs;
+            if (typeof prefs.mobile === 'boolean') this.displayBigMobile = prefs.mobile;
+            if (typeof prefs.desktop === 'boolean') this.displayBigDesktop = prefs.desktop;
+        } catch {
+            // Corrupt prefs — keep defaults
+        }
+    }
+
+    private _saveDisplayPrefs(): void {
+        if (typeof localStorage === 'undefined') return;
+        const prefs: StoredDisplayPrefs = {
+            mobile: this.displayBigMobile,
+            desktop: this.displayBigDesktop
+        };
+        localStorage.setItem(DISPLAY_PREFS_KEY, JSON.stringify(prefs));
+    }
+
+    /** Set the Big/Small preference for one layout, persisting independently. */
+    setDisplayBig(layout: LayoutKind, value: boolean): void {
+        if (layout === 'mobile') this.displayBigMobile = value;
+        else this.displayBigDesktop = value;
+        this._saveDisplayPrefs();
     }
 
     /** Read cached acts for a date from localStorage, or null if absent/stale. */
@@ -199,14 +245,16 @@ class AppState {
 
         // Restore persisted shared schedules from the API response
         if (resp.shares && resp.shares.length > 0) {
+            const ownShare = resp.share_id || undefined;
             const loaded = await Promise.allSettled(
                 resp.shares.map(async (ref: ShareRef) => {
-                    const shared = await loadSharedSchedule(ref.share_id);
+                    const shared = await loadSharedSchedule(ref.share_id, ownShare);
                     return {
                         share_id: ref.share_id,
                         name: ref.name || shared.name,
                         picks: shared.picks,
-                        acts: shared.acts
+                        acts: shared.acts,
+                        shared_back: shared.has_back_share ?? undefined
                     };
                 })
             );

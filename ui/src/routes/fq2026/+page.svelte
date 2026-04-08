@@ -60,7 +60,6 @@
     picks={appState.picks}
     maybes={appState.maybes}
     readOnly={false}
-    title="FQF 2026 Schedule Builder"
     viewTabs={VIEW_TABS}
     loadAllForModes={LOAD_ALL_FOR_MODES}
     actFilter={(a) => appState.isActVisible(a)}

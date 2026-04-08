@@ -9,10 +9,25 @@
     import { timeToMinutes, getWorstConflict } from '$lib/conflict';
     import ActBlock from './ActBlock.svelte';
 
+    // Big mode bumps the stage column min-width and the visibility thresholds
+    // so the larger fonts don't trip the existing truncation/clipping logic.
+    // Vertical density (PIXELS_PER_MINUTE) intentionally stays the same so the
+    // overall scroll length of the grid doesn't shift.
+    const BIG_COLUMN_MIN_WIDTH = 180;
+    const BIG_MIN_HEIGHT_FOR_TIME = 60;
+    const BIG_MIN_HEIGHT_FOR_GENRE = 78;
+    const BIG_MIN_HEIGHT_FOR_CONFLICT = 84;
+    const BIG_PICK_BUTTON_SIZE = 18;
+    const SMALL_MIN_HEIGHT_FOR_TIME = 50;
+    const SMALL_MIN_HEIGHT_FOR_GENRE = 65;
+    const SMALL_MIN_HEIGHT_FOR_CONFLICT = 70;
+    const SMALL_PICK_BUTTON_SIZE = 14;
+
     interface Props {
         acts: ActSummary[];
         picks: Set<string>;
         maybes: Set<string>;
+        displayBig?: boolean;
         onTogglePick: (slug: string) => void;
         onToggleMaybe: (slug: string) => void;
         onActDetail: (act: ActSummary) => void;
@@ -23,11 +38,24 @@
         acts,
         picks,
         maybes,
+        displayBig = false,
         onTogglePick,
         onToggleMaybe,
         onActDetail,
         readOnly = false
     }: Props = $props();
+
+    const colMinWidth = $derived(displayBig ? BIG_COLUMN_MIN_WIDTH : GRID_COLUMN_MIN_WIDTH);
+    const minHeightForTime = $derived(
+        displayBig ? BIG_MIN_HEIGHT_FOR_TIME : SMALL_MIN_HEIGHT_FOR_TIME
+    );
+    const minHeightForGenre = $derived(
+        displayBig ? BIG_MIN_HEIGHT_FOR_GENRE : SMALL_MIN_HEIGHT_FOR_GENRE
+    );
+    const minHeightForConflict = $derived(
+        displayBig ? BIG_MIN_HEIGHT_FOR_CONFLICT : SMALL_MIN_HEIGHT_FOR_CONFLICT
+    );
+    const pickButtonSize = $derived(displayBig ? BIG_PICK_BUTTON_SIZE : SMALL_PICK_BUTTON_SIZE);
 
     const GRID_START_MINUTES = GRID_START_HOUR * 60;
     const GRID_END_MINUTES = GRID_END_HOUR * 60;
@@ -105,10 +133,7 @@
     <!-- Stage columns -->
     <div class="flex flex-1">
         {#each stageColumns as { stage, acts: stageActs }}
-            <div
-                class="shrink-0 border-r border-surface-200"
-                style="min-width: {GRID_COLUMN_MIN_WIDTH}px;"
-            >
+            <div class="shrink-0 border-r border-surface-200" style="min-width: {colMinWidth}px;">
                 <!-- Stage header: sticky top -->
                 <div
                     class="sticky top-0 z-10 h-14 flex items-center justify-center px-2
@@ -129,6 +154,10 @@
                             conflictLevel={conflictLevel(act)}
                             allActs={acts}
                             {picks}
+                            {minHeightForTime}
+                            {minHeightForGenre}
+                            {minHeightForConflict}
+                            {pickButtonSize}
                             onToggle={() => onTogglePick(act.slug)}
                             onToggleMaybe={() => onToggleMaybe(act.slug)}
                             onDetail={() => onActDetail(act)}

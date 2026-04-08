@@ -25,7 +25,11 @@ function resetState(): void {
     appState.hiddenStages = new Set();
     appState.showAll = false;
     appState.showSelected = false;
+    appState.displayBigMobile = true;
+    appState.displayBigDesktop = false;
 }
+
+const DISPLAY_PREFS_KEY = 'fqf:display-prefs:v1';
 
 // ---------------------------------------------------------------------------
 // picksArray getter
@@ -499,5 +503,78 @@ describe('toggleStage', () => {
         appState.hiddenStages = new Set(['Stage A']);
         appState.toggleStage('Stage A');
         expect(appState.hiddenStages.has('Stage A')).toBe(false);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Display preferences (setDisplayBig + load/save)
+// ---------------------------------------------------------------------------
+
+describe('display preferences', () => {
+    beforeEach(() => {
+        resetState();
+        localStorage.clear();
+    });
+
+    it('mobile defaults Big and desktop defaults Small', () => {
+        expect(appState.displayBigMobile).toBe(true);
+        expect(appState.displayBigDesktop).toBe(false);
+    });
+
+    it('setDisplayBig(mobile, false) writes the mobile flag and persists', () => {
+        appState.setDisplayBig('mobile', false);
+        expect(appState.displayBigMobile).toBe(false);
+        const raw = localStorage.getItem(DISPLAY_PREFS_KEY);
+        expect(raw).not.toBeNull();
+        const parsed = JSON.parse(raw!);
+        expect(parsed.mobile).toBe(false);
+        // Desktop default still persisted alongside.
+        expect(parsed.desktop).toBe(false);
+    });
+
+    it('setDisplayBig(desktop, true) does not affect mobile', () => {
+        appState.setDisplayBig('desktop', true);
+        expect(appState.displayBigMobile).toBe(true); // unchanged
+        expect(appState.displayBigDesktop).toBe(true);
+        const parsed = JSON.parse(localStorage.getItem(DISPLAY_PREFS_KEY)!);
+        expect(parsed.mobile).toBe(true);
+        expect(parsed.desktop).toBe(true);
+    });
+
+    it('loadFromStorage hydrates persisted display prefs', () => {
+        localStorage.setItem(DISPLAY_PREFS_KEY, JSON.stringify({ mobile: false, desktop: true }));
+        appState.loadFromStorage();
+        expect(appState.displayBigMobile).toBe(false);
+        expect(appState.displayBigDesktop).toBe(true);
+    });
+
+    it('loadFromStorage falls back to defaults on corrupt prefs JSON', () => {
+        localStorage.setItem(DISPLAY_PREFS_KEY, '{not json');
+        expect(() => appState.loadFromStorage()).not.toThrow();
+        expect(appState.displayBigMobile).toBe(true);
+        expect(appState.displayBigDesktop).toBe(false);
+    });
+
+    it('loadFromStorage ignores non-boolean fields', () => {
+        // A stored prefs blob from a future schema version that uses a string —
+        // we should leave the existing default in place rather than blindly
+        // assigning a non-boolean value.
+        localStorage.setItem(DISPLAY_PREFS_KEY, JSON.stringify({ mobile: 'big', desktop: 0 }));
+        appState.loadFromStorage();
+        expect(appState.displayBigMobile).toBe(true);
+        expect(appState.displayBigDesktop).toBe(false);
+    });
+
+    it('round-trips through localStorage independently per layout', () => {
+        appState.setDisplayBig('mobile', false);
+        appState.setDisplayBig('desktop', true);
+
+        // Simulate a fresh page load: clear in-memory state, hydrate from storage.
+        appState.displayBigMobile = true;
+        appState.displayBigDesktop = false;
+        appState.loadFromStorage();
+
+        expect(appState.displayBigMobile).toBe(false);
+        expect(appState.displayBigDesktop).toBe(true);
     });
 });

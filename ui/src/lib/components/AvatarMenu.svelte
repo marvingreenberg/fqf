@@ -1,14 +1,26 @@
 <script lang="ts">
     import { createShare, deleteSchedule } from '$lib/api';
-    import { appState } from '$lib/stores.svelte';
+    import { appState, type LayoutKind } from '$lib/stores.svelte';
 
-    const FLEUR = '⚜️';
     const SHARE_URL_BASE = '/fq2026';
+    const MOBILE_BREAKPOINT = 768;
 
     let open = $state(false);
     let shareUrl = $state<string | null>(null);
     let shareLoading = $state(false);
     let shareCopied = $state(false);
+
+    // Track viewport width so the Display Size toggle writes to the correct
+    // per-layout slot. Mirrors the same breakpoint used by ScheduleShell.
+    let innerWidth = $state(MOBILE_BREAKPOINT + 1);
+    const layout: LayoutKind = $derived(innerWidth < MOBILE_BREAKPOINT ? 'mobile' : 'desktop');
+    const isBig = $derived(
+        layout === 'mobile' ? appState.displayBigMobile : appState.displayBigDesktop
+    );
+
+    function setBig(value: boolean): void {
+        appState.setDisplayBig(layout, value);
+    }
 
     // Logout modal: shown after logout to remind the user of their token
     let logoutModalVisible = $state(false);
@@ -103,21 +115,36 @@
     }
 </script>
 
+<svelte:window bind:innerWidth />
+
 <div class="relative">
     <button
-        class="flex items-center gap-1.5 px-2 py-1 rounded-full transition-colors"
-        style="border: 1px solid rgba(212, 168, 67, 0.5); background: rgba(212, 168, 67, 0.1); color: var(--mg-gold-bright);"
+        class="fqf-avatar-button flex items-center gap-2"
         onclick={() => {
             open = !open;
         }}
-        aria-label="Identity menu"
+        aria-label="Settings menu"
         aria-expanded={open}
     >
-        <span aria-hidden="true">{FLEUR}</span>
-        <span
-            class="text-xs font-bold tracking-wide"
-            style="font-family: 'Courier New', monospace;"
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.25"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            class="fqf-avatar-gear"
         >
+            <circle cx="12" cy="12" r="3" />
+            <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+            />
+        </svg>
+        <span class="fqf-avatar-initials" style="font-family: 'Courier New', monospace;">
             {initials}
         </span>
     </button>
@@ -161,6 +188,38 @@
             </div>
 
             <div class="px-4 py-3 flex flex-col gap-2">
+                <!-- Display size — independent per layout (mobile/desktop) -->
+                <div class="flex flex-col gap-1">
+                    <p
+                        class="text-xs"
+                        style="color: rgba(74, 26, 107, 0.65); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;"
+                    >
+                        Display size
+                    </p>
+                    <div class="fqf-segmented" role="radiogroup" aria-label="Display size">
+                        <button
+                            type="button"
+                            class="fqf-segmented-option {!isBig ? 'fqf-segmented-active' : ''}"
+                            role="radio"
+                            aria-checked={!isBig}
+                            onclick={() => setBig(false)}
+                        >
+                            Small
+                        </button>
+                        <button
+                            type="button"
+                            class="fqf-segmented-option {isBig ? 'fqf-segmented-active' : ''}"
+                            role="radio"
+                            aria-checked={isBig}
+                            onclick={() => setBig(true)}
+                        >
+                            Big
+                        </button>
+                    </div>
+                </div>
+
+                <hr style="border-color: rgba(74, 26, 107, 0.12); margin: 0.25rem 0;" />
+
                 {#if shareUrl}
                     <div
                         class="rounded-lg p-2 text-xs break-all"

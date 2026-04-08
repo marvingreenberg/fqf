@@ -6,11 +6,16 @@
     import { initNetworkWatcher } from '$lib/network';
     import AvatarMenu from '$lib/components/AvatarMenu.svelte';
     import IdentityGate from '$lib/components/IdentityGate.svelte';
+    import HelpPanel from '$lib/components/HelpPanel.svelte';
 
     let { children } = $props();
 
     // Suppress the gate during initial async auto-confirm to prevent flash
     let initializing = $state(true);
+
+    // Help panel — hoisted from ScheduleShell so the (i) button can live in
+    // the top header next to the FQF 2026 brand.
+    let showHelp = $state(false);
 
     // Detect view-only share route — no identity gate needed
     const isViewOnlyRoute = $derived(
@@ -56,11 +61,34 @@
 {:else}
     <div class="min-h-screen flex flex-col">
         <header class="fqf-header shrink-0 px-4 py-3 flex items-center justify-between">
-            <div class="flex flex-col">
-                <a href="/" style="text-decoration: none;">
+            <div class="flex items-center gap-3 min-w-0">
+                <a href="/" style="text-decoration: none;" class="flex flex-col min-w-0">
                     <span class="fqf-header-title">FQF 2026</span>
+                    <span class="fqf-header-subtitle">Schedule Builder</span>
                 </a>
-                <span class="fqf-header-subtitle">Schedule Builder</span>
+                <button
+                    class="fqf-help-button shrink-0 flex items-center justify-center"
+                    onclick={() => (showHelp = true)}
+                    aria-label="About this app"
+                    title="About this app"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.25"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                    >
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="16" x2="12" y2="12" />
+                        <line x1="12" y1="8" x2="12.01" y2="8" />
+                    </svg>
+                </button>
             </div>
             <div class="flex items-center gap-3">
                 <!-- Network / save status indicators -->
@@ -144,4 +172,8 @@
         pendingShareId={appState.pendingShareId}
         pendingShareName={appState.pendingShareName}
     />
+{/if}
+
+{#if showHelp}
+    <HelpPanel onClose={() => (showHelp = false)} />
 {/if}

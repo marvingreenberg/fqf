@@ -3,13 +3,13 @@
     import type { Snippet } from 'svelte';
     import type { ActSummary, ActDetail, MobileSortMode } from '$lib/types';
     import { listActs, getAct, listStages } from '$lib/api';
+    import { appState } from '$lib/stores.svelte';
     import DayTabs from '$lib/components/DayTabs.svelte';
     import ScheduleGrid from '$lib/components/ScheduleGrid.svelte';
     import MobileSchedule from '$lib/components/MobileSchedule.svelte';
     import MySchedule from '$lib/components/MySchedule.svelte';
     import MapView from '$lib/components/MapView.svelte';
     import ActDetailModal from '$lib/components/ActDetailModal.svelte';
-    import HelpPanel from '$lib/components/HelpPanel.svelte';
 
     const MOBILE_BREAKPOINT = 768;
     const CACHE_TTL_MS = 10 * 60 * 1000;
@@ -32,8 +32,6 @@
         maybes: Set<string>;
         /** When true, toggle buttons are hidden and callbacks are no-ops. */
         readOnly: boolean;
-        /** Title shown in the controls bar. */
-        title: string;
         /** Tab definitions for the view mode switcher. */
         viewTabs: ViewTab[];
         /**
@@ -80,7 +78,6 @@
         picks,
         maybes,
         readOnly,
-        title,
         viewTabs,
         loadAllForModes,
         actFilter,
@@ -97,7 +94,6 @@
         { value: 'by-stage', label: 'By Stage' }
     ];
 
-    let showHelp = $state(false);
     let acts = $state<ActSummary[]>([]);
     let allActs = $state<ActSummary[]>([]);
     let allActsLoaded = $state(false);
@@ -108,6 +104,20 @@
     let stageLocations = $state(new Map<string, { lat: number; lng: number }>());
 
     const isMobile = $derived(innerWidth < MOBILE_BREAKPOINT);
+
+    // Display sizing — pulls the per-layout flag from appState. Mobile and
+    // desktop preferences are independent so flipping one never reflows the
+    // other.
+    const displayBig = $derived(isMobile ? appState.displayBigMobile : appState.displayBigDesktop);
+
+    // Mirror the layout + display flags onto <html> as data attributes so
+    // CSS in app.css can target them via attribute selectors. This is the only
+    // place we touch the document root.
+    $effect(() => {
+        if (typeof document === 'undefined') return;
+        document.documentElement.dataset.layout = isMobile ? 'mobile' : 'desktop';
+        document.documentElement.dataset.display = displayBig ? 'big' : 'small';
+    });
 
     // Apply the optional caller-supplied filter; fall back to all loaded acts.
     const displayActs = $derived(actFilter ? acts.filter(actFilter) : acts);
@@ -269,23 +279,19 @@
 
 <div class="flex flex-col h-full overflow-hidden">
     <header class="shrink-0 fqf-controls-bar px-4 py-2">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <h1 class="text-base font-semibold" style="color: var(--mg-gold-bright);">
-                    {title}
-                </h1>
+        <div class="flex items-center gap-1.5 flex-wrap">
+            {#each viewTabs as tab (tab.value)}
                 <button
-                    class="flex items-center justify-center w-5 h-5 rounded-full text-xs font-bold"
-                    style="background: rgba(212, 168, 67, 0.3); color: var(--mg-gold-bright); border: 1px solid rgba(212, 168, 67, 0.5);"
-                    onclick={() => (showHelp = true)}
-                    aria-label="Help"
-                    title="About this app"
+                    class="fqf-view-pill {viewMode === tab.value
+                        ? 'fqf-view-pill-active'
+                        : 'fqf-view-pill-inactive'}"
+                    onclick={() => (viewMode = tab.value)}
                 >
-                    ℹ
+                    {tab.label()}
                 </button>
-            </div>
+            {/each}
             {#if isMobile && viewMode === 'all-acts'}
-                <div class="flex gap-1">
+                <div class="flex gap-1 ml-auto">
                     {#each SORT_MODES as mode (mode.value)}
                         <button
                             class="fqf-sort-pill {mobileSortMode === mode.value
@@ -298,19 +304,6 @@
                     {/each}
                 </div>
             {/if}
-        </div>
-
-        <div class="flex gap-1.5 mt-2">
-            {#each viewTabs as tab (tab.value)}
-                <button
-                    class="fqf-view-pill {viewMode === tab.value
-                        ? 'fqf-view-pill-active'
-                        : 'fqf-view-pill-inactive'}"
-                    onclick={() => (viewMode = tab.value)}
-                >
-                    {tab.label()}
-                </button>
-            {/each}
         </div>
     </header>
 
@@ -340,6 +333,7 @@
                 {picks}
                 {selectedDate}
                 {stageLocations}
+                big={displayBig}
                 onActDetail={openDetail}
                 onDayChange={(d) => {
                     selectedDate = d;
@@ -367,6 +361,7 @@
                 acts={displayActs}
                 {picks}
                 {maybes}
+                {displayBig}
                 onTogglePick={(slug) => onTogglePick?.(slug)}
                 onToggleMaybe={(slug) => onToggleMaybe?.(slug)}
                 onActDetail={openDetail}
@@ -388,8 +383,4 @@
         onToggleMaybe={() => detailAct && onToggleMaybe?.(detailAct.slug)}
         onClose={closeDetail}
     />
-{/if}
-
-{#if showHelp}
-    <HelpPanel onClose={() => (showHelp = false)} />
 {/if}

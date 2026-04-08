@@ -10,12 +10,18 @@
         isMaybe: boolean;
         conflictColor: string;
         readOnly?: boolean;
+        /**
+         * Whether to render the stage chip next to the name. False when the
+         * surrounding view groups by stage (the group header carries the
+         * stage already), true otherwise.
+         */
+        showStage?: boolean;
         onTogglePick: (slug: string) => void;
         onToggleMaybe: (slug: string) => void;
         onActDetail: (act: ActSummary) => void;
-        /** Optional content below stage/time in the main info section (e.g. distance info) */
+        /** Optional content rendered as a second line under the main row (e.g. distance). */
         extraMain?: Snippet;
-        /** Optional content in the right column before the genre label (e.g. badges) */
+        /** Optional content rendered at the right edge of the second line (e.g. conflict badge). */
         extra?: Snippet;
     }
 
@@ -25,6 +31,7 @@
         isMaybe,
         conflictColor,
         readOnly = false,
+        showStage = true,
         onTogglePick,
         onToggleMaybe,
         onActDetail,
@@ -36,37 +43,45 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <div
-    class="fqf-list-row flex items-center gap-3 px-3 py-2.5 border-l-4"
+    class="fqf-list-row flex flex-col gap-1 px-3 py-2.5 border-l-4"
     style="border-left-color: {conflictColor};"
     onclick={() => onActDetail(act)}
 >
-    {#if !readOnly}
-        <PickButtons
-            {isPicked}
-            {isMaybe}
-            size={18}
-            onTogglePick={() => onTogglePick(act.slug)}
-            onToggleMaybe={() => onToggleMaybe(act.slug)}
-            ariaName={act.name}
-        />
-    {/if}
-
-    <div class="flex-1 min-w-0">
-        <p class="text-sm font-semibold truncate">{act.name}</p>
-        <p class="text-xs truncate" style="color: rgba(74, 26, 107, 0.5);">
-            {formatTime12(act.start)}&#8211;{formatTime12(act.end)} &middot; {act.stage}
-        </p>
-        {#if extraMain}
-            {@render extraMain()}
+    <div class="flex items-center gap-3 min-w-0">
+        {#if !readOnly}
+            <PickButtons
+                {isPicked}
+                {isMaybe}
+                size={18}
+                onTogglePick={() => onTogglePick(act.slug)}
+                onToggleMaybe={() => onToggleMaybe(act.slug)}
+                ariaName={act.name}
+            />
         {/if}
-    </div>
 
-    <div class="shrink-0 flex items-center gap-1.5">
-        {#if extra}
-            {@render extra()}
+        <p class="fqf-card-name flex-1 min-w-0 truncate">{act.name}</p>
+
+        {#if showStage}
+            <span class="fqf-card-stage-chip" title={act.stage}>{act.stage}</span>
         {/if}
-        <span class="text-xs italic" style="color: rgba(74, 26, 107, 0.45);">
-            {act.genre}
+
+        <span class="fqf-card-time shrink-0">
+            {formatTime12(act.start)}&#8211;{formatTime12(act.end)}
         </span>
     </div>
+
+    {#if extraMain || extra}
+        <div class="flex items-center gap-2 pl-7">
+            <div class="flex-1 min-w-0">
+                {#if extraMain}
+                    {@render extraMain()}
+                {/if}
+            </div>
+            {#if extra}
+                <div class="shrink-0">
+                    {@render extra()}
+                </div>
+            {/if}
+        </div>
+    {/if}
 </div>

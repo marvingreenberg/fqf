@@ -5,10 +5,6 @@
     import { formatTime12 } from '$lib/map-utils';
     import PickButtons from '$lib/components/PickButtons.svelte';
 
-    const MIN_HEIGHT_FOR_TIME = 50;
-    const MIN_HEIGHT_FOR_GENRE = 65;
-    const MIN_HEIGHT_FOR_CONFLICT_DETAIL = 70;
-
     interface Props {
         act: ActSummary;
         top: number;
@@ -18,6 +14,14 @@
         conflictLevel: ConflictLevel;
         allActs: ActSummary[];
         picks: Set<string>;
+        /** Minimum block height (px) at which to show the time range. */
+        minHeightForTime?: number;
+        /** Minimum block height (px) at which to show the genre. */
+        minHeightForGenre?: number;
+        /** Minimum block height (px) at which to show the conflict detail row. */
+        minHeightForConflict?: number;
+        /** Pick/Maybe button SVG size in px. */
+        pickButtonSize?: number;
         onToggle: () => void;
         onToggleMaybe: () => void;
         onDetail: () => void;
@@ -33,14 +37,18 @@
         conflictLevel,
         allActs,
         picks,
+        minHeightForTime = 50,
+        minHeightForGenre = 65,
+        minHeightForConflict = 70,
+        pickButtonSize = 14,
         onToggle,
         onToggleMaybe,
         onDetail,
         readOnly = false
     }: Props = $props();
 
-    const showTime = $derived(height > MIN_HEIGHT_FOR_TIME);
-    const showGenre = $derived(height > MIN_HEIGHT_FOR_GENRE);
+    const showTime = $derived(height > minHeightForTime);
+    const showGenre = $derived(height > minHeightForGenre);
 
     const blockClass = $derived.by(() => {
         let cls = 'fqf-act-block';
@@ -76,7 +84,7 @@
     });
 
     const showConflictDetail = $derived(
-        height > MIN_HEIGHT_FOR_CONFLICT_DETAIL &&
+        height > minHeightForConflict &&
             isPicked &&
             conflictLevel !== 'none' &&
             worstConflictAct !== null
@@ -97,21 +105,25 @@
                 <PickButtons
                     {isPicked}
                     {isMaybe}
-                    size={14}
+                    size={pickButtonSize}
                     onTogglePick={() => onToggle()}
                     onToggleMaybe={() => onToggleMaybe()}
                     ariaName={act.name}
                 />
             {/if}
             <div class="min-w-0 flex-1">
-                <p class="text-xs font-semibold leading-tight truncate">{act.name}</p>
+                <p class="fqf-block-name text-xs font-semibold leading-tight truncate">
+                    {act.name}
+                </p>
                 {#if showTime}
-                    <p class="text-xs opacity-60 mt-0.5">
+                    <p class="fqf-block-time text-xs opacity-60 mt-0.5">
                         {formatTime12(act.start)}&#8211;{formatTime12(act.end)}
                     </p>
                 {/if}
                 {#if showGenre}
-                    <p class="text-[9px] italic opacity-50 truncate">{act.genre}</p>
+                    <p class="fqf-block-genre text-[9px] italic opacity-50 truncate">
+                        {act.genre}
+                    </p>
                 {/if}
             </div>
         </div>

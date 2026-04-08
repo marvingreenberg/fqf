@@ -115,12 +115,14 @@
             </span>
         </div>
 
-        <p class="text-sm mb-3 flex items-center gap-1.5" style="color: rgba(74, 26, 107, 0.55);">
+        <p class="fqf-card-time mb-3 flex items-center gap-1.5">
             {act.stage} &middot; {formatTime12(act.start)}&#8211;{formatTime12(act.end)}
         </p>
 
-        <p class="text-sm leading-relaxed">
-            {act.about || 'No bio available yet.'}
-        </p>
+        <div class="fqf-bio-body-scroll">
+            <p class="fqf-bio-body">
+                {act.about || 'No bio available yet.'}
+            </p>
+        </div>
     {/if}
 </Modal>

@@ -15,10 +15,11 @@
         status: StageStatus;
         picks: Set<string>;
         allActs: ActSummary[];
+        big?: boolean;
         onActDetail?: (act: ActSummary) => void;
     }
 
-    let { status, picks, allActs, onActDetail }: Props = $props();
+    let { status, picks, allActs, big = false, onActDetail }: Props = $props();
 
     const showNext = $derived(
         !status.current ||
@@ -62,6 +63,7 @@
         {borderStyle}
         isPicked={isPicked || isMaybeAct}
         isMaybe={isMaybeAct}
+        {big}
         onclick={(e) => {
             e.stopPropagation();
             onActDetail?.(displayAct);

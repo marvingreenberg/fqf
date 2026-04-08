@@ -88,6 +88,7 @@
                 isMaybe={maybes.has(act.slug)}
                 conflictColor={conflictColor(act)}
                 {readOnly}
+                showStage={sortMode === 'by-time'}
                 {onTogglePick}
                 {onToggleMaybe}
                 {onActDetail}

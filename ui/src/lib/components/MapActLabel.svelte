@@ -2,8 +2,9 @@
     import type { Snippet } from 'svelte';
     import { FLEUR_PATH, QUESTION_PATH } from '$lib/constants';
 
-    const FLEUR_SIZE = 14;
     const FLEUR_VIEWBOX = '0 0 16 16';
+    const SMALL_FLEUR_SIZE = 14;
+    const BIG_FLEUR_SIZE = 20;
     const PICKED_BG = 'background: #e8f5e9;';
     const UNPICKED_BG = 'background: #f0f0f0;';
 
@@ -14,6 +15,7 @@
         isPicked?: boolean;
         isMaybe?: boolean;
         title?: string;
+        big?: boolean;
         prefix?: Snippet;
         postfix?: Snippet;
         onclick?: (e: MouseEvent) => void;
@@ -26,12 +28,14 @@
         isPicked = false,
         isMaybe = false,
         title = '',
+        big = false,
         prefix,
         postfix,
         onclick
     }: Props = $props();
 
     const iconPath = $derived(isMaybe ? QUESTION_PATH : FLEUR_PATH);
+    const fleurSize = $derived(big ? BIG_FLEUR_SIZE : SMALL_FLEUR_SIZE);
     const cardStyle = $derived(borderStyle + ' ' + (isPicked ? PICKED_BG : UNPICKED_BG));
 </script>
 
@@ -41,18 +45,15 @@
     <div class="fqf-map-marker fqf-map-act-row flex items-center gap-1" style={cardStyle}>
         <svg
             class="shrink-0"
-            width={FLEUR_SIZE}
-            height={FLEUR_SIZE}
+            width={fleurSize}
+            height={fleurSize}
             viewBox={FLEUR_VIEWBOX}
             aria-hidden="true"
         >
             <path d={iconPath} fill={fleurFill} />
         </svg>
         {#if prefix}{@render prefix()}{/if}
-        <span
-            class="text-[10px] font-medium truncate"
-            style="max-width: 120px; color: var(--mg-text);"
-        >
+        <span class="fqf-map-label truncate" style="color: var(--mg-text);">
             {name}
         </span>
         {#if postfix}{@render postfix()}{/if}

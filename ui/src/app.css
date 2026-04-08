@@ -103,6 +103,93 @@ h3,
     transition: background 0.15s ease;
 }
 
+.fqf-help-button {
+    width: 1.85rem;
+    height: 1.85rem;
+    border-radius: 9999px;
+    color: var(--mg-gold-bright);
+    background: rgba(212, 168, 67, 0.18);
+    border: 1.5px solid rgba(212, 168, 67, 0.6);
+    transition:
+        background 0.15s ease,
+        transform 0.15s ease;
+}
+
+.fqf-help-button:hover {
+    background: rgba(212, 168, 67, 0.32);
+    transform: scale(1.05);
+}
+
+/* ── Avatar / settings button ────────────────────────────────────────────── */
+.fqf-avatar-button {
+    padding: 0.35rem 0.75rem 0.35rem 0.6rem;
+    border-radius: 9999px;
+    border: 2px solid var(--mg-gold-bright);
+    background: rgba(212, 168, 67, 0.2);
+    color: var(--mg-gold-bright);
+    box-shadow: 0 0 0 1px rgba(74, 26, 107, 0.35);
+    transition:
+        background 0.15s ease,
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.fqf-avatar-button:hover {
+    background: rgba(212, 168, 67, 0.32);
+    transform: scale(1.04);
+    box-shadow: 0 0 0 1px rgba(74, 26, 107, 0.55);
+}
+
+.fqf-avatar-gear {
+    color: var(--mg-green);
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.4));
+    flex-shrink: 0;
+}
+
+.fqf-avatar-initials {
+    /* Unconditional 100% increase from the previous text-xs sizing. */
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1;
+}
+
+/* ── Segmented (Small/Big) toggle in the avatar drawer ──────────────────── */
+.fqf-segmented {
+    display: flex;
+    border: 1.5px solid rgba(74, 26, 107, 0.25);
+    border-radius: 9999px;
+    overflow: hidden;
+    background: rgba(74, 26, 107, 0.04);
+}
+
+.fqf-segmented-option {
+    flex: 1;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(74, 26, 107, 0.55);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition:
+        background 0.15s ease,
+        color 0.15s ease;
+}
+
+.fqf-segmented-option:hover {
+    background: rgba(74, 26, 107, 0.06);
+}
+
+.fqf-segmented-active {
+    background: linear-gradient(135deg, var(--mg-purple) 0%, var(--mg-purple-deep) 100%);
+    color: var(--mg-gold-bright);
+}
+
+.fqf-segmented-active:hover {
+    background: linear-gradient(135deg, var(--mg-purple) 0%, var(--mg-purple-deep) 100%);
+}
+
 .fqf-btn-switch:hover {
     background: rgba(212, 168, 67, 0.2);
 }
@@ -623,4 +710,147 @@ h3,
 
 .fqf-time-scrubber input[type='range'] {
     accent-color: var(--mg-green-deep);
+}
+
+/* ── Display-size scaling ────────────────────────────────────────────────── */
+/*
+ * Two data attributes on <html> drive font sizing across the app:
+ *   data-layout = "mobile" | "desktop"  (set by ScheduleShell from isMobile)
+ *   data-display = "small" | "big"      (set from displayBigMobile/displayBigDesktop)
+ *
+ * Default values below are the Small baseline. The :root[data-display='big']
+ * blocks override on a per-layout basis. Mobile big mode is the more dramatic
+ * step (≈1.5–2×); desktop big mode is a lighter touch (≈1.15–1.25×) since the
+ * by-stage grid uses fixed-pixel layout that can't grow without bound.
+ */
+
+.fqf-card-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.fqf-card-time {
+    font-size: 0.75rem;
+    color: rgba(74, 26, 107, 0.55);
+}
+
+.fqf-card-stage-chip {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 500;
+    padding: 0.05rem 0.4rem;
+    border-radius: 9999px;
+    background: rgba(74, 26, 107, 0.1);
+    color: rgba(74, 26, 107, 0.7);
+    max-width: 9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+.fqf-bio-body {
+    font-size: 0.875rem;
+    line-height: 1.55;
+}
+
+.fqf-bio-body-scroll {
+    max-height: 60vh;
+    overflow-y: auto;
+    /* Subtle inset shadows hint at scroll affordance */
+    mask-image: linear-gradient(
+        to bottom,
+        transparent 0,
+        black 0.5rem,
+        black calc(100% - 0.5rem),
+        transparent 100%
+    );
+}
+
+.fqf-map-label {
+    font-size: 10px;
+    font-weight: 500;
+    max-width: 120px;
+}
+
+.fqf-scrubber-time {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+/* ── Mobile big mode (the more dramatic increase) ───────────────────────── */
+:root[data-layout='mobile'][data-display='big'] .fqf-card-name {
+    font-size: 1.5rem;
+    line-height: 1.15;
+}
+:root[data-layout='mobile'][data-display='big'] .fqf-card-time {
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+:root[data-layout='mobile'][data-display='big'] .fqf-card-stage-chip {
+    font-size: 0.85rem;
+    padding: 0.1rem 0.55rem;
+    max-width: 12rem;
+}
+:root[data-layout='mobile'][data-display='big'] .fqf-bio-body {
+    font-size: 1.625rem;
+    line-height: 1.5;
+}
+:root[data-layout='mobile'][data-display='big'] .fqf-map-label {
+    font-size: 15px;
+    max-width: 160px;
+}
+:root[data-layout='mobile'][data-display='big'] .fqf-scrubber-time {
+    font-size: 1.25rem;
+}
+:root[data-layout='mobile'][data-display='big'] .fqf-view-pill {
+    font-size: 1rem;
+    padding: 0.4rem 1.05rem;
+}
+:root[data-layout='mobile'][data-display='big'] .fqf-day-tab {
+    font-size: 1.4rem;
+    padding: 0.6rem 1.5rem;
+}
+:root[data-layout='mobile'][data-display='big'] .fqf-sort-pill {
+    font-size: 1rem;
+    padding: 0.3rem 0.85rem;
+}
+:root[data-layout='mobile'][data-display='big'] .fqf-group-header {
+    font-size: 1rem;
+}
+
+/* ── Desktop big mode (lighter touch — grid layout has fixed-pixel constraints) */
+:root[data-layout='desktop'][data-display='big'] .fqf-card-name {
+    font-size: 1rem;
+}
+:root[data-layout='desktop'][data-display='big'] .fqf-card-time {
+    font-size: 0.85rem;
+}
+:root[data-layout='desktop'][data-display='big'] .fqf-bio-body {
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+:root[data-layout='desktop'][data-display='big'] .fqf-view-pill {
+    font-size: 0.95rem;
+    padding: 0.35rem 1rem;
+}
+:root[data-layout='desktop'][data-display='big'] .fqf-day-tab {
+    font-size: 1.15rem;
+}
+:root[data-layout='desktop'][data-display='big'] .fqf-scrubber-time {
+    font-size: 1rem;
+}
+:root[data-layout='desktop'][data-display='big'] .fqf-block-name {
+    font-size: 0.85rem;
+}
+:root[data-layout='desktop'][data-display='big'] .fqf-block-time {
+    font-size: 0.8rem;
+}
+:root[data-layout='desktop'][data-display='big'] .fqf-block-genre {
+    font-size: 0.7rem;
+}
+:root[data-layout='desktop'][data-display='big'] .fqf-stage-header {
+    font-size: 0.95rem;
 }
