@@ -71,16 +71,7 @@ export interface SharedScheduleResponse {
     name: string;
     picks: string[];
     acts: ActSummary[];
-}
-
-export interface MergeEntry {
-    token: string;
-    picks: string[];
-}
-
-export interface MergeResponse {
-    schedules: MergeEntry[];
-    acts: ActSummary[];
+    has_back_share?: boolean | null;
 }
 
 export interface SharedSchedule {
@@ -88,6 +79,11 @@ export interface SharedSchedule {
     name: string;
     picks: string[];
     acts: ActSummary[];
+    shared_back?: boolean;
+}
+
+export interface ShareBackResponse {
+    already_shared: boolean;
 }
 
 export type ConflictLevel = 'none' | 'yellow' | 'red';

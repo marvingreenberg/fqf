@@ -292,70 +292,7 @@ class TestLoadByShare:
         assert len(data["picks"]) == 2
         assert len(data["acts"]) == 1
 
-
-# ── GET /api/v1/schedule/merge ────────────────────────────────────────────────
-
-
-class TestMergeSchedules:
-    @pytest.mark.asyncio
-    async def test_returns_200_with_merged_schedules(self, client: AsyncClient) -> None:
-        schedules_map = {
-            FAKE_TOKEN: [REAL_SLUG_1],
-            OTHER_TOKEN: [REAL_SLUG_2],
-        }
-        with patch(
-            f"{DB_MODULE}.load_multiple_schedules", new=AsyncMock(return_value=schedules_map)
-        ):
-            resp = await client.get(MERGE_URL, params={"tokens": f"{FAKE_TOKEN},{OTHER_TOKEN}"})
-
-        assert resp.status_code == 200
-        data = resp.json()
-        assert len(data["schedules"]) == 2
-        assert len(data["acts"]) == 2
-
-    @pytest.mark.asyncio
-    async def test_missing_token_gets_empty_picks(self, client: AsyncClient) -> None:
-        schedules_map = {FAKE_TOKEN: [REAL_SLUG_1]}
-        with patch(
-            f"{DB_MODULE}.load_multiple_schedules", new=AsyncMock(return_value=schedules_map)
-        ):
-            resp = await client.get(MERGE_URL, params={"tokens": f"{FAKE_TOKEN},{OTHER_TOKEN}"})
-
-        data = resp.json()
-        assert len(data["schedules"]) == 2
-        missing = next(s for s in data["schedules"] if s["token"] == OTHER_TOKEN)
-        assert missing["picks"] == []
-
-    @pytest.mark.asyncio
-    async def test_returns_400_when_too_many_tokens(self, client: AsyncClient) -> None:
-        resp = await client.get(MERGE_URL, params={"tokens": TOO_MANY_TOKENS})
-        assert resp.status_code == 400
-
-    @pytest.mark.asyncio
-    async def test_schedule_entry_shape(self, client: AsyncClient) -> None:
-        schedules_map = {FAKE_TOKEN: [REAL_SLUG_1]}
-        with patch(
-            f"{DB_MODULE}.load_multiple_schedules", new=AsyncMock(return_value=schedules_map)
-        ):
-            resp = await client.get(MERGE_URL, params={"tokens": FAKE_TOKEN})
-
-        entry = resp.json()["schedules"][0]
-        assert "token" in entry
-        assert "picks" in entry
-
-    @pytest.mark.asyncio
-    async def test_empty_token_list_returns_empty(self, client: AsyncClient) -> None:
-        with patch(f"{DB_MODULE}.load_multiple_schedules", new=AsyncMock(return_value={})):
-            resp = await client.get(MERGE_URL, params={"tokens": ""})
-
-        assert resp.status_code == 200
-        data = resp.json()
-        assert data["schedules"] == []
-        assert data["acts"] == []
-
-
 # ── POST /api/v1/schedule/{token}/add-share ───────────────────────────────────
-
 
 class TestAddShare:
     @pytest.mark.asyncio

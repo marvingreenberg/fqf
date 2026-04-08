@@ -146,14 +146,21 @@
         refreshStatus = null;
         try {
             const { loadSharedSchedule } = await import('$lib/api');
+            const checkId = appState.ownShareId || undefined;
             let changed = false;
             const updated = await Promise.all(
                 appState.sharedSchedules.map(async (s) => {
-                    const resp = await loadSharedSchedule(s.share_id);
+                    const resp = await loadSharedSchedule(s.share_id, checkId);
                     const picksChanged =
                         JSON.stringify(resp.picks.sort()) !== JSON.stringify([...s.picks].sort());
                     if (picksChanged) changed = true;
-                    return { ...s, picks: resp.picks, acts: resp.acts, name: resp.name || s.name };
+                    return {
+                        ...s,
+                        picks: resp.picks,
+                        acts: resp.acts,
+                        name: resp.name || s.name,
+                        shared_back: resp.has_back_share ?? s.shared_back
+                    };
                 })
             );
             appState.sharedSchedules = updated;
@@ -167,33 +174,31 @@
             }, REFRESH_STATUS_DURATION_MS);
         }
     }
+
+    // Share back to another user
+    let sharingBackTo = $state<string | null>(null);
+
+    async function handleShareBack(shareId: string): Promise<void> {
+        if (!appState.ownShareId || !appState.name) return;
+        sharingBackTo = shareId;
+        try {
+            const { shareBack } = await import('$lib/api');
+            await shareBack(shareId, appState.ownShareId, appState.name);
+            appState.sharedSchedules = appState.sharedSchedules.map((s) =>
+                s.share_id === shareId ? { ...s, shared_back: true } : s
+            );
+        } catch {
+            // Silently fail — button remains visible for retry
+        } finally {
+            sharingBackTo = null;
+        }
+    }
 </script>
 
 <div class="flex flex-col overflow-y-auto h-full">
     <!-- Person toggles -->
     {#if allEntries.length > 0}
         <div class="shrink-0 px-3 py-2 border-b fqf-filter-panel flex flex-wrap items-center gap-3">
-            <!-- Refresh button -->
-            {#if appState.sharedSchedules.length > 0}
-                <button
-                    class="fqf-btn-outline text-xs py-1 px-2"
-                    onclick={handleRefresh}
-                    disabled={refreshing}
-                    title="Refresh shared schedules"
-                >
-                    {refreshing ? '⟳' : '↻'} Refresh
-                </button>
-                {#if refreshStatus}
-                    <span
-                        class="text-xs font-medium"
-                        style="color: {refreshStatus === 'Updated!'
-                            ? 'var(--mg-green-deep)'
-                            : 'rgba(74,26,107,0.5)'};"
-                    >
-                        {refreshStatus}
-                    </span>
-                {/if}
-            {/if}
             {#each allEntries as entry (entry.id)}
                 <div class="flex items-center gap-1.5">
                     <label class="flex items-center gap-1.5 cursor-pointer select-none">
@@ -233,9 +238,45 @@
                         >
                             ×
                         </button>
+                        {#if appState.ownShareId}
+                            {@const shared = appState.sharedSchedules.find(
+                                (s) => s.share_id === entry.id
+                            )}
+                            {#if shared && shared.shared_back !== true}
+                                <button
+                                    class="fqf-btn-outline text-xs py-0.5 px-1.5 leading-tight"
+                                    onclick={() => handleShareBack(entry.id)}
+                                    disabled={sharingBackTo === entry.id}
+                                    title="Add your schedule to {entry.label}'s shares"
+                                >
+                                    {sharingBackTo === entry.id ? '...' : '↗'} Share back
+                                </button>
+                            {/if}
+                        {/if}
                     {/if}
                 </div>
             {/each}
+            <!-- Refresh button -->
+            {#if appState.sharedSchedules.length > 0}
+                <button
+                    class="fqf-btn-outline text-xs py-0.5 px-1.5 leading-tight"
+                    onclick={handleRefresh}
+                    disabled={refreshing}
+                    title="Refresh shared schedules"
+                >
+                    {refreshing ? '⟳' : '↻'}
+                </button>
+                {#if refreshStatus}
+                    <span
+                        class="text-xs font-medium"
+                        style="color: {refreshStatus === 'Updated!'
+                            ? 'var(--mg-green-deep)'
+                            : 'rgba(74,26,107,0.5)'};"
+                    >
+                        {refreshStatus}
+                    </span>
+                {/if}
+            {/if}
         </div>
     {/if}
 

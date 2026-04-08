@@ -36,7 +36,7 @@
 
     <div class="fqf-dialog-body flex flex-col gap-4">
         <LoginForm
-            loadLabel="If you have an existing schedule, load it"
+            loadLabel="Load your existing schedule, to compare with {shareName}'s picks!"
             newLabel="Create a new schedule, to compare with {shareName}'s picks!"
             onConfirmed={attachShare}
         >

@@ -12,10 +12,10 @@ from fqf.api.schemas import (
     CreateScheduleRequest,
     FuzzyLookupRequest,
     FuzzyLookupResponse,
-    MergeEntry,
-    MergeResponse,
     ScheduleResponse,
     ScheduleUpdate,
+    ShareBackRequest,
+    ShareBackResponse,
     SharedScheduleResponse,
     ShareRef,
     ShareResponse,
@@ -26,7 +26,7 @@ from fqf.db import (
     create_schedule,
     create_share_id,
     delete_schedule,
-    load_multiple_schedules,
+    has_share_in_schedule,
     load_schedule,
     load_schedule_by_share,
     remove_share_from_schedule,
@@ -38,9 +38,7 @@ from fqf.tokens.fuzzy import fuzzy_resolve
 router = APIRouter(prefix="/api/v1/schedule", tags=["schedule"])
 
 NOT_FOUND_DETAIL = "Schedule not found"
-TOO_MANY_TOKENS_DETAIL = "Too many tokens"
 FUZZY_NO_MATCH_DETAIL = "No matching token found"
-MAX_MERGE_TOKENS = 5
 
 SHARE_PATH_PREFIX = "/s"
 
@@ -69,27 +67,8 @@ async def _build_schedule_response(token: str) -> ScheduleResponse:
     )
 
 
-# IMPORTANT: /merge, /fuzzy-lookup, and /by-share/... must be defined before /{token}
+# IMPORTANT: /fuzzy-lookup and /by-share/... must be defined before /{token}
 # to avoid those literal path segments being captured as a token parameter.
-@router.get("/merge", response_model=MergeResponse)
-async def merge(
-    _rl: _GlobalRateLimit,
-    tokens: str = Query(..., description="Comma-separated tokens"),
-) -> MergeResponse:
-    """Merge multiple schedules for comparison."""
-    token_list = [t.strip() for t in tokens.split(",") if t.strip()]
-    if len(token_list) > MAX_MERGE_TOKENS:
-        raise HTTPException(status_code=400, detail=TOO_MANY_TOKENS_DETAIL)
-
-    schedules_map = await load_multiple_schedules(token_list)
-    entries = [MergeEntry(token=tok, picks=schedules_map.get(tok, [])) for tok in token_list]
-
-    all_slugs = {slug for picks in schedules_map.values() for slug in picks}
-    acts = [s for slug in all_slugs if (s := _slug_to_summary(slug)) is not None]
-
-    return MergeResponse(schedules=entries, acts=acts)
-
-
 @router.post("/fuzzy-lookup", response_model=FuzzyLookupResponse)
 async def fuzzy_lookup(
     body: FuzzyLookupRequest,
@@ -114,14 +93,39 @@ async def fuzzy_lookup(
 
 
 @router.get("/by-share/{share_id}", response_model=SharedScheduleResponse)
-async def load_by_share(share_id: str, _rl: _GlobalRateLimit) -> SharedScheduleResponse:
+async def load_by_share(
+    share_id: str,
+    _rl: _GlobalRateLimit,
+    check_share_id: str | None = Query(
+        None, description="Check if this share_id is in target's shares"
+    ),
+) -> SharedScheduleResponse:
     """Load a read-only schedule view by its share_id."""
     result = await load_schedule_by_share(share_id)
     if result is None:
         raise HTTPException(status_code=404, detail=NOT_FOUND_DETAIL)
     _token, picks, name = result
     acts = [s for slug in picks if (s := _slug_to_summary(slug)) is not None]
-    return SharedScheduleResponse(name=name, picks=picks, acts=acts)
+    has_back: bool | None = None
+    if check_share_id is not None:
+        has_back = await has_share_in_schedule(share_id, check_share_id) or False
+    return SharedScheduleResponse(name=name, picks=picks, acts=acts, has_back_share=has_back)
+
+
+@router.post("/by-share/{share_id}/share-back", response_model=ShareBackResponse)
+async def share_back(
+    share_id: str, body: ShareBackRequest, _rl: _GlobalRateLimit
+) -> ShareBackResponse:
+    """Add the caller's share to another user's schedule, looked up by share_id."""
+    result = await load_schedule_by_share(share_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail=NOT_FOUND_DETAIL)
+    target_token = result[0]
+    already = await has_share_in_schedule(share_id, body.our_share_id)
+    if already:
+        return ShareBackResponse(already_shared=True)
+    await add_share_to_schedule(target_token, body.our_share_id, body.our_name)
+    return ShareBackResponse(already_shared=False)
 
 
 @router.post("", response_model=TokenResponse, status_code=201)

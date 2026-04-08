@@ -17,7 +17,6 @@ from fqf.db import (
     create_share_id,
     delete_schedule,
     init_pool,
-    load_multiple_schedules,
     load_schedule,
     load_schedule_by_share,
     remove_share_from_schedule,
@@ -346,30 +345,6 @@ class TestInMemorySavePicks:
         picks.append("mutated")
         assert db_module._memory_store[FAKE_TOKEN][PICKS_FIELD] == SAMPLE_PICKS
 
-
-class TestInMemoryLoadMultipleSchedules:
-    @pytest.mark.asyncio
-    async def test_returns_dict_keyed_by_token(self) -> None:
-        db_module._memory_store = {
-            FAKE_TOKEN: _mem_doc(list(SAMPLE_PICKS)),
-            ANOTHER_TOKEN: _mem_doc(list(ANOTHER_PICKS)),
-        }
-        result = await load_multiple_schedules([FAKE_TOKEN, ANOTHER_TOKEN])
-        assert result == {FAKE_TOKEN: SAMPLE_PICKS, ANOTHER_TOKEN: ANOTHER_PICKS}
-
-    @pytest.mark.asyncio
-    async def test_skips_missing_tokens(self) -> None:
-        db_module._memory_store = {FAKE_TOKEN: _mem_doc(list(SAMPLE_PICKS))}
-        result = await load_multiple_schedules([FAKE_TOKEN, "nope"])
-        assert result == {FAKE_TOKEN: SAMPLE_PICKS}
-
-    @pytest.mark.asyncio
-    async def test_returns_empty_dict_for_no_matches(self) -> None:
-        db_module._memory_store = {}
-        result = await load_multiple_schedules(["nope-a", "nope-b"])
-        assert result == {}
-
-
 # ── In-memory: create_share_id ────────────────────────────────────────────────
 
 
@@ -592,51 +567,6 @@ class TestFirestoreSavePicks:
 
         assert result is False
         doc_ref.update.assert_not_called()
-
-
-class TestFirestoreLoadMultipleSchedules:
-    @pytest.mark.asyncio
-    async def test_returns_dict_for_existing_tokens(self) -> None:
-        fake_client = MagicMock()
-        db_module._db = fake_client
-
-        docs = {
-            FAKE_TOKEN: _make_firestore_doc(exists=True, data={PICKS_FIELD: list(SAMPLE_PICKS)}),
-            ANOTHER_TOKEN: _make_firestore_doc(
-                exists=True, data={PICKS_FIELD: list(ANOTHER_PICKS)}
-            ),
-        }
-
-        def make_doc_ref(token: str) -> MagicMock:
-            doc_ref = MagicMock()
-            doc_ref.get.return_value = docs[token]
-            return doc_ref
-
-        fake_client.collection().document.side_effect = make_doc_ref
-
-        result = await load_multiple_schedules([FAKE_TOKEN, ANOTHER_TOKEN])
-        assert result == {FAKE_TOKEN: SAMPLE_PICKS, ANOTHER_TOKEN: ANOTHER_PICKS}
-
-    @pytest.mark.asyncio
-    async def test_skips_missing_tokens(self) -> None:
-        fake_client = MagicMock()
-        db_module._db = fake_client
-
-        missing_doc = _make_firestore_doc(exists=False)
-        fake_client.collection().document().get.return_value = missing_doc
-
-        result = await load_multiple_schedules(["nope-a"])
-        assert result == {}
-
-    @pytest.mark.asyncio
-    async def test_returns_empty_dict_for_empty_token_list(self) -> None:
-        fake_client = MagicMock()
-        db_module._db = fake_client
-
-        result = await load_multiple_schedules([])
-        assert result == {}
-        fake_client.collection.assert_not_called()
-
 
 # ── Firestore: create_share_id ────────────────────────────────────────────────
 

@@ -288,6 +288,32 @@ async def remove_share_from_schedule(token: str, share_id: str) -> bool:
     return True
 
 
+async def has_share_in_schedule(target_share_id: str, check_share_id: str) -> bool | None:
+    """Check if check_share_id is in the shares list of the schedule identified by target_share_id.
+
+    Returns True if present, False if not present, None if target not found.
+    """
+    if _using_memory():
+        assert _memory_store is not None
+        for _token, doc in _memory_store.items():
+            if doc.get(SHARE_ID_FIELD) == target_share_id:
+                shares: list[dict[str, str]] = doc.get(SHARES_FIELD, [])
+                return any(s[SHARE_ID_FIELD] == check_share_id for s in shares)
+        return None
+    assert _db is not None
+    results = (
+        _db.collection(SCHEDULES_COLLECTION)
+        .where(SHARE_ID_FIELD, "==", target_share_id)
+        .limit(1)
+        .get()
+    )
+    for doc in results:
+        data = doc.to_dict() or {}
+        fs_shares: list[dict[str, str]] = list(data.get(SHARES_FIELD, []))
+        return any(s[SHARE_ID_FIELD] == check_share_id for s in fs_shares)
+    return None
+
+
 async def delete_schedule(token: str) -> bool:
     """Delete a schedule entirely. Returns False if token not found."""
     if _using_memory():
@@ -302,18 +328,3 @@ async def delete_schedule(token: str) -> bool:
         return False
     doc_ref.delete()
     return True
-
-
-async def load_multiple_schedules(tokens: list[str]) -> dict[str, list[str]]:
-    """Load picks for multiple tokens at once."""
-    if _using_memory():
-        assert _memory_store is not None
-        return {t: list(_memory_store[t][PICKS_FIELD]) for t in tokens if t in _memory_store}
-    assert _db is not None
-    result: dict[str, list[str]] = {}
-    for token in tokens:
-        doc = _db.collection(SCHEDULES_COLLECTION).document(token).get()
-        if doc.exists:
-            data = doc.to_dict()
-            result[token] = list(data.get(PICKS_FIELD, [])) if data else []
-    return result

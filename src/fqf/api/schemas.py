@@ -135,17 +135,17 @@ class SharedScheduleResponse(BaseModel):
     name: str
     picks: list[str]
     acts: list[ActSummary]
+    has_back_share: bool | None = None
 
 
-class MergeEntry(BaseModel):
-    """One person's picks in a merge response."""
+class ShareBackRequest(BaseModel):
+    """Request body for sharing back to another user."""
 
-    token: str
-    picks: list[str]
+    our_share_id: str
+    our_name: str
 
 
-class MergeResponse(BaseModel):
-    """Response for merge endpoint."""
+class ShareBackResponse(BaseModel):
+    """Response from share-back operation."""
 
-    schedules: list[MergeEntry]
-    acts: list[ActSummary]
+    already_shared: bool

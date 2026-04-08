@@ -5,11 +5,11 @@ import type {
     ScheduleResponse,
     ScheduleUpdate,
     TokenResponse,
-    MergeResponse,
     StageListResponse,
     ShareResponse,
     SharedScheduleResponse,
-    ShareRef
+    ShareRef,
+    ShareBackResponse
 } from '$lib/types';
 
 const BASE = '/api/v1';
@@ -97,8 +97,24 @@ export async function createShare(token: string): Promise<ShareResponse> {
     return fetchJson<ShareResponse>(`${BASE}/schedule/${token}/share`, { method: 'POST' });
 }
 
-export async function loadSharedSchedule(shareId: string): Promise<SharedScheduleResponse> {
-    return fetchJson<SharedScheduleResponse>(`${BASE}/schedule/by-share/${shareId}`);
+export async function loadSharedSchedule(
+    shareId: string,
+    checkShareId?: string
+): Promise<SharedScheduleResponse> {
+    const params = checkShareId ? `?check_share_id=${encodeURIComponent(checkShareId)}` : '';
+    return fetchJson<SharedScheduleResponse>(`${BASE}/schedule/by-share/${shareId}${params}`);
+}
+
+export async function shareBack(
+    targetShareId: string,
+    ourShareId: string,
+    ourName: string
+): Promise<ShareBackResponse> {
+    return fetchJson<ShareBackResponse>(`${BASE}/schedule/by-share/${targetShareId}/share-back`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ our_share_id: ourShareId, our_name: ourName })
+    });
 }
 
 export async function addShareToSchedule(
@@ -126,10 +142,6 @@ export async function deleteSchedule(token: string): Promise<void> {
     if (!resp.ok) {
         throw new Error(`API error: ${resp.status} ${resp.statusText}`);
     }
-}
-
-export async function mergeSchedules(tokens: string[]): Promise<MergeResponse> {
-    return fetchJson<MergeResponse>(`${BASE}/schedule/merge?tokens=${tokens.join(',')}`);
 }
 
 export async function listStages(): Promise<StageListResponse> {
