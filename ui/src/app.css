@@ -702,6 +702,25 @@ h3,
     margin: 0 auto;
 }
 
+/*
+ * Map frame — a 200px gray strip on the right of the map image so labels
+ * positioned near the right edge of the map can extend horizontally without
+ * truncating. The image and percent-positioned markers live inside an inner
+ * positioning anchor that's still sized to the original map dimensions, so
+ * a marker at left:90% still lands at 90% of the *map*, not 90% of the frame.
+ * Absolute markers naturally overflow into the gutter.
+ */
+.fqf-map-frame {
+    background: #d4d4d8;
+    /* Outer frame is wider than the map by GUTTER_PX so the gray strip is
+       visible flush against the map's right edge. */
+}
+
+.fqf-map-positioning {
+    /* width = frame - gutter; left-aligned within the frame so the gray
+       strip sits on the right. */
+}
+
 /* ── Map time scrubber ──────────────────────────────────────────────────── */
 .fqf-time-scrubber {
     background: linear-gradient(180deg, rgba(26, 122, 74, 0.1) 0%, rgba(26, 122, 74, 0.05) 100%);
@@ -730,25 +749,36 @@ h3,
     line-height: 1.2;
 }
 
+/*
+ * Applied by the shrinkOnTruncate action when more than 60% of the name is
+ * hidden by ellipsis. Drops the font-size by ~25% so a longer prefix fits.
+ */
+.fqf-card-name.fqf-card-name-shrunk {
+    font-size: 0.75rem;
+}
+
 .fqf-card-time {
     font-size: 0.75rem;
     color: rgba(74, 26, 107, 0.55);
 }
 
+/*
+ * Stage chip — rendered on its own line below the name (not inline). Has
+ * a soft pill background for visual grouping; truncates with an ellipsis
+ * when the stage name is longer than the row.
+ */
 .fqf-card-stage-chip {
     display: inline-block;
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     font-weight: 500;
-    padding: 0.05rem 0.4rem;
+    padding: 0.1rem 0.55rem;
     border-radius: 9999px;
     background: rgba(74, 26, 107, 0.1);
     color: rgba(74, 26, 107, 0.7);
-    max-width: 9rem;
+    max-width: 100%;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    flex-shrink: 1;
-    min-width: 0;
 }
 
 .fqf-bio-body {
@@ -773,6 +803,9 @@ h3,
     font-size: 10px;
     font-weight: 500;
     max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .fqf-scrubber-time {
@@ -790,17 +823,31 @@ h3,
     font-weight: 600;
 }
 :root[data-layout='mobile'][data-display='big'] .fqf-card-stage-chip {
-    font-size: 0.85rem;
-    padding: 0.1rem 0.55rem;
-    max-width: 12rem;
+    font-size: 1rem;
+    padding: 0.15rem 0.7rem;
+    max-width: 100%;
+}
+/* Same shrunk treatment in big mode — drop ~25% to ~1.125rem. */
+:root[data-layout='mobile'][data-display='big'] .fqf-card-name.fqf-card-name-shrunk {
+    font-size: 1.125rem;
 }
 :root[data-layout='mobile'][data-display='big'] .fqf-bio-body {
     font-size: 1.625rem;
     line-height: 1.5;
 }
+/*
+ * Big mode keeps labels on a single line with ellipsis truncation (so they
+ * never push other map content around) but gives them a much larger max-width
+ * so most band names fit comfortably. Markers near the right edge of the map
+ * can extend into the .fqf-map-gutter (a 200px gray strip to the right of
+ * the map image) — so right-edge labels still get the full text.
+ */
 :root[data-layout='mobile'][data-display='big'] .fqf-map-label {
     font-size: 15px;
-    max-width: 160px;
+    max-width: 220px;
+}
+:root[data-layout='mobile'][data-display='big'] .fqf-map-marker {
+    max-width: 340px;
 }
 :root[data-layout='mobile'][data-display='big'] .fqf-scrubber-time {
     font-size: 1.25rem;

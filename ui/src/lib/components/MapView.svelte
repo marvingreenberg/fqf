@@ -238,151 +238,161 @@
 
     <!-- Map container -->
     <div class="flex-1 overflow-auto">
-        <div class="relative mx-auto" style="max-width: 900px; min-width: 700px;">
-            <img
-                src="/fqf-map.png"
-                alt="French Quarter Festival area map"
-                class="w-full h-auto block"
-                draggable="false"
-            />
+        <div
+            class="mx-auto fqf-map-frame"
+            style="max-width: calc(900px + 200px); min-width: calc(700px + 200px);"
+        >
+            <div
+                class="relative fqf-map-positioning"
+                style="width: calc(100% - 200px); max-width: 900px;"
+            >
+                <img
+                    src="/fqf-map.png"
+                    alt="French Quarter Festival area map"
+                    class="w-full h-auto block"
+                    draggable="false"
+                />
 
-            <!-- Music note markers at active stage locations -->
-            {#each activeStagePositions as { pos, stage } (stage)}
-                <div
-                    class="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-                    style="left: {pos.x}%; top: {pos.y}%;"
-                >
-                    <span class="text-[10px] px-0.5" style={MUSIC_NOTE_STYLE}> 🎶 </span>
-                </div>
-            {/each}
+                <!-- Music note markers at active stage locations -->
+                {#each activeStagePositions as { pos, stage } (stage)}
+                    <div
+                        class="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                        style="left: {pos.x}%; top: {pos.y}%;"
+                    >
+                        <span class="text-[10px] px-0.5" style={MUSIC_NOTE_STYLE}> 🎶 </span>
+                    </div>
+                {/each}
 
-            {#if appState.mapMode !== 'my-schedule'}
-                <!-- Scroll Time / Now: stage-status markers -->
-                {#each statuses as status (status.stage)}
-                    {@const loc = stageLocations.get(status.stage)}
-                    {#if loc}
-                        {@const pos = latLngToPercent(loc.lat, loc.lng)}
+                {#if appState.mapMode !== 'my-schedule'}
+                    <!-- Scroll Time / Now: stage-status markers -->
+                    {#each statuses as status (status.stage)}
+                        {@const loc = stageLocations.get(status.stage)}
+                        {#if loc}
+                            {@const pos = latLngToPercent(loc.lat, loc.lng)}
+                            <div
+                                class="absolute"
+                                style="left: calc({pos.x}% + {MARKER_OFFSET_REM}rem); top: calc({pos.y}% + {MARKER_OFFSET_REM}rem);"
+                            >
+                                <StageMarker {status} {picks} {onActDetail} {allActs} {big} />
+                            </div>
+                        {/if}
+                    {/each}
+                {:else}
+                    <!-- My Schedule: path arrows (SVG overlay) -->
+                    {#if appState.mapShowPaths && pathArrows.length > 0}
+                        <svg
+                            class="absolute inset-0 w-full h-full pointer-events-none"
+                            style="overflow: visible;"
+                            aria-hidden="true"
+                        >
+                            <defs>
+                                <marker
+                                    id={ARROW_MARKER_ID}
+                                    markerWidth="8"
+                                    markerHeight="8"
+                                    refX="4"
+                                    refY="2"
+                                    orient="auto"
+                                >
+                                    <path d="M0,0 L0,4 L6,2 z" fill="#7c3aed" />
+                                </marker>
+                            </defs>
+                            {#each pathArrows as arrow, i (i)}
+                                {@const mid = midpoint(arrow.from, arrow.to)}
+                                <line
+                                    x1="{arrow.from.x}%"
+                                    y1="{arrow.from.y}%"
+                                    x2="{arrow.to.x}%"
+                                    y2="{arrow.to.y}%"
+                                    stroke="#7c3aed"
+                                    stroke-width="2"
+                                    stroke-dasharray="6 3"
+                                    marker-end="url(#{ARROW_MARKER_ID})"
+                                    opacity="0.75"
+                                />
+                                <text
+                                    x="{mid.x}%"
+                                    y="{mid.y}%"
+                                    dy="-{LABEL_OFFSET_PX}"
+                                    text-anchor="middle"
+                                    font-size="9"
+                                    fill="#7c3aed"
+                                    font-weight="600"
+                                >
+                                    {formatDistanceM(arrow.distanceMeters)}
+                                </text>
+                            {/each}
+                        </svg>
+                    {/if}
+
+                    <!-- My Schedule: numbered act markers -->
+                    {#each scheduleMarkers as marker (marker.act.slug)}
+                        {@const size = marker.isFirst ? FIRST_MARKER_SIZE : OTHER_MARKER_SIZE}
+                        {@const circleBg = marker.isFirst ? SCHEDULE_MARKER_PURPLE : '#ffffff'}
+                        {@const circleText = marker.isFirst ? '#ffffff' : 'var(--mg-text)'}
+                        {@const circleBorder = marker.isFirst
+                            ? 'none'
+                            : '1.5px solid rgba(74, 26, 107, 0.35)'}
+                        {@const conflictColor = CONFLICT_COLORS[marker.conflict]}
+                        {@const borderStyle = `border-left: ${SCHED_BORDER_LEFT_PX}px solid ${conflictColor}; border-bottom: ${SCHED_BORDER_BOTTOM_PX}px solid ${conflictColor};`}
+                        {@const actIsMaybe = _isMaybe(marker.act.slug, picks)}
                         <div
                             class="absolute"
-                            style="left: calc({pos.x}% + {MARKER_OFFSET_REM}rem); top: calc({pos.y}% + {MARKER_OFFSET_REM}rem);"
+                            style="left: calc({marker.pos
+                                .x}% + {MARKER_OFFSET_REM}rem + {marker.stageOffset *
+                                STACK_HORIZONTAL_REM}rem); top: calc({marker.pos
+                                .y}% + {MARKER_OFFSET_REM}rem + {marker.stageOffset *
+                                STACK_VERTICAL_REM}rem);"
                         >
-                            <StageMarker {status} {picks} {onActDetail} {allActs} {big} />
+                            <MapActLabel
+                                name={marker.act.name}
+                                fleurFill={actIsMaybe ? MAYBE_FILL_COLOR : CONFLICT_COLORS.none}
+                                {borderStyle}
+                                isPicked={!actIsMaybe}
+                                isMaybe={actIsMaybe}
+                                {big}
+                                title={markerLabel(marker.order, marker.act)}
+                                onclick={(e) => {
+                                    e.stopPropagation();
+                                    onActDetail?.(marker.act);
+                                }}
+                            >
+                                {#snippet prefix()}
+                                    <div
+                                        class="flex items-center justify-center rounded-full shrink-0 font-bold"
+                                        style="width: {size}px; height: {size}px; background: {circleBg}; color: {circleText}; font-size: {marker.isFirst
+                                            ? FIRST_CIRCLE_FONT
+                                            : OTHER_CIRCLE_FONT}px; border: {circleBorder}; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"
+                                    >
+                                        {marker.order}
+                                    </div>
+                                    <span
+                                        class="text-[9px] shrink-0"
+                                        style="color: var(--mg-purple-deep);"
+                                    >
+                                        {formatTime12(marker.act.start)}–{formatTime12(
+                                            marker.act.end
+                                        )}
+                                    </span>
+                                {/snippet}
+                            </MapActLabel>
+                        </div>
+                    {/each}
+
+                    {#if scheduleMarkers.length === 0}
+                        <div
+                            class="absolute inset-0 flex items-center justify-center pointer-events-none"
+                        >
+                            <p
+                                class="text-sm px-4 py-2 rounded"
+                                style="background: rgba(255,255,255,0.85); color: var(--mg-purple-deep);"
+                            >
+                                No picks for this day yet.
+                            </p>
                         </div>
                     {/if}
-                {/each}
-            {:else}
-                <!-- My Schedule: path arrows (SVG overlay) -->
-                {#if appState.mapShowPaths && pathArrows.length > 0}
-                    <svg
-                        class="absolute inset-0 w-full h-full pointer-events-none"
-                        style="overflow: visible;"
-                        aria-hidden="true"
-                    >
-                        <defs>
-                            <marker
-                                id={ARROW_MARKER_ID}
-                                markerWidth="8"
-                                markerHeight="8"
-                                refX="4"
-                                refY="2"
-                                orient="auto"
-                            >
-                                <path d="M0,0 L0,4 L6,2 z" fill="#7c3aed" />
-                            </marker>
-                        </defs>
-                        {#each pathArrows as arrow, i (i)}
-                            {@const mid = midpoint(arrow.from, arrow.to)}
-                            <line
-                                x1="{arrow.from.x}%"
-                                y1="{arrow.from.y}%"
-                                x2="{arrow.to.x}%"
-                                y2="{arrow.to.y}%"
-                                stroke="#7c3aed"
-                                stroke-width="2"
-                                stroke-dasharray="6 3"
-                                marker-end="url(#{ARROW_MARKER_ID})"
-                                opacity="0.75"
-                            />
-                            <text
-                                x="{mid.x}%"
-                                y="{mid.y}%"
-                                dy="-{LABEL_OFFSET_PX}"
-                                text-anchor="middle"
-                                font-size="9"
-                                fill="#7c3aed"
-                                font-weight="600"
-                            >
-                                {formatDistanceM(arrow.distanceMeters)}
-                            </text>
-                        {/each}
-                    </svg>
                 {/if}
-
-                <!-- My Schedule: numbered act markers -->
-                {#each scheduleMarkers as marker (marker.act.slug)}
-                    {@const size = marker.isFirst ? FIRST_MARKER_SIZE : OTHER_MARKER_SIZE}
-                    {@const circleBg = marker.isFirst ? SCHEDULE_MARKER_PURPLE : '#ffffff'}
-                    {@const circleText = marker.isFirst ? '#ffffff' : 'var(--mg-text)'}
-                    {@const circleBorder = marker.isFirst
-                        ? 'none'
-                        : '1.5px solid rgba(74, 26, 107, 0.35)'}
-                    {@const conflictColor = CONFLICT_COLORS[marker.conflict]}
-                    {@const borderStyle = `border-left: ${SCHED_BORDER_LEFT_PX}px solid ${conflictColor}; border-bottom: ${SCHED_BORDER_BOTTOM_PX}px solid ${conflictColor};`}
-                    {@const actIsMaybe = _isMaybe(marker.act.slug, picks)}
-                    <div
-                        class="absolute"
-                        style="left: calc({marker.pos
-                            .x}% + {MARKER_OFFSET_REM}rem + {marker.stageOffset *
-                            STACK_HORIZONTAL_REM}rem); top: calc({marker.pos
-                            .y}% + {MARKER_OFFSET_REM}rem + {marker.stageOffset *
-                            STACK_VERTICAL_REM}rem);"
-                    >
-                        <MapActLabel
-                            name={marker.act.name}
-                            fleurFill={actIsMaybe ? MAYBE_FILL_COLOR : CONFLICT_COLORS.none}
-                            {borderStyle}
-                            isPicked={!actIsMaybe}
-                            isMaybe={actIsMaybe}
-                            {big}
-                            title={markerLabel(marker.order, marker.act)}
-                            onclick={(e) => {
-                                e.stopPropagation();
-                                onActDetail?.(marker.act);
-                            }}
-                        >
-                            {#snippet prefix()}
-                                <div
-                                    class="flex items-center justify-center rounded-full shrink-0 font-bold"
-                                    style="width: {size}px; height: {size}px; background: {circleBg}; color: {circleText}; font-size: {marker.isFirst
-                                        ? FIRST_CIRCLE_FONT
-                                        : OTHER_CIRCLE_FONT}px; border: {circleBorder}; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"
-                                >
-                                    {marker.order}
-                                </div>
-                                <span
-                                    class="text-[9px] shrink-0"
-                                    style="color: var(--mg-purple-deep);"
-                                >
-                                    {formatTime12(marker.act.start)}–{formatTime12(marker.act.end)}
-                                </span>
-                            {/snippet}
-                        </MapActLabel>
-                    </div>
-                {/each}
-
-                {#if scheduleMarkers.length === 0}
-                    <div
-                        class="absolute inset-0 flex items-center justify-center pointer-events-none"
-                    >
-                        <p
-                            class="text-sm px-4 py-2 rounded"
-                            style="background: rgba(255,255,255,0.85); color: var(--mg-purple-deep);"
-                        >
-                            No picks for this day yet.
-                        </p>
-                    </div>
-                {/if}
-            {/if}
+            </div>
         </div>
     </div>
 </div>

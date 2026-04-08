@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { Snippet } from 'svelte';
     import { FLEUR_PATH, QUESTION_PATH } from '$lib/constants';
+    import { displayName } from '$lib/display';
 
     const FLEUR_VIEWBOX = '0 0 16 16';
     const SMALL_FLEUR_SIZE = 14;
@@ -53,8 +54,8 @@
             <path d={iconPath} fill={fleurFill} />
         </svg>
         {#if prefix}{@render prefix()}{/if}
-        <span class="fqf-map-label truncate" style="color: var(--mg-text);">
-            {name}
+        <span class="fqf-map-label" style="color: var(--mg-text);">
+            {displayName(name)}
         </span>
         {#if postfix}{@render postfix()}{/if}
     </div>
