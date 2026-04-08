@@ -20,6 +20,7 @@ ui/build/
 ui/test-results/
 ui/.svelte-kit/
 .pnpm-store/
+ui/vite.config.ts.timestamp-*.mjs
 
 # IDE
 .vscode/

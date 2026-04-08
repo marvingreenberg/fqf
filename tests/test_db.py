@@ -345,6 +345,7 @@ class TestInMemorySavePicks:
         picks.append("mutated")
         assert db_module._memory_store[FAKE_TOKEN][PICKS_FIELD] == SAMPLE_PICKS
 
+
 # ── In-memory: create_share_id ────────────────────────────────────────────────
 
 
@@ -567,6 +568,7 @@ class TestFirestoreSavePicks:
 
         assert result is False
         doc_ref.update.assert_not_called()
+
 
 # ── Firestore: create_share_id ────────────────────────────────────────────────
 
