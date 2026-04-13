@@ -6,6 +6,9 @@
     const ICON_SIZE = 16;
     const VIEWBOX = '0 0 16 16';
 
+    declare const __APP_VERSION__: string;
+    const appVersion = __APP_VERSION__;
+
     interface Props {
         onClose: () => void;
     }
@@ -121,5 +124,7 @@
                 you're back online. A wifi icon in the header shows your connection status.
             </p>
         </section>
+
+        <p class="text-xs opacity-50 text-right">{appVersion}</p>
     </div>
 </Modal>

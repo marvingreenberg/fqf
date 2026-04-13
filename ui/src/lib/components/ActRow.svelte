@@ -2,7 +2,7 @@
     import type { ActSummary } from '$lib/types';
     import type { Snippet } from 'svelte';
     import { formatTime12 } from '$lib/map-utils';
-    import { displayName, shrinkOnTruncate } from '$lib/display';
+    import { displayName, displayStage, shrinkOnTruncate } from '$lib/display';
     import PickButtons from '$lib/components/PickButtons.svelte';
 
     interface Props {
@@ -75,8 +75,9 @@
     </div>
 
     {#if showStage}
-        <div class="flex {secondaryIndentClass}">
-            <span class="fqf-card-stage-chip" title={act.stage}>{act.stage}</span>
+        <div class="flex items-center {secondaryIndentClass}">
+            <span class="fqf-card-stage-chip" title={act.stage}>{displayStage(act.stage)}</span>
+            <span class="fqf-genre-badge ml-auto italic" title={act.genre}>{act.genre}</span>
         </div>
     {/if}
 

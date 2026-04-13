@@ -827,6 +827,10 @@ h3,
     padding: 0.15rem 0.7rem;
     max-width: 100%;
 }
+:root[data-layout='mobile'][data-display='big'] .fqf-genre-badge {
+    font-size: 0.9rem;
+    padding: 0.15rem 0.6rem;
+}
 /* Same shrunk treatment in big mode — drop ~25% to ~1.125rem. */
 :root[data-layout='mobile'][data-display='big'] .fqf-card-name.fqf-card-name-shrunk {
     font-size: 1.125rem;

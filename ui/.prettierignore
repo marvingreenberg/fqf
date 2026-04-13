@@ -6,3 +6,6 @@ package-lock.json
 build/
 dist/
 .svelte-kit/
+
+# Test artifacts
+test-results/

@@ -41,11 +41,11 @@ self.addEventListener('fetch', (event) => {
     if (url.origin !== self.location.origin) return;
 
     if (url.pathname.startsWith('/api/')) {
-        // Network-first for API: try live response, fall back to cached
+        // Network-first for API: try live response, fall back to cached (GET only)
         event.respondWith(
             fetch(request)
                 .then((resp) => {
-                    if (resp.ok) {
+                    if (resp.ok && request.method === 'GET') {
                         const clone = resp.clone();
                         caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
                     }

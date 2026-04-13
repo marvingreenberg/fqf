@@ -17,6 +17,13 @@ const SHRUNK_CLASS = 'fqf-card-name-shrunk';
 export function displayName(name: string): string {
     return name.replace(/^the\s+/i, '');
 }
+export function displayStage(stage: string): string {
+    let stage_short = stage.replace(/^the\s+|\s+stage$/i, '');
+    if (stage_short.length > 24) {
+        stage_short = `${stage_short.substring(0, 23)}...`;
+    }
+    return stage_short;
+}
 
 interface ShrinkOpts {
     /**
