@@ -230,11 +230,18 @@
                     </label>
                     {#if entry.id !== appState.token}
                         <button
-                            class="text-xs leading-none"
-                            style="color: rgba(74,26,107,0.4);"
+                            class="fqf-share-remove-btn"
                             title="Remove {entry.label}"
                             aria-label="Remove {entry.label}"
-                            onclick={() => appState.removeSharedSchedule(entry.id)}
+                            onclick={() => {
+                                if (
+                                    confirm(
+                                        `Remove ${entry.label}'s shared schedule? This cannot be undone.`
+                                    )
+                                ) {
+                                    appState.removeSharedSchedule(entry.id);
+                                }
+                            }}
                         >
                             ×
                         </button>
@@ -258,24 +265,26 @@
             {/each}
             <!-- Refresh button -->
             {#if appState.sharedSchedules.length > 0}
-                <button
-                    class="fqf-btn-outline text-xs py-0.5 px-1.5 leading-tight"
-                    onclick={handleRefresh}
-                    disabled={refreshing}
-                    title="Refresh shared schedules"
-                >
-                    {refreshing ? '⟳' : '↻'}
-                </button>
-                {#if refreshStatus}
-                    <span
-                        class="text-xs font-medium"
-                        style="color: {refreshStatus === 'Updated!'
-                            ? 'var(--mg-green-deep)'
-                            : 'rgba(74,26,107,0.5)'};"
+                <div class="ml-auto flex items-center gap-2">
+                    {#if refreshStatus}
+                        <span
+                            class="text-xs font-medium"
+                            style="color: {refreshStatus === 'Updated!'
+                                ? 'var(--mg-green-deep)'
+                                : 'rgba(74,26,107,0.5)'};"
+                        >
+                            {refreshStatus}
+                        </span>
+                    {/if}
+                    <button
+                        class="fqf-btn-outline text-sm py-1 px-2.5 leading-tight inline-flex items-center gap-1"
+                        onclick={handleRefresh}
+                        disabled={refreshing}
+                        title="Refresh shared schedules"
                     >
-                        {refreshStatus}
-                    </span>
-                {/if}
+                        Refresh <span aria-hidden="true">{refreshing ? '⟳' : '↻'}</span>
+                    </button>
+                </div>
             {/if}
         </div>
     {/if}

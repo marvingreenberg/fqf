@@ -1,5 +1,6 @@
 <script lang="ts">
     import { createShare, deleteSchedule } from '$lib/api';
+    import { displayToken } from '$lib/auth-utils';
     import { appState, type LayoutKind } from '$lib/stores.svelte';
 
     const SHARE_URL_BASE = '/fq2026';
@@ -33,7 +34,7 @@
 
     const initials = $derived.by(() => {
         if (!appState.token) return '???';
-        const words = appState.token.split('-');
+        const words = displayToken(appState.token).split('-');
         return words
             .slice(0, 3)
             .map((w) => w[0]?.toUpperCase() ?? '')
@@ -178,7 +179,7 @@
                     class="text-base font-bold"
                     style="font-family: 'Playfair Display', Georgia, serif; color: var(--mg-gold-bright); word-break: break-all;"
                 >
-                    {appState.token}
+                    {displayToken(appState.token)}
                 </p>
                 {#if appState.name}
                     <p class="text-xs mt-1" style="color: rgba(255,255,255,0.7);">
@@ -276,7 +277,7 @@
                     class="text-base font-bold px-3 py-2 rounded-lg"
                     style="font-family: 'Courier New', monospace; background: rgba(74,26,107,0.07); color: var(--mg-gold-dark); word-break: break-all;"
                 >
-                    {logoutToken}
+                    {displayToken(logoutToken)}
                 </p>
                 <p class="text-sm" style="color: var(--mg-purple-deep);">
                     🤔 You have to remember those secret words! You can load your schedule on this

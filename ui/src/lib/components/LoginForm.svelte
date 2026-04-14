@@ -2,7 +2,7 @@
     import type { Snippet } from 'svelte';
     import { fuzzyLookup } from '$lib/api';
     import { appState } from '$lib/stores.svelte';
-    import { createNewSchedule } from '$lib/auth-utils';
+    import { createNewSchedule, reverseDisplayToken } from '$lib/auth-utils';
 
     interface Props {
         /**
@@ -48,7 +48,7 @@
     });
 
     async function handleLoad(): Promise<void> {
-        const triple = tripleInput.trim();
+        const triple = reverseDisplayToken(tripleInput.trim());
         if (!triple) {
             errorMsg = 'Please enter your secret words.';
             return;

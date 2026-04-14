@@ -429,6 +429,23 @@ h3,
     text-transform: uppercase;
 }
 
+.fqf-share-remove-btn {
+    color: var(--mg-purple-deep);
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1;
+    padding: 0 0.35rem;
+    border-radius: 0.25rem;
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
+}
+
+.fqf-share-remove-btn:hover {
+    background-color: rgba(180, 40, 40, 0.12);
+    color: #b42828;
+}
+
 /* ── Token dialog ────────────────────────────────────────────────────────── */
 .fqf-dialog-card {
     background-color: var(--mg-cream);
